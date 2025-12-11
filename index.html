@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통합 정비관리 시스템</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                <span>Maintenance System</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard">
+                    <a href="#"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                </li>
+
+                <li class="menu-category">TURBINE AREA</li>
+                <li data-target="brush">
+                    <a href="#"><i class="fa-solid fa-brush"></i> Brush Management</a>
+                </li>
+
+                <li class="menu-category">BOILER AREA</li>
+                <li data-target="sootblower">
+                    <a href="#"><i class="fa-solid fa-wind"></i> Chute Blower Management</a>
+                </li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 id="page-title">대시보드</h1>
+                <div class="user-profile">
+                    <span>관리자</span>
+                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </header>
+            <div id="content-area" class="content-area">
+                <!-- Content will be loaded here -->
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3>시스템 상태</h3>
+                        <p>정상 가동 중</p>
+                    </div>
+                    <div class="widget">
+                        <h3>최근 알림</h3>
+                        <p>새로운 정비 이력이 등록되었습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
