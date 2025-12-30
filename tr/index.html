@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EP Manager (Google Sheets API)</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Babel (JSX 변환기) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
@@ -23,15 +24,41 @@
     </script>
 
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
+
 <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
 
@@ -39,9 +66,9 @@
         // 이 변수들은 Canvas 환경에서 사용됩니다.
         if (typeof window.__firebase_config === 'undefined' && typeof __firebase_config === 'undefined') {
             window.__firebase_config = JSON.stringify({
-                apiKey: "YOUR_API_KEY",              
+                apiKey: "YOUR_API_KEY",
                 authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-                projectId: "YOUR_PROJECT_ID",        
+                projectId: "YOUR_PROJECT_ID",
                 storageBucket: "YOUR_PROJECT_ID.appspot.com",
                 messagingSenderId: "YOUR_SENDER_ID",
                 appId: "YOUR_APP_ID"
@@ -50,7 +77,7 @@
         if (typeof window.__app_id === 'undefined' && typeof __app_id === 'undefined') {
             window.__app_id = 'ep-manager-v1';
         }
-        
+
         const appId = (typeof window.__app_id !== 'undefined' ? window.__app_id : 'ep-manager-v1');
         const firebaseConfig = JSON.parse(typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : '{}');
 
@@ -72,28 +99,28 @@
                 if (SHEET_API_URL.includes("YOUR_APPS_SCRIPT_WEB_APP_URL")) {
                     throw new Error("API URL이 설정되지 않았거나 올바르지 않습니다. Apps Script URL을 확인하세요.");
                 }
-                
+
                 const url = `${SHEET_API_URL}?id=${encodeURIComponent(targetId)}&t=${Date.now()}`;
                 let lastError;
 
                 for (let i = 0; i < retries; i++) {
                     try {
-                        const response = await fetch(url, { 
+                        const response = await fetch(url, {
                             method: 'GET',
                             redirect: 'follow',
-                            credentials: 'omit' 
+                            credentials: 'omit'
                         });
-                        
+
                         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
                         const result = await response.json();
 
                         if (result.error === "Data not initialized" || result.error === "Data corrupted") {
                             console.warn(`Data missing or corrupted for ${targetId}.`);
-                            return null; 
+                            return null;
                         }
                         if (result.error) throw new Error(result.error);
-                        return result; 
+                        return result;
                     } catch (error) {
                         lastError = error;
                         console.warn(`Attempt ${i + 1} failed for ${targetId}:`, error);
@@ -128,7 +155,7 @@
         };
 
         const isConfigValid = () => SHEET_API_URL !== "YOUR_APPS_SCRIPT_WEB_APP_URL";
-        
+
         const generateData = (layoutId) => {
             const panelIds = ['31', '21', '22', '32', '11', '12'];
             const isZone4 = layoutId === 'ZONE 4';
@@ -144,7 +171,7 @@
                         moduleId: m,
                         status: 'NORMAL',
                         technician: '',
-                        memo: '', 
+                        memo: '',
                         updatedAt: new Date().toLocaleDateString(),
                         history: [],
                         errorCode: ''
@@ -173,7 +200,7 @@
         const ERROR_CODES = [
             { code: 'E01', label: 'Display-모듈고장' },
             { code: 'E02', label: 'Display-기판고장' },
-            { code: 'E03', label: '냉각/누유 문제' }, 
+            { code: 'E03', label: '냉각/누유 문제' },
             { code: 'E04', label: '내부 문제' },
         ];
 
@@ -211,7 +238,7 @@
                     <div className="bg-white rounded-xl w-full max-w-3xl h-[80vh] shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
                         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
                             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <History size={20} className="text-blue-600" /> 
+                                <History size={20} className="text-blue-600" />
                                 PNL-{module.panelId} / Mod-{module.moduleId} 이력 관리
                             </h2>
                             <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full"><X size={20} className="text-gray-500" /></button>
@@ -244,8 +271,8 @@
                                                     <td className="px-6 py-4 font-medium text-gray-900">{item.tech || '-'}</td>
                                                     <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap text-xs">{renderText(item.action)}</td>
                                                     <td className="px-6 py-4 text-right">
-                                                        <button 
-                                                            onClick={() => onShowConfirm(item)} 
+                                                        <button
+                                                            onClick={() => onShowConfirm(item)}
                                                             className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
                                                             title="이력 삭제"
                                                         >
@@ -293,8 +320,8 @@
                     document.body.appendChild(customAlert);
                     return;
                 }
-                
-                let csvContent = "\uFEFF"; 
+
+                let csvContent = "\uFEFF";
                 csvContent += "일시,패널ID,모듈ID,상태,작업자,내용/코드\n";
                 allHistory.forEach(item => {
                     const safeAction = item.action ? item.action.replace(/,/g, " ").replace(/\n/g, " ") : "";
@@ -349,8 +376,8 @@
                                                     <td className="px-6 py-4 font-medium text-gray-900">{item.tech || '-'}</td>
                                                     <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap">{renderText(item.action)}</td>
                                                     <td className="px-6 py-4 text-right">
-                                                        <button 
-                                                            onClick={() => onShowConfirm({ panelId: item.panelId, moduleId: item.moduleId }, item)} 
+                                                        <button
+                                                            onClick={() => onShowConfirm({ panelId: item.panelId, moduleId: item.moduleId }, item)}
                                                             className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
                                                             title="이력 삭제"
                                                         >
@@ -374,11 +401,11 @@
             const allHistory = useMemo(() => {
                 const list = [];
                 if (!dataCache) return [];
-                
+
                 Object.entries(dataCache).forEach(([docId, panels]) => {
                     const [zone, side] = docId.split('-');
                     if (!panels) return;
-                    
+
                     Object.keys(panels).forEach(panelId => {
                         panels[panelId].forEach(module => {
                             if (module.history && module.history.length > 0) {
@@ -404,8 +431,8 @@
                     document.body.appendChild(customAlert);
                     return;
                 }
-                
-                let csvContent = "\uFEFF"; 
+
+                let csvContent = "\uFEFF";
                 csvContent += "일시,위치,상태,작업자,내용/코드\n";
                 allHistory.forEach(item => {
                     const safeAction = item.action ? item.action.replace(/,/g, " ").replace(/\n/g, " ") : "";
@@ -478,8 +505,8 @@
             const warningCount = data ? data.filter(m => m.status === 'CHECK').length : 0;
             const isClean = errorCount === 0 && warningCount === 0;
             let borderColor = 'border-slate-300', bgColor = 'bg-white', shadow = 'shadow-sm hover:shadow-md';
-            if (errorCount > 0) { borderColor = 'border-rose-400'; bgColor = 'bg-rose-50/30'; shadow = 'shadow-md shadow-rose-100'; } 
-            else if (warningCount > 0) { borderColor = 'border-amber-400'; bgColor = 'bg-amber-50/30'; shadow = 'shadow-md shadow-amber-100'; } 
+            if (errorCount > 0) { borderColor = 'border-rose-400'; bgColor = 'bg-rose-50/30'; shadow = 'shadow-md shadow-rose-100'; }
+            else if (warningCount > 0) { borderColor = 'border-amber-400'; bgColor = 'bg-amber-50/30'; shadow = 'shadow-md shadow-amber-100'; }
             else { shadow = 'shadow-sm hover:shadow-md hover:shadow-slate-100'; }
 
             return (
@@ -491,7 +518,7 @@
                     <div className="w-full">
                         <div className="h-px bg-slate-200 w-full mb-3"></div>
                         <div className="flex justify-between items-center text-sm font-bold text-slate-500">
-                            <span>Modules: {data ? data.length : 0}</span> 
+                            <span>Modules: {data ? data.length : 0}</span>
                             {!isClean && <div className="flex gap-2">{errorCount > 0 && <span className="text-rose-600">기타: {errorCount}</span>}{warningCount > 0 && <span className="text-amber-600">모듈: {warningCount}</span>}</div>}
                             {isClean && <span className="text-emerald-600">정상</span>}
                         </div>
@@ -546,7 +573,7 @@
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">상태 변경</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {['NORMAL', 'CHECK', 'ERROR'].map(status => (
-                                        <button key={status} onClick={() => setForm({...form, status, errorCode: ''})} className={`py-2 rounded-md text-xs font-bold border ${form.status === status ? `bg-slate-800 text-white` : 'border-gray-200 text-gray-500'}`}>{status === 'NORMAL' ? '정상' : (status === 'CHECK' ? '모듈 고장' : '기타 고장')}</button>
+                                        <button key={status} onClick={() => setForm({ ...form, status, errorCode: '' })} className={`py-2 rounded-md text-xs font-bold border ${form.status === status ? `bg-slate-800 text-white` : 'border-gray-200 text-gray-500'}`}>{status === 'NORMAL' ? '정상' : (status === 'CHECK' ? '모듈 고장' : '기타 고장')}</button>
                                     ))}
                                 </div>
                             </div>
@@ -561,13 +588,13 @@
                                 </div>
                             )}
                             <div className="space-y-3">
-                                <div className="space-y-1"><label className="text-xs text-gray-500">작업자</label><input type="text" value={form.technician} onChange={e => setForm({...form, technician: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm" placeholder="작업자 이름" /></div>
+                                <div className="space-y-1"><label className="text-xs text-gray-500">작업자</label><input type="text" value={form.technician} onChange={e => setForm({ ...form, technician: e.target.value })} className="w-full border rounded-md px-3 py-2 text-sm" placeholder="작업자 이름" /></div>
                                 <div className="space-y-1"><label className="text-xs text-gray-500">메모</label>
-                                    <textarea 
-                                        value={form.memo} 
-                                        onChange={e => setForm({...form, memo: e.target.value})} 
-                                        className="w-full border rounded-md px-3 py-2 text-sm h-24 resize-none text-gray-900 placeholder:text-gray-400" 
-                                        placeholder="내용 입력..." 
+                                    <textarea
+                                        value={form.memo}
+                                        onChange={e => setForm({ ...form, memo: e.target.value })}
+                                        className="w-full border rounded-md px-3 py-2 text-sm h-24 resize-none text-gray-900 placeholder:text-gray-400"
+                                        placeholder="내용 입력..."
                                     />
                                 </div>
                             </div>
@@ -608,44 +635,42 @@
 
         // --- Layouts ---
 
-        const FieldLayout = ({ onBack, layoutId, globalData, updateGlobalData }) => { 
-            const [currentSide, setCurrentSide] = useState('A'); 
+        const FieldLayout = ({ onBack, layoutId, globalData, updateGlobalData }) => {
+            const [currentSide, setCurrentSide] = useState('A');
             const [selectedPanel, setSelectedPanel] = useState(null);
             const [selectedModule, setSelectedModule] = useState(null);
             const [showHistorySheet, setShowHistorySheet] = useState(false);
             const [loading, setLoading] = useState(false);
             const [error, setError] = useState(null);
             const [bgSyncing, setBgSyncing] = useState(false);
-            
-            const [historyModule, setHistoryModule] = useState(null); 
-            const [deleteConfirm, setDeleteConfirm] = useState(null); 
-            
+
+            const [historyModule, setHistoryModule] = useState(null);
+            const [deleteConfirm, setDeleteConfirm] = useState(null);
+
             const isFetching = useRef(false);
             const timeoutRef = useRef(null);
 
             const docId = `${layoutId}-${currentSide}`;
-            
+
             // 캐시된 데이터 즉시 사용
             const panels = globalData[docId] || null;
 
             const fetchPanels = async (side, isBackground = false) => {
-                if (isFetching.current) return; 
+                if (isFetching.current) return;
                 isFetching.current = true;
-                
+
+                const currentDocId = `${layoutId}-${side}`;
+
                 // [변경] 데이터가 아예 없을 때만 로딩 표시.
-                if (!globalData[`${layoutId}-${side}`]) {
+                if (!globalData[currentDocId]) {
                     setLoading(true);
+                } else {
+                    setBgSyncing(true); // 이미 데이터가 있으면 백그라운드 싱크 모드
                 }
-                
-                if (!globalData[`${layoutId}-${side}`]) {
-                     setError(null);
-                }
-                
-                const currentDocId = `${layoutId}-${side}`; 
-                
+
                 try {
                     let data = await SheetsAPIService.getDoc(currentDocId);
-                    
+
                     if (!data) {
                         console.warn("Data missing/corrupted. Initializing local data...");
                         data = generateData(layoutId);
@@ -655,15 +680,16 @@
                     }
                     // 전역 데이터 업데이트 (화면 즉시 반영)
                     updateGlobalData(currentDocId, data.panels);
-                    setError(null); 
+                    setError(null);
                 } catch (e) {
-                    console.error("Data fetch failed:", e); 
+                    console.error("Data fetch failed:", e);
                     // 데이터가 없는데 실패했을 때만 에러 표시
                     if (!globalData[currentDocId]) {
                         setError(`연결 실패: ${e.message}`);
                     }
                 } finally {
                     setLoading(false);
+                    setBgSyncing(false);
                     isFetching.current = false;
                 }
             }
@@ -671,7 +697,7 @@
             const handleHistoryDelete = async (module, record) => {
                 setDeleteConfirm(null);
                 // 낙관적 업데이트: 로컬 데이터 즉시 수정
-                
+
                 const panelId = module.panelId;
                 const moduleId = module.moduleId;
                 const dateToDelete = record.date;
@@ -680,7 +706,7 @@
                 const newPanels = { ...panels };
                 const moduleList = newPanels[panelId];
                 const moduleIndex = moduleList.findIndex(m => m.moduleId === moduleId);
-                
+
                 if (moduleIndex === -1) return;
 
                 moduleList[moduleIndex].history = moduleList[moduleIndex].history.filter(
@@ -690,9 +716,9 @@
                 // UI 즉시 반영
                 updateGlobalData(currentDocId, newPanels);
                 if (historyModule) {
-                    setHistoryModule(prev => ({ ...prev, history: moduleList[moduleIndex].history })); 
+                    setHistoryModule(prev => ({ ...prev, history: moduleList[moduleIndex].history }));
                 }
-                
+
                 // 백그라운드 저장 (저장 시에는 표시)
                 setBgSyncing(true);
                 try {
@@ -714,24 +740,24 @@
                 // 사이드 변경 시 데이터가 없으면 즉시 로딩 시작
                 // 데이터가 있어도 최신화를 위해 백그라운드 로딩 시작
                 fetchPanels(currentSide);
-                
+
                 // Polling 제거 (요청에 따라) -> 필요할 때만 호출
                 // const startPolling = () => { ... }
                 // startPolling();
-                
-            }, [currentSide]); 
+
+            }, [currentSide]);
 
 
             const handleUpdate = async (formData) => {
                 if (!panels) return;
-                
+
                 const currentModuleList = panels[formData.panelId];
                 const oldModule = currentModuleList.find(m => m.moduleId === formData.moduleId);
-                
-                const hasChanged = oldModule.status !== formData.status || 
-                                   oldModule.technician !== formData.technician || 
-                                   oldModule.memo !== formData.memo ||
-                                   oldModule.errorCode !== formData.errorCode;
+
+                const hasChanged = oldModule.status !== formData.status ||
+                    oldModule.technician !== formData.technician ||
+                    oldModule.memo !== formData.memo ||
+                    oldModule.errorCode !== formData.errorCode;
 
                 if (!hasChanged) {
                     const customAlert = document.createElement('div');
@@ -741,45 +767,45 @@
                     setSelectedModule(null);
                     return;
                 }
-                
+
                 // --- Optimistic Update (낙관적 업데이트) ---
                 const newPanels = { ...panels };
                 const list = newPanels[formData.panelId];
                 const idx = list.findIndex(m => m.moduleId === formData.moduleId);
-                
+
                 let actionText = formData.memo;
                 let codeLabel = '';
                 if (formData.errorCode) {
                     if (formData.status === 'CHECK') codeLabel = CHECK_CODES.find(c => c.code === formData.errorCode)?.label || '모듈 고장';
                     else if (formData.status === 'ERROR') codeLabel = ERROR_CODES.find(c => c.code === formData.errorCode)?.label || '기타 고장';
                 }
-                
+
                 const statusChangeText = oldModule.status !== formData.status ? `[상태변경: ${oldModule.status} -> ${formData.status}] ` : '';
                 const codeText = codeLabel ? `[${formData.errorCode}] ${codeLabel}` : '';
-                
+
                 actionText = `${statusChangeText}${codeText} ${formData.memo || '(메모 없음)'}`.trim();
 
-                const newHistoryItem = { 
-                    date: new Date().toLocaleString(), 
-                    action: actionText, 
-                    tech: formData.technician, 
-                    status: formData.status, 
-                    errorCode: formData.errorCode || '' 
+                const newHistoryItem = {
+                    date: new Date().toLocaleString(),
+                    action: actionText,
+                    tech: formData.technician,
+                    status: formData.status,
+                    errorCode: formData.errorCode || ''
                 };
-                
+
                 list[idx] = { ...list[idx], ...formData, history: [newHistoryItem, ...list[idx].history] };
-                
+
                 // 전역 상태 업데이트 -> 화면 즉시 반영
                 updateGlobalData(docId, newPanels);
                 setSelectedModule(null); // 모달 닫기
 
                 // 2. 서버 저장은 백그라운드에서 수행 (저장 시에는 표시)
                 setBgSyncing(true);
-                try { 
-                    await SheetsAPIService.setDoc(docId, { panels: newPanels }); 
-                } 
-                catch (e) { 
-                    console.error("Save failed:", e); 
+                try {
+                    await SheetsAPIService.setDoc(docId, { panels: newPanels });
+                }
+                catch (e) {
+                    console.error("Save failed:", e);
                     const customAlert = document.createElement('div');
                     customAlert.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100]';
                     customAlert.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-xl"><p class="text-lg font-bold mb-4">❌ 저장 실패 (동기화 오류)</p><p class="text-sm text-gray-600 mb-4">${e.message}</p><button class="bg-rose-600 text-white px-4 py-2 rounded-md hover:bg-rose-700" onclick="this.parentNode.parentNode.remove()">확인</button></div>`;
@@ -789,12 +815,12 @@
                     setBgSyncing(false);
                 }
             };
-            
+
             const handleHistoryManagement = (module) => {
-                setSelectedModule(null); 
-                setHistoryModule(module); 
+                setSelectedModule(null);
+                setHistoryModule(module);
             };
-            
+
             const handleShowDeleteConfirm = (record) => {
                 setDeleteConfirm({ module: historyModule, record });
             };
@@ -803,7 +829,7 @@
             return (
                 <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-slate-200 relative fade-in">
                     <button onClick={onBack} className="absolute top-8 left-8 p-2 rounded-full hover:bg-gray-100 text-slate-400 hover:text-slate-600 transition-colors z-40"><ArrowLeft size={24} /></button>
-                    
+
                     <div className="absolute top-8 right-8 z-40 flex items-center gap-2">
                         {loading || bgSyncing ? (
                             <span className="text-xs text-gray-400 flex items-center gap-1 animate-pulse transition-all"><RefreshCw size={12} className='animate-spin' /> {loading ? "로딩 중..." : "저장 중..."}</span>
@@ -825,14 +851,14 @@
                         <div className="flex justify-between items-end mb-10 border-b-2 border-gray-200 pb-4">
                             <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3"><span className="text-blue-600">{layoutId.replace('ZONE ', '#')}</span> {currentSide}-SIDE EP TR PANEL</h2>
                         </div>
-                        
+
                         {loading && !panels && (
                             <div className="w-full h-96 flex flex-col items-center justify-center text-gray-400 gap-4">
                                 <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
                                 <p className="text-sm font-medium">데이터를 불러오는 중입니다...</p>
                             </div>
                         )}
-                        
+
                         {!loading && error && !panels && (
                             <div className="w-full h-96 flex flex-col items-center justify-center text-rose-500 gap-4 p-4 text-center">
                                 <AlertTriangle size={48} />
@@ -845,10 +871,10 @@
                         {panels && (
                             <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
-                                    {['31', '21', '22', '32'].map(id => <PanelCard key={id} id={id} data={panels ? panels[id] : []} onClick={() => { if(layoutId === 'ZONE 4') { setSelectedModule(panels[id][0]); } else { setSelectedPanel(id); } }} />)}
+                                    {['31', '21', '22', '32'].map(id => <PanelCard key={id} id={id} data={panels ? panels[id] : []} onClick={() => { if (layoutId === 'ZONE 4') { setSelectedModule(panels[id][0]); } else { setSelectedPanel(id); } }} />)}
                                 </div>
-                                <div className="flex gap-6 w-full md:w-1/2 mx-auto"> 
-                                    {['11', '12'].map(id => <PanelCard key={id} id={id} data={panels ? panels[id] : []} onClick={() => { if(layoutId === 'ZONE 4') { setSelectedModule(panels[id][0]); } else { setSelectedPanel(id); } }} />)}
+                                <div className="flex gap-6 w-full md:w-1/2 mx-auto">
+                                    {['11', '12'].map(id => <PanelCard key={id} id={id} data={panels ? panels[id] : []} onClick={() => { if (layoutId === 'ZONE 4') { setSelectedModule(panels[id][0]); } else { setSelectedPanel(id); } }} />)}
                                 </div>
                             </div>
                         )}
@@ -856,7 +882,7 @@
                     {selectedPanel && panels && <PanelPopup panelId={selectedPanel} data={panels[selectedPanel]} onClose={() => setSelectedPanel(null)} onModuleClick={setSelectedModule} />}
                     {selectedModule && <ModuleDialog module={selectedModule} onClose={() => setSelectedModule(null)} onUpdate={handleUpdate} onHistoryManagement={handleHistoryManagement} isUpdating={bgSyncing} />}
                     {showHistorySheet && <HistorySheet panels={panels} onClose={() => setShowHistorySheet(false)} onShowConfirm={handleGlobalHistoryDeleteConfirm} />}
-                    
+
                     {historyModule && (
                         <ModuleHistoryManager
                             module={historyModule}
@@ -879,12 +905,12 @@
             );
         };
 
-        const MainDashboard = ({ onSelectLayout, globalData, updateGlobalData }) => { 
+        const MainDashboard = ({ onSelectLayout, globalData, updateGlobalData }) => {
             const [summary, setSummary] = useState({ panelIssues: new Set(), moduleErrorCount: 0, otherErrorCount: 0, totalHistoryCount: 0, loading: true, issuesList: [] });
-            const [selectedIssueType, setSelectedIssueType] = useState(null); 
+            const [selectedIssueType, setSelectedIssueType] = useState(null);
             const [showGlobalHistory, setShowGlobalHistory] = useState(false);
             const monitorTargets = ['ZONE 3-A', 'ZONE 3-B', 'ZONE 4-A', 'ZONE 4-B'];
-            
+
             const isFetching = useRef(false);
 
             // globalData를 사용하여 summary 계산 (캐시된 데이터로 즉시 계산)
@@ -892,7 +918,7 @@
                 let pIssues = new Set(), mCount = 0, oCount = 0, iList = [];
                 let hCount = 0;
                 Object.keys(globalData).forEach(key => {
-                    const [zone, side] = key.split('-'); 
+                    const [zone, side] = key.split('-');
                     const panels = globalData[key];
                     if (!panels) return;
                     Object.keys(panels).forEach(pId => {
@@ -903,9 +929,9 @@
                                 panelHasIssue = true;
                                 let desc = mod.memo;
                                 let statusType = '';
-                                if (mod.status === 'CHECK') { mCount++; statusType = 'MODULE'; desc = '모듈 고장'; } 
+                                if (mod.status === 'CHECK') { mCount++; statusType = 'MODULE'; desc = '모듈 고장'; }
                                 else if (mod.status === 'ERROR') { oCount++; statusType = 'OTHER'; desc = '기타 고장'; }
-                                if(mod.errorCode) desc = `[${mod.errorCode}] ${desc}`;
+                                if (mod.errorCode) desc = `[${mod.errorCode}] ${desc}`;
                                 iList.push({ key: `${key}-${pId}-${mod.moduleId}`, zone, side, panelId: pId, moduleId: mod.moduleId, status: mod.status, statusType, errorCode: mod.errorCode, desc });
                             }
                         });
@@ -919,7 +945,12 @@
             const fetchAllData = async () => {
                 if (isFetching.current) return;
                 isFetching.current = true;
-                setSummary(prev => ({ ...prev, loading: true })); // 수동 새로고침 시 로딩 표시
+
+                // 데이터가 하나도 없거나 수동 요청일 때만 loading 상태 사용
+                const hasAnyData = Object.keys(globalData).length > 0;
+                if (!hasAnyData) {
+                    setSummary(prev => ({ ...prev, loading: true }));
+                }
 
                 for (const targetId of monitorTargets) {
                     try {
@@ -934,16 +965,16 @@
                     } catch (e) {
                         console.warn(`Failed to fetch ${targetId}:`, e);
                     }
-                    await wait(10); 
+                    await wait(10);
                 }
                 isFetching.current = false;
                 setSummary(prev => ({ ...prev, loading: false }));
             };
-            
+
             useEffect(() => {
                 // 초기 1회 로드 (Polling 제거됨)
                 fetchAllData();
-            }, []); 
+            }, []);
 
             const filteredIssues = useMemo(() => {
                 if (!selectedIssueType) return [];
@@ -1019,16 +1050,16 @@
                             )}
                         </div>
                     </main>
-                    
+
                     {showGlobalHistory && <GlobalHistorySheet dataCache={globalData} onClose={() => setShowGlobalHistory(false)} />}
                 </div>
             );
         };
 
         // --- Auth & Main App ---
-        
+
         const SetupRequiredScreen = () => {
-             // 이 화면은 API URL이 유효하지 않을 때만 표시됩니다.
+            // 이 화면은 API URL이 유효하지 않을 때만 표시됩니다.
             return (
                 <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-8 text-center">
                     <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full border-2 border-rose-100">
@@ -1037,8 +1068,8 @@
                         </div>
                         <h1 className="text-2xl font-black text-slate-800 mb-2">Google Sheets API 설정 필요</h1>
                         <p className="text-gray-600 mb-6 leading-relaxed">
-                            Apps Script 웹 앱 URL이 설정되지 않았거나 잘못되었습니다.<br/>
-                            <code className="bg-slate-100 px-2 py-1 rounded text-sm text-rose-600">index.html</code> 파일을 열어<br/>
+                            Apps Script 웹 앱 URL이 설정되지 않았거나 잘못되었습니다.<br />
+                            <code className="bg-slate-100 px-2 py-1 rounded text-sm text-rose-600">index.html</code> 파일을 열어<br />
                             상단의 <strong>SHEET_API_URL</strong>에 정확한 URL을 입력해주세요.
                         </p>
                         <div className="bg-slate-50 p-4 rounded text-left text-xs font-mono text-slate-500 border border-slate-200 overflow-x-auto">
@@ -1057,8 +1088,8 @@
         );
 
         const App = () => {
-            const [view, setView] = useState('MAIN'); 
-            const [selectedLayout, setSelectedLayout] = useState(null); 
+            const [view, setView] = useState('MAIN');
+            const [selectedLayout, setSelectedLayout] = useState(null);
             const isValid = useMemo(() => isConfigValid(), []);
 
             // [전역 상태] 모든 뷰에서 공유하는 데이터 캐시
@@ -1089,20 +1120,20 @@
             if (authLoading) return <LoadingScreen />;
 
             if (view === 'DETAIL') return (
-                <FieldLayout 
-                    onBack={() => { setSelectedLayout(null); setView('MAIN'); }} 
-                    layoutId={selectedLayout} 
-                    user={user} 
-                    globalData={globalData} 
-                    updateGlobalData={updateGlobalData} 
+                <FieldLayout
+                    onBack={() => { setSelectedLayout(null); setView('MAIN'); }}
+                    layoutId={selectedLayout}
+                    user={user}
+                    globalData={globalData}
+                    updateGlobalData={updateGlobalData}
                 />
             );
             return (
-                <MainDashboard 
-                    onSelectLayout={(layoutId) => { setSelectedLayout(layoutId); setView('DETAIL'); }} 
-                    user={user} 
-                    globalData={globalData} 
-                    updateGlobalData={updateGlobalData} 
+                <MainDashboard
+                    onSelectLayout={(layoutId) => { setSelectedLayout(layoutId); setView('DETAIL'); }}
+                    user={user}
+                    globalData={globalData}
+                    updateGlobalData={updateGlobalData}
                 />
             );
         };
@@ -1111,4 +1142,5 @@
         root.render(<App />);
     </script>
 </body>
+
 </html>

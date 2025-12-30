@@ -219,35 +219,61 @@
         window.onload = loadStats;
 
         function loadStats() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('brushList').innerHTML = '';
+            const loadingEl = document.getElementById('loading');
 
+            // 1. 캐시 로드
+            const cachedData = localStorage.getItem('brush_stats_cache');
+            if (cachedData) {
+                try {
+                    allData = JSON.parse(cachedData);
+                    renderList(allData);
+                    loadingEl.style.display = 'none';
+                    checkDeepLink(); // 캐시 데이터로도 딥링크 처리 시도
+                } catch (e) {
+                    console.error("캐시 파싱 실패:", e);
+                }
+            } else {
+                loadingEl.style.display = 'block';
+                document.getElementById('brushList').innerHTML = '';
+            }
+
+            // 2. 백그라운드 fetch
             fetch(`${SCRIPT_URL}?action=getStats`)
                 .then(res => res.json())
                 .then(data => {
                     allData = data;
+                    localStorage.setItem('brush_stats_cache', JSON.stringify(data)); // 캐시 저장
                     renderList(data);
-                    document.getElementById('loading').style.display = 'none';
+                    loadingEl.style.display = 'none';
 
-                    const params = new URLSearchParams(window.location.search);
-                    const pUnit = params.get('unit');
-                    const pLoc = params.get('location');
-
-                    if (pUnit && pLoc) {
-                        document.getElementById('searchInput').value = pLoc;
-                        filterList();
-                        setTimeout(() => {
-                            const items = document.querySelectorAll('.item-row');
-                            for (let item of items) {
-                                if (item.innerText.includes(pUnit) && item.innerText.includes(pLoc)) {
-                                    item.click();
-                                    break;
-                                }
-                            }
-                        }, 200);
-                    }
+                    checkDeepLink();
                 })
-                .catch(err => alert("로딩 실패: " + err));
+                .catch(err => {
+                    console.error("로딩 실패:", err);
+                    if (!allData || allData.length === 0) {
+                        alert("데이터 로드 실패: " + err);
+                    }
+                });
+        }
+
+        function checkDeepLink() {
+            const params = new URLSearchParams(window.location.search);
+            const pUnit = params.get('unit');
+            const pLoc = params.get('location');
+
+            if (pUnit && pLoc) {
+                document.getElementById('searchInput').value = pLoc;
+                filterList();
+                setTimeout(() => {
+                    const items = document.querySelectorAll('.item-row');
+                    for (let item of items) {
+                        if (item.innerText.includes(pUnit) && item.innerText.includes(pLoc)) {
+                            item.click();
+                            break;
+                        }
+                    }
+                }, 200);
+            }
         }
 
         function renderList(data) {

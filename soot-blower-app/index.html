@@ -1,30 +1,48 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soot Blower 관리 시스템</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 폰트: 프리텐다드 -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; color: #334155; }
-        
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
         /* 화면 전환 애니메이션 */
-        .page-section { display: none; opacity: 0; transition: opacity 0.3s ease; }
-        .page-section.active { display: block; opacity: 1; }
+        .page-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .page-section.active {
+            display: block;
+            opacity: 1;
+        }
 
         /* =========================================
            1. 메인 대시보드 스타일 (심플 박스형)
            ========================================= */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
         .dashboard-card {
             background: white;
             border-radius: 12px;
             padding: 0;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: all 0.2s;
             cursor: pointer;
             position: relative;
@@ -35,106 +53,325 @@
             align-items: center;
             height: 80px;
         }
-        
+
         /* 왼쪽 컬러바 */
         .dashboard-card::before {
-            content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 6px;
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 6px;
         }
-        .dashboard-card.blue::before { background-color: #3b82f6; }
-        .dashboard-card.red::before { background-color: #ef4444; }
-        .dashboard-card.dark::before { background-color: #334155; }
 
-        .dashboard-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .dashboard-card:active { transform: scale(0.98); background-color: #f1f5f9; }
-        
+        .dashboard-card.blue::before {
+            background-color: #3b82f6;
+        }
+
+        .dashboard-card.red::before {
+            background-color: #ef4444;
+        }
+
+        .dashboard-card.dark::before {
+            background-color: #334155;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-card:active {
+            transform: scale(0.98);
+            background-color: #f1f5f9;
+        }
+
         /* 텍스트 스타일 */
-        .card-title { font-size: 16px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
-        .card-desc { font-size: 11px; color: #64748b; margin-top: 2px; }
-        
+        .card-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: -0.5px;
+        }
+
+        .card-desc {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
         /* 호기 선택 버튼용 스타일 */
-        .unit-card { height: 120px; } 
-        .unit-title { font-size: 32px; font-weight: 900; color: #1e293b; }
+        .unit-card {
+            height: 120px;
+        }
+
+        .unit-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #1e293b;
+        }
 
         /* =========================================
            2. 상세 화면 스타일
            ========================================= */
         .boiler-container {
-            background: white; border-radius: 24px; 
+            background: white;
+            border-radius: 24px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            padding: 20px; position: relative; aspect-ratio: 1 / 1; 
-            max-width: 400px; margin: 0 auto; border: 1px solid #f1f5f9;
+            padding: 20px;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 1px solid #f1f5f9;
         }
-        .boiler-grid { 
-            display: grid; 
-            grid-template-columns: 60px 1fr 60px; 
-            grid-template-rows: 60px 1fr 60px; 
-            height: 100%; gap: 8px; position: relative; z-index: 10; 
+
+        .boiler-grid {
+            display: grid;
+            grid-template-columns: 60px 1fr 60px;
+            grid-template-rows: 60px 1fr 60px;
+            height: 100%;
+            gap: 8px;
+            position: relative;
+            z-index: 10;
         }
-        .corner-number { position: absolute; font-weight: 900; font-size: 3rem; color: #ffe4e6; line-height: 1; z-index: 0; user-select: none; }
-        .cn-1 { bottom: 10px; left: 15px; } .cn-2 { top: 10px; left: 15px; } 
-        .cn-3 { top: 10px; right: 15px; } .cn-4 { bottom: 10px; right: 15px; }
-        
+
+        .corner-number {
+            position: absolute;
+            font-weight: 900;
+            font-size: 3rem;
+            color: #ffe4e6;
+            line-height: 1;
+            z-index: 0;
+            user-select: none;
+        }
+
+        .cn-1 {
+            bottom: 10px;
+            left: 15px;
+        }
+
+        .cn-2 {
+            top: 10px;
+            left: 15px;
+        }
+
+        .cn-3 {
+            top: 10px;
+            right: 15px;
+        }
+
+        .cn-4 {
+            bottom: 10px;
+            right: 15px;
+        }
+
         .center-status-box {
-            grid-column: 2 / 3; grid-row: 2 / 3; border: 2px dashed #cbd5e1; border-radius: 12px;
-            background-color: #f8fafc; display: flex; flex-direction: column; padding: 8px; overflow: hidden;
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            overflow: hidden;
         }
-        
+
         .device-btn {
-            width: 42px; height: 42px; background: white; border: 1.5px solid #475569; border-radius: 6px;
-            color: #1e293b; font-weight: 700; font-size: 14px; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.15s; cursor: pointer; z-index: 20;
+            width: 42px;
+            height: 42px;
+            background: white;
+            border: 1.5px solid #475569;
+            border-radius: 6px;
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.15s;
+            cursor: pointer;
+            z-index: 20;
         }
-        .device-btn:active { transform: scale(0.92); background-color: #f1f5f9; }
-        .device-btn:hover { border-color: #2563eb; color: #2563eb; }
-        
-        .label-sm { font-size: 9px; line-height: 1; color: #64748b; margin-bottom: 1px; }
-        .label-lg { font-size: 15px; line-height: 1; }
-        
-        .side-container { display: flex; align-items: center; justify-content: space-evenly; width: 100%; height: 100%; }
-        .side-top { grid-column: 2/3; grid-row: 1/2; flex-direction: row; align-items: flex-end; padding-bottom: 4px; }
-        .side-bottom { grid-column: 2/3; grid-row: 3/4; flex-direction: row; align-items: flex-start; padding-top: 4px; }
-        .side-left { grid-column: 1/2; grid-row: 2/3; flex-direction: column; align-items: flex-end; padding-right: 4px; }
-        .side-right { grid-column: 3/4; grid-row: 2/3; flex-direction: column; align-items: flex-start; padding-left: 4px; }
-        
+
+        .device-btn:active {
+            transform: scale(0.92);
+            background-color: #f1f5f9;
+        }
+
+        .device-btn:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        .label-sm {
+            font-size: 9px;
+            line-height: 1;
+            color: #64748b;
+            margin-bottom: 1px;
+        }
+
+        .label-lg {
+            font-size: 15px;
+            line-height: 1;
+        }
+
+        .side-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            width: 100%;
+            height: 100%;
+        }
+
+        .side-top {
+            grid-column: 2/3;
+            grid-row: 1/2;
+            flex-direction: row;
+            align-items: flex-end;
+            padding-bottom: 4px;
+        }
+
+        .side-bottom {
+            grid-column: 2/3;
+            grid-row: 3/4;
+            flex-direction: row;
+            align-items: flex-start;
+            padding-top: 4px;
+        }
+
+        .side-left {
+            grid-column: 1/2;
+            grid-row: 2/3;
+            flex-direction: column;
+            align-items: flex-end;
+            padding-right: 4px;
+        }
+
+        .side-right {
+            grid-column: 3/4;
+            grid-row: 2/3;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-left: 4px;
+        }
+
         .status-row {
-            display: flex; justify-content: space-between; align-items: center; padding: 5px 0; 
-            border-bottom: 1px solid #f1f5f9; font-size: 11px; color: #475569; cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 11px;
+            color: #475569;
+            cursor: pointer;
         }
-        .status-row:last-child { border-bottom: none; }
-        .status-row:hover { color: #2563eb; }
-        .badge { background: #e2e8f0; color: #64748b; padding: 1px 5px; border-radius: 99px; font-size: 10px; font-weight: bold; }
-        .badge.active { background: #ef4444; color: white; }
+
+        .status-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-row:hover {
+            color: #2563eb;
+        }
+
+        .badge {
+            background: #e2e8f0;
+            color: #64748b;
+            padding: 1px 5px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .badge.active {
+            background: #ef4444;
+            color: white;
+        }
 
         /* 메모장 스타일 */
         .memo-container {
-            margin-top: 20px; background-color: white; border-radius: 16px; padding: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
         }
+
         .memo-input {
-            width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; font-size: 13px;
-            resize: none; height: 70px; background-color: #f8fafc; transition: all 0.2s;
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            resize: none;
+            height: 70px;
+            background-color: #f8fafc;
+            transition: all 0.2s;
         }
-        .memo-input:focus { outline: none; border-color: #3b82f6; background-color: white; }
+
+        .memo-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: white;
+        }
+
         .memo-btn {
-            margin-top: 8px; width: 100%; background-color: #334155; color: white; padding: 10px;
-            border-radius: 8px; font-weight: bold; font-size: 13px; transition: background 0.2s;
+            margin-top: 8px;
+            width: 100%;
+            background-color: #334155;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            transition: background 0.2s;
         }
-        .memo-btn:active { transform: scale(0.98); }
+
+        .memo-btn:active {
+            transform: scale(0.98);
+        }
+
         .memo-summary-btn {
-            display: flex; justify-content: space-between; align-items: center;
-            width: 100%; padding: 10px 12px; border-radius: 8px; background-color: #f1f5f9;
-            border: 1px solid #e2e8f0; margin-top: 8px; font-weight: 700; font-size: 12px;
-            color: #475569; cursor: pointer; transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            margin-top: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .memo-count-badge { background-color: #94a3b8; color: white; padding: 1px 6px; border-radius: 99px; font-size: 10px; font-weight: 800; }
-        .memo-count-badge.active { background-color: #ef4444; }
+
+        .memo-count-badge {
+            background-color: #94a3b8;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .memo-count-badge.active {
+            background-color: #ef4444;
+        }
 
         /* 새로운 대시보드 그리드 (3열) */
-        #total-dashboard-grid { 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; 
+        #total-dashboard-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
+
         #total-dashboard-grid .dashboard-card {
             height: 90px;
             padding: 10px;
@@ -142,12 +379,14 @@
         }
     </style>
 </head>
+
 <body class="max-w-md mx-auto min-h-screen flex flex-col pb-6">
 
     <!-- ================= PAGE 0: 호기 선택 ================= -->
     <div id="page-unit-selection" class="page-section active p-5">
         <header class="mb-10 mt-8 text-center">
-            <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Soot Blower <span class="text-blue-600">Manager</span></h1>
+            <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Soot Blower <span
+                    class="text-blue-600">Manager</span></h1>
             <p class="text-slate-400 text-xs mt-2 font-medium">관리할 호기(Unit)를 선택해주세요</p>
         </header>
 
@@ -162,7 +401,7 @@
                 <div class="card-desc">4호기 설비</div>
             </div>
         </div>
-        
+
         <!-- ================= 전체 작업 현황 대시보드 ================= -->
         <div id="total-summary-section" class="mt-4">
             <div class="flex items-center mb-3 pl-1">
@@ -173,7 +412,9 @@
                 <!-- Summary cards will be injected here -->
                 <div class="col-span-2 text-center py-10 text-slate-400" id="totalSummaryLoading">
                     <div class="flex items-center justify-center h-full text-slate-300 text-xs">
-                        <div class="animate-spin mr-2 rounded-full border-2 border-slate-300 border-t-slate-500 h-4 w-4"></div>
+                        <div
+                            class="animate-spin mr-2 rounded-full border-2 border-slate-300 border-t-slate-500 h-4 w-4">
+                        </div>
                         데이터 로드 중...
                     </div>
                 </div>
@@ -184,14 +425,15 @@
     <!-- ================= PAGE 1: 그룹 선택 ================= -->
     <div id="page-group-selection" class="page-section p-5">
         <header class="mb-6 mt-4 flex items-center justify-between">
-            <button onclick="goUnitSelection()" class="text-slate-400 hover:text-slate-600 font-bold text-xs px-2 py-1 border border-slate-200 rounded">
+            <button onclick="goUnitSelection()"
+                class="text-slate-400 hover:text-slate-600 font-bold text-xs px-2 py-1 border border-slate-200 rounded">
                 ◀ 호기 변경
             </button>
             <div class="text-center flex-1 mr-12">
                 <h1 class="text-xl font-extrabold text-slate-800 tracking-tight" id="headerUnitTitle">#3호기</h1>
             </div>
         </header>
-        
+
         <!-- Short Section -->
         <div class="mb-8">
             <div class="flex items-center mb-3 pl-1">
@@ -215,7 +457,8 @@
     <div id="page-detail" class="page-section p-4 h-screen flex flex-col pb-10 overflow-y-auto">
         <!-- 상단 네비게이션 -->
         <div class="flex justify-between items-center mb-6 px-2">
-            <button onclick="goGroupSelection()" class="flex items-center text-slate-500 hover:text-slate-800 font-bold text-sm transition-colors">
+            <button onclick="goGroupSelection()"
+                class="flex items-center text-slate-500 hover:text-slate-800 font-bold text-sm transition-colors">
                 ◀ 그룹 선택
             </button>
             <div class="text-right">
@@ -237,7 +480,7 @@
                     <div class="center-status-box" id="centerBox">
                         <!-- 초기 로딩 상태 -->
                     </div>
-                    
+
                     <div id="area-top" class="side-container side-top"></div>
                     <div id="area-bottom" class="side-container side-bottom"></div>
                     <div id="area-left" class="side-container side-left"></div>
@@ -253,19 +496,21 @@
             </h3>
             <textarea id="memoInput" class="memo-input" placeholder="예) 3번 기기 소음 발생, 비계 설치 필요 등"></textarea>
             <button onclick="submitMemo()" class="memo-btn">메모 저장</button>
-            
+
             <button id="memoSummaryButton" onclick="openHistoryModal('NOTE', 'GROUP')" class="memo-summary-btn">
                 <span>특이사항 종합 확인</span>
                 <span id="memoCountBadge" class="memo-count-badge">0건</span>
             </button>
         </div>
-        
+
         <div class="h-10"></div>
     </div>
 
     <!-- ================= 작업 입력 모달 ================= -->
-    <div id="actionModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4 backdrop-blur-[2px] transition-opacity">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden transform scale-100 transition-transform">
+    <div id="actionModal"
+        class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4 backdrop-blur-[2px] transition-opacity">
+        <div
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden transform scale-100 transition-transform">
             <div class="bg-slate-800 p-4 text-white flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-lg" id="modalTitle">No. 00</h3>
@@ -274,31 +519,58 @@
                 <span class="bg-blue-500 text-[10px] font-bold px-2 py-1 rounded">작업 선택</span>
             </div>
             <div class="p-4 grid grid-cols-1 gap-2">
-                <button onclick="submitAction('케이블 교체')" class="w-full p-3 border rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">🔌</span> 1. 케이블 교체</button>
-                <button onclick="submitAction('전동기 소손')" class="w-full p-3 border rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">🔥</span> 2. 전동기 소손</button>
+                <button onclick="submitAction('케이블 교체')"
+                    class="w-full p-3 border rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">🔌</span> 1. 케이블 교체</button>
+                <button onclick="submitAction('전동기 소손')"
+                    class="w-full p-3 border rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">🔥</span> 2. 전동기 소손</button>
                 <!-- [수정완료] 오타 수정됨: > 추가 -->
-                <button onclick="submitAction('전동기 베어링 교체')" class="w-full p-3 border rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">⚙️</span> 3. 베어링 교체</button>
-                <button onclick="submitAction('전동기 역상')" class="w-full p-3 border rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">⚠️</span> 4. 전동기 역상</button>
-                <button onclick="submitAction('리미트 정비 [회로]')" class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">⚡</span> 5. 리미트 정비 [회로]</button>
-                <button onclick="submitAction('MOV 정비 [회로]')" class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">🔋</span> 6. MOV 정비 [회로]</button>
-                <button onclick="submitAction('단로기 정비 [회로]')" class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">💡</span> 7. 단로기 정비 [회로]</button>
-                <button onclick="submitAction('MC 정비 [회로]')" class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">◻️</span> 8. MC 정비 [회로]</button>
-                <button onclick="submitAction('기계적 고착 [기계]')" class="w-full p-3 border rounded-xl hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span class="w-6 text-center mr-2">🔧</span> 9. 기계적 고착 [기계]</button>
+                <button onclick="submitAction('전동기 베어링 교체')"
+                    class="w-full p-3 border rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">⚙️</span> 3. 베어링 교체</button>
+                <button onclick="submitAction('전동기 역상')"
+                    class="w-full p-3 border rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">⚠️</span> 4. 전동기 역상</button>
+                <button onclick="submitAction('리미트 정비 [회로]')"
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">⚡</span> 5. 리미트 정비 [회로]</button>
+                <button onclick="submitAction('MOV 정비 [회로]')"
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">🔋</span> 6. MOV 정비 [회로]</button>
+                <button onclick="submitAction('단로기 정비 [회로]')"
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">💡</span> 7. 단로기 정비 [회로]</button>
+                <button onclick="submitAction('MC 정비 [회로]')"
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">◻️</span> 8. MC 정비 [회로]</button>
+                <button onclick="submitAction('기계적 고착 [기계]')"
+                    class="w-full p-3 border rounded-xl hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
+                        class="w-6 text-center mr-2">🔧</span> 9. 기계적 고착 [기계]</button>
             </div>
-            <div class="bg-slate-50 p-3 text-center border-t cursor-pointer hover:bg-slate-100 transition-colors" onclick="closeModal('actionModal')"><span class="text-slate-500 font-bold text-sm">닫기</span></div>
+            <div class="bg-slate-50 p-3 text-center border-t cursor-pointer hover:bg-slate-100 transition-colors"
+                onclick="closeModal('actionModal')"><span class="text-slate-500 font-bold text-sm">닫기</span></div>
         </div>
     </div>
 
     <!-- ================= 이력 확인 모달 ================= -->
-    <div id="historyModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-[60] p-4 backdrop-blur-[2px]">
+    <div id="historyModal"
+        class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-[60] p-4 backdrop-blur-[2px]">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm h-3/4 flex flex-col overflow-hidden">
             <div class="p-4 border-b flex justify-between items-center bg-white sticky top-0">
                 <h3 class="font-bold text-lg text-slate-800" id="historyTitle">이력</h3>
-                <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-slate-800 text-2xl">&times;</button>
+                <button onclick="closeModal('historyModal')"
+                    class="text-slate-400 hover:text-slate-800 text-2xl">&times;</button>
             </div>
             <div class="flex-1 overflow-y-auto p-0 bg-slate-50">
                 <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-slate-500 uppercase bg-slate-100 sticky top-0"><tr><th class="px-4 py-3">날짜</th><th class="px-2 py-3">기기/위치</th><th class="px-4 py-3">내용</th></tr></thead>
+                    <thead class="text-xs text-slate-500 uppercase bg-slate-100 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-3">날짜</th>
+                            <th class="px-2 py-3">기기/위치</th>
+                            <th class="px-4 py-3">내용</th>
+                        </tr>
+                    </thead>
                     <tbody id="historyListBody" class="text-slate-700 divide-y divide-slate-200 bg-white"></tbody>
                 </table>
                 <div id="noHistoryMsg" class="hidden p-10 text-center text-slate-400 text-sm">기록된 이력이 없습니다.</div>
@@ -307,7 +579,8 @@
     </div>
 
     <!-- 로딩 인디케이터 -->
-    <div id="loadingOverlay" class="fixed inset-0 hidden items-center justify-center z-[70] bg-white/80 backdrop-blur-sm">
+    <div id="loadingOverlay"
+        class="fixed inset-0 hidden items-center justify-center z-[70] bg-white/80 backdrop-blur-sm">
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
             <span class="font-bold text-slate-600 animate-pulse">데이터 처리 중...</span>
@@ -315,7 +588,9 @@
     </div>
 
     <!-- Custom Toast/Alert Message Box -->
-    <div id="toastMessage" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg font-bold text-sm hidden transition-opacity duration-300 z-[80]"></div>
+    <div id="toastMessage"
+        class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg font-bold text-sm hidden transition-opacity duration-300 z-[80]">
+    </div>
 
     <script>
         // ★★★★★ [필수] 앱스 스크립트 URL 입력 ★★★★★
@@ -326,54 +601,54 @@
         let currentGroupData = [];
         let totalCounts = {}; // 전체 요약 건수
         let totalDataRecords = []; // 전체 데이터 레코드
-        
+
         const STATUS_CATEGORIES = [
-            { code: 'C', label: '케이블 교체' }, 
-            { code: 'MB', label: '전동기 소손' }, 
-            { code: 'BR', label: '베어링 교체' }, 
+            { code: 'C', label: '케이블 교체' },
+            { code: 'MB', label: '전동기 소손' },
+            { code: 'BR', label: '베어링 교체' },
             { code: 'RP', label: '전동기 역상' },
-            { code: 'LR', label: '리미트 정비' }, 
+            { code: 'LR', label: '리미트 정비' },
             { code: 'MV', label: 'MOV 정비' },
-            { code: 'DS', label: '단로기 정비' }, 
+            { code: 'DS', label: '단로기 정비' },
             { code: 'MC', label: 'MC 정비' },
-            { code: 'MS', label: '기계적 고착' }, 
-            { code: 'NOTE', label: '특이사항 메모' } 
+            { code: 'MS', label: '기계적 고착' },
+            { code: 'NOTE', label: '특이사항 메모' }
         ];
 
         // 키워드 매칭 로직 (공백 무시)
         function getCategoryByAction(action) {
             let str = action ? String(action) : '';
-            str = str.replace(/\s+/g, ''); 
+            str = str.replace(/\s+/g, '');
 
             if (str.includes('케이블')) return 'C';
-            if (str.includes('소손')) return 'MB';      
-            if (str.includes('베어링')) return 'BR';    
-            if (str.includes('역상')) return 'RP';      
-            if (str.includes('리미트')) return 'LR';    
-            if (str.includes('MOV')) return 'MV';       
-            if (str.includes('단로기')) return 'DS';    
-            if (str.includes('MC')) return 'MC';        
-            if (str.includes('고착')) return 'MS';      
-            
+            if (str.includes('소손')) return 'MB';
+            if (str.includes('베어링')) return 'BR';
+            if (str.includes('역상')) return 'RP';
+            if (str.includes('리미트')) return 'LR';
+            if (str.includes('MOV')) return 'MV';
+            if (str.includes('단로기')) return 'DS';
+            if (str.includes('MC')) return 'MC';
+            if (str.includes('고착')) return 'MS';
+
             return 'ETC';
         }
-        
+
         function calculateTotalCounts(data) {
             const counts = {};
             STATUS_CATEGORIES.forEach(cat => counts[cat.code] = 0);
-            
+
             data.forEach(item => {
                 let code;
                 if (item.device === 'NOTE') {
                     code = 'NOTE';
                 } else {
-                    code = getCategoryByAction(item.action); 
+                    code = getCategoryByAction(item.action);
                 }
                 if (counts[code] !== undefined) counts[code]++;
             });
             return counts;
         }
-        
+
         // 전체 작업 현황 데이터 로드
         function fetchTotalSummary() {
             const loadingEl = document.getElementById('totalSummaryLoading');
@@ -383,18 +658,31 @@
                 loadingEl.innerHTML = `URL 미설정 (백엔드 연동 불가)`;
                 return;
             }
-            
-            gridEl.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-400">
-                    <div class="flex items-center justify-center h-full text-slate-300 text-xs">
-                        <div class="animate-spin mr-2 rounded-full border-2 border-slate-300 border-t-slate-500 h-4 w-4"></div>
-                        데이터 갱신 중...
-                    </div>
-                </div>`;
-            
+
+            // 1. 캐시 시도
+            const cachedTotal = localStorage.getItem('sb_total_records_cache');
+            if (cachedTotal) {
+                try {
+                    totalDataRecords = JSON.parse(cachedTotal);
+                    totalCounts = calculateTotalCounts(totalDataRecords);
+                    renderTotalDashboard();
+                    // 캐시가 있으면 로딩 중 표시를 제거하되, 살짝 반투명하게 하거나 표시를 작게 할 수도 있음
+                    // 여기선 단순히 로더를 숨김
+                    if (loadingEl) loadingEl.style.display = 'none';
+                } catch (e) { console.error("Total 캐시 파싱 에러:", e); }
+            } else {
+                gridEl.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-400">
+                        <div class="flex items-center justify-center h-full text-slate-300 text-xs">
+                            <div class="animate-spin mr-2 rounded-full border-2 border-slate-300 border-t-slate-500 h-4 w-4"></div>
+                            데이터 로드 중...
+                        </div>
+                    </div>`;
+            }
+
             const separator = GOOGLE_SCRIPT_URL.includes('?') ? '&' : '?';
             const cacheBuster = `${separator}t=${new Date().getTime()}`;
 
-            fetch(GOOGLE_SCRIPT_URL + cacheBuster) 
+            fetch(GOOGLE_SCRIPT_URL + cacheBuster)
                 .then(res => res.json())
                 .then(data => {
                     let finalData = data;
@@ -404,23 +692,26 @@
                         else finalData = [];
                     }
 
-                    totalDataRecords = finalData; 
+                    totalDataRecords = finalData;
                     totalCounts = calculateTotalCounts(finalData);
-                    
+                    localStorage.setItem('sb_total_records_cache', JSON.stringify(finalData)); // 캐시 저장
+
                     renderTotalDashboard();
                 })
                 .catch(err => {
                     console.error("Total summary fetch failed:", err);
-                    gridEl.innerHTML = `<div class="col-span-3 text-center py-10 text-red-400">데이터 로드 실패</div>`;
+                    if (!totalDataRecords || totalDataRecords.length === 0) {
+                        gridEl.innerHTML = `<div class="col-span-3 text-center py-10 text-red-400">데이터 로드 실패</div>`;
+                    }
                 });
         }
-        
+
         function renderTotalDashboard() {
             const grid = document.getElementById('total-dashboard-grid');
-            grid.innerHTML = ''; 
+            grid.innerHTML = '';
 
             const repairCategories = STATUS_CATEGORIES.filter(c => c.code !== 'NOTE');
-            
+
             if (repairCategories.length === 0) {
                 grid.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-400">정비 항목이 정의되지 않았습니다.</div>`;
                 return;
@@ -428,11 +719,11 @@
 
             repairCategories.forEach(cat => {
                 const count = totalCounts[cat.code] || 0;
-                const barColor = count > 0 ? 'red' : 'dark'; 
-                
+                const barColor = count > 0 ? 'red' : 'dark';
+
                 const card = document.createElement('div');
                 card.className = `dashboard-card ${barColor} relative`;
-                card.style.cursor = 'pointer'; 
+                card.style.cursor = 'pointer';
                 card.onclick = () => openHistoryModal(cat.code, 'TOTAL');
 
                 card.innerHTML = `
@@ -450,27 +741,27 @@
         }
 
         const SECTIONS = [
-            { 
-                id: "short", title: "Short SB", theme: "blue", 
+            {
+                id: "short", title: "Short SB", theme: "blue",
                 groups: [
-                    { name: "GROUP 1 (7F)", desc: "Bottom Area", devices: [{no:3,pos:'left'},{no:2,pos:'left'},{no:1,pos:'left'},{no:10,pos:'top'},{no:11,pos:'top'},{no:12,pos:'top'},{no:9,pos:'right'},{no:8,pos:'right'},{no:7,pos:'right'},{no:6,pos:'bottom'},{no:5,pos:'bottom'},{no:4,pos:'bottom'}] },
-                    { name: "GROUP 2 (7.5F)", desc: "Lower Area", devices: [{no:13,pos:'left'},{no:14,pos:'left'},{no:15,pos:'left'},{no:16,pos:'left'},{no:17,pos:'left'},{no:32,pos:'top'},{no:31,pos:'top'},{no:30,pos:'top'},{no:29,pos:'top'},{no:28,pos:'top'},{no:23,pos:'right'},{no:24,pos:'right'},{no:25,pos:'right'},{no:26,pos:'right'},{no:27,pos:'right'},{no:18,pos:'bottom'},{no:19,pos:'bottom'},{no:20,pos:'bottom'},{no:21,pos:'bottom'},{no:22,pos:'bottom'}] },
-                    { name: "GROUP 3 (8F)", desc: "Middle Area", devices: [{no:37,pos:'left'},{no:36,pos:'left'},{no:35,pos:'left'},{no:34,pos:'left'},{no:33,pos:'left'},{no:48,pos:'top'},{no:49,pos:'top'},{no:50,pos:'top'},{no:51,pos:'top'},{no:52,pos:'top'},{no:47,pos:'right'},{no:46,pos:'right'},{no:45,pos:'right'},{no:44,pos:'right'},{no:43,pos:'right'},{no:42,pos:'bottom'},{no:41,pos:'bottom'},{no:40,pos:'bottom'},{no:39,pos:'bottom'},{no:38,pos:'bottom'}] },
-                    { name: "GROUP 4 (8.5F)", desc: "Upper Area", devices: [{no:53,pos:'left'},{no:54,pos:'left'},{no:55,pos:'left'},{no:56,pos:'left'},{no:57,pos:'left'},{no:72,pos:'top'},{no:71,pos:'top'},{no:70,pos:'top'},{no:69,pos:'top'},{no:68,pos:'top'},{no:63,pos:'right'},{no:64,pos:'right'},{no:65,pos:'right'},{no:66,pos:'right'},{no:67,pos:'right'},{no:58,pos:'bottom'},{no:59,pos:'bottom'},{no:60,pos:'bottom'},{no:61,pos:'bottom'},{no:62,pos:'bottom'}] },
-                    { name: "GROUP 4.5 (9F)", desc: "NS Series", devices: [{no:'NS1',pos:'left'},{no:'NS2',pos:'left'},{no:'NS3',pos:'left'},{no:'NS4',pos:'left'},{no:'NS20',pos:'top'},{no:'NS19',pos:'top'},{no:'NS18',pos:'top'},{no:'NS17',pos:'top'},{no:'NS16',pos:'top'},{no:'NS14',pos:'right'},{no:'NS13',pos:'right'},{no:'NS12',pos:'right'},{no:'NS11',pos:'right'},{no:'NS6',pos:'bottom'},{no:'NS7',pos:'bottom'},{no:'NS8',pos:'bottom'},{no:'NS9',pos:'bottom'},{no:'NS10',pos:'bottom'}] }
+                    { name: "GROUP 1 (7F)", desc: "Bottom Area", devices: [{ no: 3, pos: 'left' }, { no: 2, pos: 'left' }, { no: 1, pos: 'left' }, { no: 10, pos: 'top' }, { no: 11, pos: 'top' }, { no: 12, pos: 'top' }, { no: 9, pos: 'right' }, { no: 8, pos: 'right' }, { no: 7, pos: 'right' }, { no: 6, pos: 'bottom' }, { no: 5, pos: 'bottom' }, { no: 4, pos: 'bottom' }] },
+                    { name: "GROUP 2 (7.5F)", desc: "Lower Area", devices: [{ no: 13, pos: 'left' }, { no: 14, pos: 'left' }, { no: 15, pos: 'left' }, { no: 16, pos: 'left' }, { no: 17, pos: 'left' }, { no: 32, pos: 'top' }, { no: 31, pos: 'top' }, { no: 30, pos: 'top' }, { no: 29, pos: 'top' }, { no: 28, pos: 'top' }, { no: 23, pos: 'right' }, { no: 24, pos: 'right' }, { no: 25, pos: 'right' }, { no: 26, pos: 'right' }, { no: 27, pos: 'right' }, { no: 18, pos: 'bottom' }, { no: 19, pos: 'bottom' }, { no: 20, pos: 'bottom' }, { no: 21, pos: 'bottom' }, { no: 22, pos: 'bottom' }] },
+                    { name: "GROUP 3 (8F)", desc: "Middle Area", devices: [{ no: 37, pos: 'left' }, { no: 36, pos: 'left' }, { no: 35, pos: 'left' }, { no: 34, pos: 'left' }, { no: 33, pos: 'left' }, { no: 48, pos: 'top' }, { no: 49, pos: 'top' }, { no: 50, pos: 'top' }, { no: 51, pos: 'top' }, { no: 52, pos: 'top' }, { no: 47, pos: 'right' }, { no: 46, pos: 'right' }, { no: 45, pos: 'right' }, { no: 44, pos: 'right' }, { no: 43, pos: 'right' }, { no: 42, pos: 'bottom' }, { no: 41, pos: 'bottom' }, { no: 40, pos: 'bottom' }, { no: 39, pos: 'bottom' }, { no: 38, pos: 'bottom' }] },
+                    { name: "GROUP 4 (8.5F)", desc: "Upper Area", devices: [{ no: 53, pos: 'left' }, { no: 54, pos: 'left' }, { no: 55, pos: 'left' }, { no: 56, pos: 'left' }, { no: 57, pos: 'left' }, { no: 72, pos: 'top' }, { no: 71, pos: 'top' }, { no: 70, pos: 'top' }, { no: 69, pos: 'top' }, { no: 68, pos: 'top' }, { no: 63, pos: 'right' }, { no: 64, pos: 'right' }, { no: 65, pos: 'right' }, { no: 66, pos: 'right' }, { no: 67, pos: 'right' }, { no: 58, pos: 'bottom' }, { no: 59, pos: 'bottom' }, { no: 60, pos: 'bottom' }, { no: 61, pos: 'bottom' }, { no: 62, pos: 'bottom' }] },
+                    { name: "GROUP 4.5 (9F)", desc: "NS Series", devices: [{ no: 'NS1', pos: 'left' }, { no: 'NS2', pos: 'left' }, { no: 'NS3', pos: 'left' }, { no: 'NS4', pos: 'left' }, { no: 'NS20', pos: 'top' }, { no: 'NS19', pos: 'top' }, { no: 'NS18', pos: 'top' }, { no: 'NS17', pos: 'top' }, { no: 'NS16', pos: 'top' }, { no: 'NS14', pos: 'right' }, { no: 'NS13', pos: 'right' }, { no: 'NS12', pos: 'right' }, { no: 'NS11', pos: 'right' }, { no: 'NS6', pos: 'bottom' }, { no: 'NS7', pos: 'bottom' }, { no: 'NS8', pos: 'bottom' }, { no: 'NS9', pos: 'bottom' }, { no: 'NS10', pos: 'bottom' }] }
                 ]
             },
-            { 
-                id: "long", title: "Long SB", theme: "red", 
+            {
+                id: "long", title: "Long SB", theme: "red",
                 groups: [
-                    { name: "GROUP 5 (10F)", desc: "Middle Section 1", devices: [{no:74,pos:'left'},{no:128,pos:'left'},{no:76,pos:'left'},{no:124,pos:'left'},{no:78,pos:'left'},{no:73,pos:'right'},{no:127,pos:'right'},{no:75,pos:'right'},{no:123,pos:'right'},{no:77,pos:'right'}] },
-                    { name: "GROUP 5.5 (10.5F)", desc: "Middle Section 2", devices: [{no:86,pos:'left'},{no:84,pos:'left'},{no:'NL2',pos:'left'},{no:82,pos:'left'},{no:80,pos:'left'},{no:85,pos:'right'},{no:83,pos:'right'},{no:'NL1',pos:'right'},{no:81,pos:'right'},{no:79,pos:'right'}] },
-                    { name: "GROUP 6 (11F)", desc: "Upper Middle", devices: [{no:88,pos:'left'},{no:90,pos:'left'},{no:92,pos:'left'},{no:94,pos:'left'},{no:96,pos:'left'},{no:87,pos:'right'},{no:89,pos:'right'},{no:91,pos:'right'},{no:93,pos:'right'},{no:95,pos:'right'}] },
-                    { name: "GROUP 7 (12F)", desc: "Upper Section", devices: [{no:104,pos:'left'},{no:102,pos:'left'},{no:'NL4',pos:'left'},{no:100,pos:'left'},{no:98,pos:'left'},{no:103,pos:'right'},{no:101,pos:'right'},{no:'NL3',pos:'right'},{no:99,pos:'right'},{no:97,pos:'right'}] },
-                    { name: "GROUP 8 (13F)", desc: "High Section 1", devices: [{no:106,pos:'left'},{no:108,pos:'left'},{no:110,pos:'left'},{no:112,pos:'left'},{no:'NL6',pos:'left'},{no:105,pos:'right'},{no:107,pos:'right'},{no:109,pos:'right'},{no:111,pos:'right'},{no:'NL5',pos:'right'}] },
-                    { name: "GROUP 8.5 (14F)", desc: "High Section 2", devices: [{no:122,pos:'left'},{no:120,pos:'left'},{no:118,pos:'left'},{no:116,pos:'left'},{no:114,pos:'left'},{no:121,pos:'right'},{no:119,pos:'right'},{no:117,pos:'right'},{no:115,pos:'right'},{no:113,pos:'right'}] },
-                    { name: "GROUP 9 (ECO - 12F)", desc: "Economizer Lower", devices: [{no:130,pos:'left'},{no:132,pos:'left'},{no:134,pos:'left'},{no:129,pos:'right'},{no:131,pos:'right'},{no:133,pos:'right'}] },
-                    { name: "GROUP 9.5 (ECO - 13F)", desc: "Economizer Upper", devices: [{no:'NL8',pos:'left'},{no:126,pos:'left'},{no:'NL10',pos:'left'},{no:'NL7',pos:'right'},{no:125,pos:'right'},{no:'NL9',pos:'right'}] }
+                    { name: "GROUP 5 (10F)", desc: "Middle Section 1", devices: [{ no: 74, pos: 'left' }, { no: 128, pos: 'left' }, { no: 76, pos: 'left' }, { no: 124, pos: 'left' }, { no: 78, pos: 'left' }, { no: 73, pos: 'right' }, { no: 127, pos: 'right' }, { no: 75, pos: 'right' }, { no: 123, pos: 'right' }, { no: 77, pos: 'right' }] },
+                    { name: "GROUP 5.5 (10.5F)", desc: "Middle Section 2", devices: [{ no: 86, pos: 'left' }, { no: 84, pos: 'left' }, { no: 'NL2', pos: 'left' }, { no: 82, pos: 'left' }, { no: 80, pos: 'left' }, { no: 85, pos: 'right' }, { no: 83, pos: 'right' }, { no: 'NL1', pos: 'right' }, { no: 81, pos: 'right' }, { no: 79, pos: 'right' }] },
+                    { name: "GROUP 6 (11F)", desc: "Upper Middle", devices: [{ no: 88, pos: 'left' }, { no: 90, pos: 'left' }, { no: 92, pos: 'left' }, { no: 94, pos: 'left' }, { no: 96, pos: 'left' }, { no: 87, pos: 'right' }, { no: 89, pos: 'right' }, { no: 91, pos: 'right' }, { no: 93, pos: 'right' }, { no: 95, pos: 'right' }] },
+                    { name: "GROUP 7 (12F)", desc: "Upper Section", devices: [{ no: 104, pos: 'left' }, { no: 102, pos: 'left' }, { no: 'NL4', pos: 'left' }, { no: 100, pos: 'left' }, { no: 98, pos: 'left' }, { no: 103, pos: 'right' }, { no: 101, pos: 'right' }, { no: 'NL3', pos: 'right' }, { no: 99, pos: 'right' }, { no: 97, pos: 'right' }] },
+                    { name: "GROUP 8 (13F)", desc: "High Section 1", devices: [{ no: 106, pos: 'left' }, { no: 108, pos: 'left' }, { no: 110, pos: 'left' }, { no: 112, pos: 'left' }, { no: 'NL6', pos: 'left' }, { no: 105, pos: 'right' }, { no: 107, pos: 'right' }, { no: 109, pos: 'right' }, { no: 111, pos: 'right' }, { no: 'NL5', pos: 'right' }] },
+                    { name: "GROUP 8.5 (14F)", desc: "High Section 2", devices: [{ no: 122, pos: 'left' }, { no: 120, pos: 'left' }, { no: 118, pos: 'left' }, { no: 116, pos: 'left' }, { no: 114, pos: 'left' }, { no: 121, pos: 'right' }, { no: 119, pos: 'right' }, { no: 117, pos: 'right' }, { no: 115, pos: 'right' }, { no: 113, pos: 'right' }] },
+                    { name: "GROUP 9 (ECO - 12F)", desc: "Economizer Lower", devices: [{ no: 130, pos: 'left' }, { no: 132, pos: 'left' }, { no: 134, pos: 'left' }, { no: 129, pos: 'right' }, { no: 131, pos: 'right' }, { no: 133, pos: 'right' }] },
+                    { name: "GROUP 9.5 (ECO - 13F)", desc: "Economizer Upper", devices: [{ no: 'NL8', pos: 'left' }, { no: 126, pos: 'left' }, { no: 'NL10', pos: 'left' }, { no: 'NL7', pos: 'right' }, { no: 125, pos: 'right' }, { no: 'NL9', pos: 'right' }] }
                 ]
             }
         ];
@@ -488,7 +779,7 @@
 
         function initDashboard() {
             document.getElementById('page-unit-selection').classList.add('active');
-            fetchTotalSummary(); 
+            fetchTotalSummary();
         }
 
         function selectUnit(unitName) {
@@ -514,11 +805,11 @@
             document.getElementById('page-group-selection').classList.remove('active');
             document.getElementById('page-unit-selection').classList.add('active');
             currentUnit = null;
-            fetchTotalSummary(); 
+            fetchTotalSummary();
         }
 
-        function goGroupSelection() { 
-            document.getElementById('page-detail').classList.remove('active'); 
+        function goGroupSelection() {
+            document.getElementById('page-detail').classList.remove('active');
             document.getElementById('page-group-selection').classList.add('active');
             document.getElementById('memoInput').value = '';
         }
@@ -550,7 +841,7 @@
                 let content = '';
                 const strNo = String(device.no);
                 if (strNo.startsWith('NS') || strNo.startsWith('NL')) {
-                    const type = strNo.substring(0,2); const num = strNo.substring(2);
+                    const type = strNo.substring(0, 2); const num = strNo.substring(2);
                     content = `<span class="label-sm">${type}</span><span class="label-lg">${num}</span>`;
                 } else { content = `<span class="label-lg">${strNo}</span>`; }
                 btn.innerHTML = content;
@@ -563,16 +854,26 @@
             fetchGroupData(fullGroupName);
             document.getElementById('page-group-selection').classList.remove('active');
             document.getElementById('page-detail').classList.add('active');
-            window.scrollTo(0,0);
+            window.scrollTo(0, 0);
         }
 
         function fetchGroupData(fullGroupName) {
-            if(GOOGLE_SCRIPT_URL.includes("여기에")) {
+            if (GOOGLE_SCRIPT_URL.includes("여기에")) {
                 const sl = document.getElementById('statusList');
-                if(sl) sl.innerHTML = `<div class="text-center text-xs text-red-400 mt-4">URL 미설정</div>`;
+                if (sl) sl.innerHTML = `<div class="text-center text-xs text-red-400 mt-4">URL 미설정</div>`;
                 return;
             }
-            
+
+            // 1. 그룹별 캐시 로드
+            const cacheId = `sb_group_cache_${fullGroupName}`;
+            const cachedGroup = localStorage.getItem(cacheId);
+            if (cachedGroup) {
+                try {
+                    currentGroupData = JSON.parse(cachedGroup);
+                    updateCenterStatus(currentGroupData);
+                } catch (e) { console.error("Group 캐시 파싱 에러:", e); }
+            }
+
             const separator = GOOGLE_SCRIPT_URL.includes('?') ? '&' : '?';
             const url = `${GOOGLE_SCRIPT_URL}${separator}group=${encodeURIComponent(fullGroupName)}&t=${new Date().getTime()}`;
 
@@ -586,12 +887,15 @@
                         else finalData = [];
                     }
                     currentGroupData = finalData;
+                    localStorage.setItem(cacheId, JSON.stringify(finalData)); // 캐시 업데이트
                     updateCenterStatus(finalData);
                 })
                 .catch(err => {
                     console.error(err);
-                    const sl = document.getElementById('statusList');
-                    if(sl) sl.innerHTML = `<div class="text-center text-xs text-slate-400 mt-4">데이터 로드 실패</div>`;
+                    if (!currentGroupData || currentGroupData.length === 0) {
+                        const sl = document.getElementById('statusList');
+                        if (sl) sl.innerHTML = `<div class="text-center text-xs text-slate-400 mt-4">데이터 로드 실패</div>`;
+                    }
                 });
         }
 
@@ -600,7 +904,7 @@
             STATUS_CATEGORIES.forEach(cat => counts[cat.code] = 0);
             data.forEach(item => {
                 let code;
-                if (item.device === 'NOTE') { code = 'NOTE'; } 
+                if (item.device === 'NOTE') { code = 'NOTE'; }
                 else { code = getCategoryByAction(item.action); }
                 if (counts[code] !== undefined) counts[code]++;
             });
@@ -610,11 +914,11 @@
             STATUS_CATEGORIES.forEach((cat, idx) => {
                 const count = counts[cat.code] || 0;
                 const activeClass = count > 0 ? 'active' : '';
-                html += `<div class="status-row ${activeClass}" onclick="openHistoryModal('${cat.code}', 'GROUP')"><span>${idx+1}. ${cat.label}</span><span class="badge ${activeClass}">${count}건</span></div>`;
+                html += `<div class="status-row ${activeClass}" onclick="openHistoryModal('${cat.code}', 'GROUP')"><span>${idx + 1}. ${cat.label}</span><span class="badge ${activeClass}">${count}건</span></div>`;
             });
             html += `</div>`;
             const centerBox = document.getElementById('centerBox');
-            if(centerBox) centerBox.innerHTML = html;
+            if (centerBox) centerBox.innerHTML = html;
             const memoCount = counts['NOTE'] || 0;
             const memoBadge = document.getElementById('memoCountBadge');
             if (memoBadge) {
@@ -626,21 +930,21 @@
         function openHistoryModal(code, scope = 'GROUP') {
             const cat = STATUS_CATEGORIES.find(c => c.code === code);
             document.getElementById('historyTitle').textContent = `[${cat.label}] ${scope === 'TOTAL' ? '전체' : '그룹'} 이력`;
-            
+
             const tbody = document.getElementById('historyListBody');
             const noMsg = document.getElementById('noHistoryMsg');
             tbody.innerHTML = '';
-            
+
             const sourceData = scope === 'TOTAL' ? totalDataRecords : currentGroupData;
 
             let filtered;
-            if (code === 'NOTE') { 
-                filtered = sourceData.filter(d => d.device === 'NOTE'); 
-            } else { 
-                filtered = sourceData.filter(d => d.device !== 'NOTE' && getCategoryByAction(d.action) === code); 
+            if (code === 'NOTE') {
+                filtered = sourceData.filter(d => d.device === 'NOTE');
+            } else {
+                filtered = sourceData.filter(d => d.device !== 'NOTE' && getCategoryByAction(d.action) === code);
             }
-            
-            if(filtered.length === 0) { noMsg.classList.remove('hidden'); } 
+
+            if (filtered.length === 0) { noMsg.classList.remove('hidden'); }
             else {
                 noMsg.classList.add('hidden');
                 filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -649,11 +953,11 @@
                     let deviceLocationDisplay;
 
                     if (scope === 'TOTAL') {
-                         const unitName = item.group.split(' - ')[0].split(' ')[1]; 
-                         const groupName = item.group.split(' - ')[1]; 
-                         const deviceNum = item.device === 'NOTE' ? '메모' : `No.${item.device}`;
+                        const unitName = item.group.split(' - ')[0].split(' ')[1];
+                        const groupName = item.group.split(' - ')[1];
+                        const deviceNum = item.device === 'NOTE' ? '메모' : `No.${item.device}`;
 
-                         deviceLocationDisplay = `#${unitName}호기 - ${groupName} (${deviceNum})`;
+                        deviceLocationDisplay = `#${unitName}호기 - ${groupName} (${deviceNum})`;
                     } else {
                         deviceLocationDisplay = item.device === 'NOTE' ? '메모' : `No.${item.device}`;
                     }
@@ -667,26 +971,26 @@
                     </tr>`;
                 });
             }
-            
+
             const modal = document.getElementById('historyModal');
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.add('flex'), 10);
         }
 
-        function openModal(g, d) { 
-            currentSelection = { group: currentSelection.group, deviceNo: d }; 
-            const displayGroup = currentSelection.group.split(' - ')[1] || currentSelection.group; 
-            document.getElementById('modalTitle').textContent = `No. ${d}`; 
-            document.getElementById('modalSubtitle').textContent = displayGroup; 
-            document.getElementById('actionModal').classList.remove('hidden'); 
-            setTimeout(() => document.getElementById('actionModal').classList.add('flex'), 10); 
+        function openModal(g, d) {
+            currentSelection = { group: currentSelection.group, deviceNo: d };
+            const displayGroup = currentSelection.group.split(' - ')[1] || currentSelection.group;
+            document.getElementById('modalTitle').textContent = `No. ${d}`;
+            document.getElementById('modalSubtitle').textContent = displayGroup;
+            document.getElementById('actionModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('actionModal').classList.add('flex'), 10);
         }
-        function closeModal(id) { 
-            const modal = document.getElementById(id); 
-            modal.classList.remove('flex'); 
-            setTimeout(() => modal.classList.add('hidden'), 200); 
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('flex');
+            setTimeout(() => modal.classList.add('hidden'), 200);
         }
-        
+
         // Optimistic Update Implementation
         function optimisticUpdate(group, deviceNo, action) {
             const today = new Date();
@@ -694,81 +998,82 @@
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             const dateStr = `${year}-${month}-${day}`;
-            
+
             const newRecord = {
                 date: dateStr,
                 group: group,
                 device: deviceNo,
                 action: action
             };
-            
+
             totalDataRecords.push(newRecord);
             currentGroupData.push(newRecord);
             totalCounts = calculateTotalCounts(totalDataRecords);
-            
+
             renderTotalDashboard();
-            
+
             if (document.getElementById('page-detail').classList.contains('active')) {
                 updateCenterStatus(currentGroupData);
             }
         }
 
         function submitAction(action) {
-            if(!currentSelection.group) return;
+            if (!currentSelection.group) return;
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden'); loading.classList.add('flex');
             closeModal('actionModal');
-            
+
             optimisticUpdate(currentSelection.group, currentSelection.deviceNo, action);
-            
+
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST", mode: "no-cors",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({group: currentSelection.group, deviceNo: currentSelection.deviceNo, action: action})
-            }).then(() => { 
-                loading.classList.add('hidden'); loading.classList.remove('flex'); 
-                showAlert(`[${currentUnit} - ${currentSelection.deviceNo} - ${action}] 저장 완료!`); 
-                
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ group: currentSelection.group, deviceNo: currentSelection.deviceNo, action: action })
+            }).then(() => {
+                loading.classList.add('hidden'); loading.classList.remove('flex');
+                showAlert(`[${currentUnit} - ${currentSelection.deviceNo} - ${action}] 저장 완료!`);
+
                 setTimeout(() => {
                     fetchGroupData(currentSelection.group);
-                    fetchTotalSummary(); 
-                }, 1000); 
-            }).catch(() => { 
-                loading.classList.add('hidden'); loading.classList.remove('flex'); 
-                showAlert("전송 실패 (화면엔 반영됨)"); 
+                    fetchTotalSummary();
+                }, 1000);
+            }).catch(() => {
+                loading.classList.add('hidden'); loading.classList.remove('flex');
+                showAlert("전송 실패 (화면엔 반영됨)");
             });
         }
 
         function submitMemo() {
             const memoText = document.getElementById('memoInput').value;
-            if(!memoText.trim()) { showAlert("내용을 입력해주세요."); return; }
-            if(!currentSelection.group) { showAlert("그룹 정보가 없습니다."); return; }
-            
+            if (!memoText.trim()) { showAlert("내용을 입력해주세요."); return; }
+            if (!currentSelection.group) { showAlert("그룹 정보가 없습니다."); return; }
+
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden'); loading.classList.add('flex');
-            
+
             optimisticUpdate(currentSelection.group, 'NOTE', memoText);
-            
+
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST", mode: "no-cors",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ group: currentSelection.group, deviceNo: 'NOTE', action: memoText })
-            }).then(() => { 
-                loading.classList.add('hidden'); loading.classList.remove('flex'); 
-                showAlert("특이사항이 저장되었습니다."); 
-                document.getElementById('memoInput').value = ''; 
-                
+            }).then(() => {
+                loading.classList.add('hidden'); loading.classList.remove('flex');
+                showAlert("특이사항이 저장되었습니다.");
+                document.getElementById('memoInput').value = '';
+
                 setTimeout(() => {
-                    fetchGroupData(currentSelection.group); 
+                    fetchGroupData(currentSelection.group);
                     fetchTotalSummary();
                 }, 1000);
-            }).catch(() => { 
-                loading.classList.add('hidden'); loading.classList.remove('flex'); 
-                showAlert("저장 실패 (화면엔 반영됨)"); 
+            }).catch(() => {
+                loading.classList.add('hidden'); loading.classList.remove('flex');
+                showAlert("저장 실패 (화면엔 반영됨)");
             });
         }
 
         initDashboard();
     </script>
 </body>
+
 </html>
