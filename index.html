@@ -95,21 +95,28 @@
 
         <!-- Quick Access Folders -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-10">
-            <!-- Button 1: Risk Assessment -->
-            <a href="https://advsnet.komipo.co.kr:19091/" target="_blank"
-                class="app-card p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-blue-200 group transition-all">
-                <div
-                    class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                    <i data-lucide="shield-check" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h3
-                        class="font-bold text-slate-900 text-base md:text-lg group-hover:text-blue-600 transition-colors">
-                        위험성 평가 발행</h3>
-                    <p class="text-xs text-slate-400 font-medium">Risk Assessment System</p>
-                </div>
-                <i data-lucide="external-link" class="w-4 h-4 text-slate-300 ml-auto group-hover:text-blue-400"></i>
-            </a>
+            <!-- Button 1: Risk Assessment (Auto Login) -->
+            <form id="riskAuthForm" action="https://advsnet.komipo.co.kr:19091/login/login01_select" method="POST"
+                target="_blank" class="contents">
+                <input type="hidden" name="loginCode" value="rsm">
+                <input type="hidden" name="login01_c_crn" value="2148195522">
+                <input type="hidden" name="login01_pwd" value="9327079q!">
+                <input type="hidden" name="login01_name" value="">
+                <button type="submit"
+                    class="app-card p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-blue-200 group transition-all w-full text-left">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3
+                            class="font-bold text-slate-900 text-base md:text-lg group-hover:text-blue-600 transition-colors">
+                            위험성 평가 발행</h3>
+                        <p class="text-[10px] text-blue-500 font-bold">협력사 자동 로그인 모드 ⚡</p>
+                    </div>
+                    <i data-lucide="zap" class="w-4 h-4 text-blue-400 ml-auto group-hover:animate-pulse"></i>
+                </button>
+            </form>
 
             <a href="https://www.notion.so/3-Generator-Class-B-1ce52b92f36880f6bb1bfd594e5d4bbd?source=copy_link"
                 target="_blank"
