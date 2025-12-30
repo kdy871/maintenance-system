@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>브러쉬 이력 조회 (확인용)</title>
+    <style>
+        /* 스타일은 기존과 동일하되, 텍스트 스타일 추가 */
+        :root {
+            --yard-bg: #f3e5f5; --yard-header: #9c27b0;
+            --boiler-bg: #fff8e1; --boiler-header: #fbc02d;
+            --btn-base: #fff; --btn-hover: #e3f2fd;
+        }
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background: #fafafa; }
+        
+        /* [수정됨] 헤더 스타일 변경 */
+        h2 { 
+            text-align: center; 
+            margin-bottom: 20px;
+            font-family: 'Arial', 'Helvetica', sans-serif; /* 깔끔한 고딕 폰트 */
+            font-weight: 800; /* 아주 굵게 */
+            font-size: 2.2rem; /* 폰트 크기 키움 */
+            color: #1a1a1a; /* 기본 진한 검정색 */
+            letter-spacing: -0.5px; /* 자간 살짝 좁게 */
+        }
+        
+        /* [추가됨] Manager 텍스트를 위한 파란색 스타일 */
+        .title-highlight {
+            color: #2962ff; /* 쨍한 파란색 */
+        }
+
+        .unit-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .unit-btn { padding: 10px 30px; font-size: 18px; border: 2px solid #333; background: #fff; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .unit-btn.active { background: #333; color: #fff; }
+        .main-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .direction-section { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .section-header { padding: 10px; text-align: center; font-weight: bold; font-size: 1.2rem; color: white; }
+        .yard-theme .section-header { background-color: var(--yard-header); }
+        .yard-theme .content { background-color: var(--yard-bg); }
+        .boiler-theme .section-header { background-color: var(--boiler-header); }
+        .boiler-theme .content { background-color: var(--boiler-bg); }
+        .content { display: flex; padding: 15px; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .equipment-part { flex: 1; min-width: 300px; }
+        .part-title { text-align: center; font-weight: bold; margin-bottom: 10px; color: #444; border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 5px; }
+        
+        /* 그리드 및 버튼 스타일 */
+        .grid-wrapper { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+        
+        .brush-btn { 
+            background-color: var(--btn-base); 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            padding: 5px 2px; /* 패딩 살짝 줄임 */
+            cursor: pointer; 
+            text-align: center; 
+            transition: all 0.2s; 
+            height: 60px; /* 높이를 살짝 키움 (글씨 2줄 들어가야 함) */
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .brush-btn:hover { background-color: var(--btn-hover); border-color: #2196f3; }
+        
+        /* 버튼 내부 텍스트 스타일 */
+        .btn-code { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #333; }
+        .btn-count { font-size: 11px; color: #e03131; font-weight: bold; } /* 빨간색 누적 횟수 */
+        
+        /* 구분선 */
+        .grid-wrapper > div:nth-child(8n+4) { position: relative; }
+        .grid-wrapper > div:nth-child(8n+4)::after { content: ""; position: absolute; right: -6px; top: 5px; bottom: 5px; width: 2px; background-color: #d1d1d1; border-radius: 2px; }
+
+        /* 로딩 표시 */
+        #loadingMsg { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- [수정됨] 텍스트 및 스타일 적용 -->
+    <h2>Generator Brush <span class="title-highlight">Manager</span></h2>
+    
+    <div id="loadingMsg">데이터 불러오는 중...</div>
+    
+    <div class="unit-selector">
+        <button class="unit-btn active" onclick="setUnit(3)">#3호기</button>
+        <button class="unit-btn" onclick="setUnit(4)">#4호기</button>
+    </div>
+
+    <div class="main-container">
+        <div class="direction-section yard-theme">
+            <div class="section-header">YARD 방향</div>
+            <div class="content">
+                <div class="equipment-part"><div class="part-title">COLLECTOR (C/Y)</div><div class="grid-wrapper" id="grid-CY"></div></div>
+                <div class="equipment-part"><div class="part-title">TURBINE (T/Y)</div><div class="grid-wrapper" id="grid-TY"></div></div>
+            </div>
+        </div>
+        <div class="direction-section boiler-theme">
+            <div class="section-header">BOILER 방향</div>
+            <div class="content">
+                <div class="equipment-part"><div class="part-title">COLLECTOR (C/B)</div><div class="grid-wrapper" id="grid-CB"></div></div>
+                <div class="equipment-part"><div class="part-title">TURBINE (T/B)</div><div class="grid-wrapper" id="grid-TB"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // [1] 구글 앱스 스크립트 주소 (통계 데이터 받아오기용) - 필수 입력!
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyn5VaSQ0Fd21EgY5OcHQRPc7-oRpwQTiGzoaJlXnWeNCPPpM3CWUynSGPnjYKb5LO7jg/exec"; 
+        
+        // [2] 대시보드 주소 (그래프 보러 가기용) - 필수 입력!
+        const DASHBOARD_URL = "https://kdy871.github.io/brush-manager/dashboard.html"; 
+        // =========================================================================
+
+        let currentUnit = 3;
+        let globalStats = []; // 받아온 통계 데이터를 저장할 곳
+
+        const levelMapping = { 4: { left: 4, right: 8 }, 3: { left: 3, right: 7 }, 2: { left: 2, right: 6 }, 1: { left: 1, right: 5 } };
+        const cols = ['A', 'B', 'C', 'D'];
+
+        // 시작하자마자 데이터부터 가져옵니다
+        window.onload = function() {
+            fetchStats();
+        };
+
+        // 통계 데이터 가져오기 함수
+        function fetchStats() {
+            const msg = document.getElementById('loadingMsg');
+            msg.style.display = 'block';
+
+            fetch(`${SCRIPT_URL}?action=getStats`)
+            .then(res => res.json())
+            .then(data => {
+                globalStats = data; // 데이터 저장
+                msg.style.display = 'none';
+                init(); // 화면 그리기 시작
+            })
+            .catch(err => {
+                msg.innerText = "데이터 로딩 실패 (새로고침 해주세요)";
+                console.error(err);
+                // 에러가 나도 일단 화면은 그립니다 (카운트 없이)
+                init();
+            });
+        }
+
+        function createGrid(elementId, prefix, orderList) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = ""; 
+            orderList.forEach(level => {
+                const map = levelMapping[level];
+                cols.forEach(col => createBtn(container, prefix, map.left, col));
+                cols.forEach(col => createBtn(container, prefix, map.right, col));
+            });
+        }
+
+        function createBtn(container, prefix, num, col) {
+            const btnCode = `${prefix}-${num}${col}`; // 예: C/Y-4A
+            const btn = document.createElement('div');
+            btn.className = 'brush-btn';
+            
+            // [핵심] 현재 호기와 위치에 맞는 카운트 찾기
+            // 데이터 형식: { unit: "3호기", location: "C/Y-4A", count: 5 ... }
+            const myStat = globalStats.find(item => 
+                item.unit == `${currentUnit}호기` && item.location == btnCode
+            );
+            
+            // 카운트가 있으면 "누적 N회", 없으면 "-"
+            const countText = myStat ? `누적 ${myStat.count}회` : "-";
+            // 많이 교체된 것(5회 이상)은 더 진하게 표시 (선택사항)
+            const countColor = (myStat && myStat.count >= 5) ? "#d90429" : "#e03131"; 
+
+            btn.innerHTML = `
+                <div class="btn-code">${btnCode}</div>
+                <div class="btn-count" style="color:${countColor}">${countText}</div>
+            `;
+
+            // 클릭 시 대시보드 이동
+            btn.onclick = function() {
+                const targetUrl = `${DASHBOARD_URL}?unit=${encodeURIComponent(currentUnit + '호기')}&location=${encodeURIComponent(btnCode)}`;
+                // iframe 내에서 이동을 시도합니다. 새 창을 원하시면 window.open을 사용하세요.
+                window.location.href = targetUrl;
+            };
+            container.appendChild(btn);
+        }
+
+        function init() {
+            const yardOrder = [4, 3, 2, 1];
+            const boilerOrder = [1, 2, 3, 4];
+            
+            // 버튼을 그릴 때마다 globalStats 데이터를 참고해서 숫자를 넣습니다.
+            createGrid('grid-CY', 'C/Y', yardOrder);
+            createGrid('grid-TY', 'T/Y', yardOrder);
+            createGrid('grid-CB', 'C/B', boilerOrder);
+            createGrid('grid-TB', 'T/B', boilerOrder);
+        }
+
+        function setUnit(unit) {
+            currentUnit = unit;
+            document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 호기를 바꾸면 화면을 다시 그려서 (3호기용/4호기용) 숫자를 업데이트합니다.
+            init();
+        }
+    </script>
+</body>
+</html>

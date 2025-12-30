@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>브러쉬 교체 모니터링</title>
+    <style>
+        :root {
+            --yard-bg: #f3e5f5;
+            --yard-header: #9c27b0;
+            --boiler-bg: #fff8e1;
+            --boiler-header: #fbc02d;
+            --btn-base: #fff;
+            --btn-hover: #e3f2fd;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* 호기 선택 탭 */
+        .unit-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .unit-btn {
+            padding: 10px 30px;
+            font-size: 18px;
+            border: 2px solid #333;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .unit-btn.active {
+            background: #333;
+            color: #fff;
+        }
+
+        /* 메인 레이아웃 */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 방향 섹션 */
+        .direction-section {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .yard-theme .section-header {
+            background-color: var(--yard-header);
+        }
+
+        .yard-theme .content {
+            background-color: var(--yard-bg);
+        }
+
+        .boiler-theme .section-header {
+            background-color: var(--boiler-header);
+        }
+
+        .boiler-theme .content {
+            background-color: var(--boiler-bg);
+        }
+
+        .content {
+            display: flex;
+            padding: 15px;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .equipment-part {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .part-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #444;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 5px;
+        }
+
+        /* 그리드 레이아웃 */
+        .grid-wrapper {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 12px;
+        }
+
+        .brush-btn {
+            background-color: var(--btn-base);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 2px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 11px;
+            transition: all 0.2s;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .brush-btn:hover {
+            background-color: var(--btn-hover);
+            border-color: #2196f3;
+        }
+
+        .brush-btn.clicked {
+            background-color: #4caf50;
+            color: white;
+            border-color: #388e3c;
+        }
+
+        /* 가운데 회색 구분선 */
+        .grid-wrapper>div:nth-child(8n+4) {
+            position: relative;
+        }
+
+        .grid-wrapper>div:nth-child(8n+4)::after {
+            content: "";
+            position: absolute;
+            right: -7px;
+            top: 2px;
+            bottom: 2px;
+            width: 1px;
+            background-color: #bbb;
+        }
+
+        /* [추가] 커스텀 확인창 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-msg {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-confirm {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #eee;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>브러쉬 교체 모니터링</h2>
+
+    <div class="unit-selector">
+        <button class="unit-btn active" onclick="setUnit(3, this)">#3호기</button>
+        <button class="unit-btn" onclick="setUnit(4, this)">#4호기</button>
+    </div>
+
+    <div class="main-container">
+        <div class="direction-section yard-theme">
+            <div class="section-header">YARD 방향</div>
+            <div class="content">
+                <div class="equipment-part">
+                    <div class="part-title">COLLECTOR (C/Y)</div>
+                    <div class="grid-wrapper" id="grid-CY"></div>
+                </div>
+                <div class="equipment-part">
+                    <div class="part-title">TURBINE (T/Y)</div>
+                    <div class="grid-wrapper" id="grid-TY"></div>
+                </div>
+            </div>
+        </div>
+        <div class="direction-section boiler-theme">
+            <div class="section-header">BOILER 방향</div>
+            <div class="content">
+                <div class="equipment-part">
+                    <div class="part-title">COLLECTOR (C/B)</div>
+                    <div class="grid-wrapper" id="grid-CB"></div>
+                </div>
+                <div class="equipment-part">
+                    <div class="part-title">TURBINE (T/B)</div>
+                    <div class="grid-wrapper" id="grid-TB"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [추가] 커스텀 확인창 HTML -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modalMsg" class="modal-msg"></div>
+            <div class="modal-btns">
+                <button class="modal-btn btn-confirm" onclick="handleConfirm(true)">교체 입력</button>
+                <button class="modal-btn btn-cancel" onclick="handleConfirm(false)">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyn5VaSQ0Fd21EgY5OcHQRPc7-oRpwQTiGzoaJlXnWeNCPPpM3CWUynSGPnjYKb5LO7jg/exec";
+
+        let currentUnit = 3;
+        let pendingData = null; // 확인창 승인을 대기하는 데이터 임시 저장용
+
+        const levelMapping = {
+            4: { left: 4, right: 8 },
+            3: { left: 3, right: 7 },
+            2: { left: 2, right: 6 },
+            1: { left: 1, right: 5 }
+        };
+
+        const cols = ['A', 'B', 'C', 'D'];
+
+        function createGrid(elementId, prefix, orderList) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = "";
+            orderList.forEach(level => {
+                const map = levelMapping[level];
+                cols.forEach(col => createBtn(container, prefix, map.left, col));
+                cols.forEach(col => createBtn(container, prefix, map.right, col));
+            });
+        }
+
+        function createBtn(container, prefix, num, col) {
+            const btnCode = `${prefix}-${num}${col}`;
+            const btn = document.createElement('div');
+            btn.className = 'brush-btn';
+            btn.innerHTML = `<div>${btnCode}</div>`;
+
+            btn.onclick = function () {
+                // 클릭 시 즉시 전송하지 않고 확인창을 띄움
+                openConfirmModal(btnCode, btn);
+
+                if (navigator.vibrate) {
+                    navigator.vibrate(30);
+                }
+            };
+            container.appendChild(btn);
+        }
+
+        // [추가] 확인창 열기 함수
+        function openConfirmModal(locationCode, element) {
+            pendingData = { code: locationCode, el: element };
+            const modal = document.getElementById('confirmModal');
+            const msg = document.getElementById('modalMsg');
+
+            msg.innerHTML = `[${currentUnit}호기] <br> ${locationCode} 브러쉬를 <br>교체 입력하시겠습니까?`;
+            modal.style.display = 'flex';
+        }
+
+        // [추가] 확인창 결과 처리 함수
+        function handleConfirm(isConfirmed) {
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'none';
+
+            if (isConfirmed && pendingData) {
+                sendData(pendingData.code, pendingData.el);
+            }
+            pendingData = null;
+        }
+
+        function init() {
+            const yardOrder = [4, 3, 2, 1];
+            const boilerOrder = [1, 2, 3, 4];
+            createGrid('grid-CY', 'C/Y', yardOrder);
+            createGrid('grid-TY', 'T/Y', yardOrder);
+            createGrid('grid-CB', 'C/B', boilerOrder);
+            createGrid('grid-TB', 'T/B', boilerOrder);
+        }
+
+        function setUnit(unit, btnElement) {
+            currentUnit = unit;
+            document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+            document.querySelectorAll('.brush-btn').forEach(b => b.classList.remove('clicked'));
+        }
+
+        function sendData(locationCode, btnElement) {
+            btnElement.classList.add('clicked');
+            const payload = {
+                brushId: `${currentUnit}호기`,
+                location: locationCode
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(payload)
+            }).then(() => {
+                console.log("전송 완료:", payload);
+            }).catch(err => console.error("전송 에러:", err));
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

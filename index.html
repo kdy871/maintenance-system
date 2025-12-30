@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Integrated Power Plant Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=Pretendard:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Pretendard', 'Outfit', sans-serif;
+        }
+
+        /* Premium Card Style - Clean & Scalable */
+        .app-card {
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+            /* Optimize touch */
+        }
+
+        @media (hover: hover) {
+            .app-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
+            }
+        }
+
+        .app-card:active {
+            transform: scale(0.98);
+        }
+
+        /* Subtle Gradient Text for Brand */
+        .brand-text {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Eco-Friendly Mesh Gradient Background */
+        body {
+            background-color: #f8fafc;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(186, 230, 253, 0.5) 0px, transparent 50%),
+                /* Sky Blue */
+                radial-gradient(at 100% 0%, rgba(187, 247, 208, 0.5) 0px, transparent 50%),
+                /* Nature Green */
+                radial-gradient(at 100% 100%, rgba(224, 242, 254, 0.5) 0px, transparent 50%),
+                /* Light Blue */
+                radial-gradient(at 0% 100%, rgba(220, 252, 231, 0.5) 0px, transparent 50%);
+            /* Light Green */
+            background-attachment: fixed;
+            /* Keeps gradient stable during scroll */
+            color: #1e293b;
+            /* Slate 800 */
+            min-height: 100vh;
+        }
+
+        /* Selection Color to match theme */
+        ::selection {
+            background-color: #86efac;
+            /* Green-300 */
+            color: #064e3b;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <!-- Main Container -->
+    <!-- Mobile: Reduced padding (px-4 py-8). Desktop: Large padding (px-12 py-24) -->
+    <div class="max-w-7xl mx-auto px-4 py-8 md:px-12 md:py-24 min-h-screen flex flex-col">
+
+        <!-- Header Section -->
+        <!-- Mobile: tighter bottom margin (mb-10) -->
+        <header class="text-center mb-10 md:mb-20">
+            <!-- Logo Main Title -->
+            <a href="http://www.oneplant.net/main/index.html" target="_blank"
+                class="inline-flex items-center gap-4 md:gap-6 bg-white/90 backdrop-blur-md px-8 py-6 md:px-12 md:py-8 rounded-full shadow-lg border border-white/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer active:scale-95">
+                <img src="./logo.png" alt="Logo" class="w-12 h-12 md:w-20 md:h-20 object-contain">
+                <div class="flex flex-col items-start leading-none gap-1 md:gap-2">
+                    <span class="text-3xl md:text-6xl font-black text-slate-900 tracking-tighter brand-text">ONE
+                        PLANT</span>
+                    <span
+                        class="text-xs md:text-lg font-bold text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">Future
+                        Energy System</span>
+                </div>
+            </a>
+        </header>
+
+        <!-- Quick Access Folders -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-10">
+            <!-- Button 1: Risk Assessment -->
+            <a href="https://advsnet.komipo.co.kr:19091/" target="_blank"
+                class="app-card p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-blue-200 group transition-all">
+                <div
+                    class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3
+                        class="font-bold text-slate-900 text-base md:text-lg group-hover:text-blue-600 transition-colors">
+                        위험성 평가 발행</h3>
+                    <p class="text-xs text-slate-400 font-medium">Risk Assessment System</p>
+                </div>
+                <i data-lucide="external-link" class="w-4 h-4 text-slate-300 ml-auto group-hover:text-blue-400"></i>
+            </a>
+
+            <!-- Button 2: O/H Materials -->
+            <a href="./oh_materials.html" target="_blank"
+                class="app-card p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-violet-200 group transition-all">
+                <div
+                    class="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600 group-hover:scale-110 transition-transform">
+                    <i data-lucide="file-text" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3
+                        class="font-bold text-slate-900 text-base md:text-lg group-hover:text-violet-600 transition-colors">
+                        O/H 관련자료(노션)</h3>
+                    <p class="text-xs text-slate-400 font-medium">O/H Materials (Notion)</p>
+                </div>
+                <i data-lucide="external-link" class="w-4 h-4 text-slate-300 ml-auto group-hover:text-violet-400"></i>
+            </a>
+
+            <!-- Button 3: Placeholder -->
+            <div
+                class="p-5 md:p-6 rounded-2xl border border-dashed border-slate-200 flex items-center gap-4 bg-slate-50/50">
+                <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-300">
+                    <i data-lucide="folder-plus" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-slate-400 text-sm md:text-base">추후 추가 예정</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scalable Grid Layout -->
+        <!-- Mobile: gap-4 (tight). Desktop: gap-8 (spacious) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8 mb-auto">
+
+            <!-- Card 1: Work Order -->
+            <a href="./work-orders/index.html" class="group block">
+                <!-- Mobile: p-5. Desktop: p-8 -->
+                <div
+                    class="app-card h-full p-5 md:p-8 rounded-3xl md:rounded-[2rem] border border-slate-200/60 md:border-slate-100 shadow-sm relative overflow-hidden flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-0">
+                    <!-- Icon Box -->
+                    <div
+                        class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-emerald-50 mb-0 md:mb-6 flex-shrink-0 flex items-center justify-center text-emerald-600 md:group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="clipboard-list" class="w-6 h-6 md:w-7 md:h-7"></i>
+                    </div>
+
+                    <div class="flex-1 flex flex-col">
+                        <h2
+                            class="text-lg md:text-xl font-bold text-slate-900 mb-1 md:mb-2 group-hover:text-emerald-600 transition-colors">
+                            작업지시서</h2>
+                        <!-- Mobile: Hidden description or simplified -->
+                        <p
+                            class="text-slate-500 text-xs md:text-sm leading-relaxed mb-0 md:mb-8 line-clamp-1 md:line-clamp-none">
+                            작업 오더 현황 및 긴급 마감 조회
+                        </p>
+                        <!-- Mobile: Hidden arrow text, full card is click area -->
+                        <div
+                            class="mt-auto hidden md:flex items-center text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                            Open System <i data-lucide="arrow-right"
+                                class="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Chevron -->
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 md:hidden"></i>
+                </div>
+            </a>
+
+            <!-- Card 2: Brush Monitor -->
+            <div class="group block relative h-full">
+                <!-- Wrapper for Admin Link Logic -->
+                <div
+                    class="app-card h-full p-5 md:p-8 rounded-3xl md:rounded-[2rem] border border-slate-200/60 md:border-slate-100 shadow-sm relative overflow-hidden flex flex-col">
+                    <a href="./brush-status/inspector.html"
+                        class="flex-1 block flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-0">
+                        <div
+                            class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-amber-50 mb-0 md:mb-6 flex-shrink-0 flex items-center justify-center text-amber-600 md:group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="zap" class="w-6 h-6 md:w-7 md:h-7"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h2
+                                class="text-lg md:text-xl font-bold text-slate-900 mb-1 md:mb-2 group-hover:text-amber-600 transition-colors">
+                                브러쉬 교체</h2>
+                            <p
+                                class="text-slate-500 text-xs md:text-sm leading-relaxed mb-0 md:mb-6 line-clamp-1 md:line-clamp-none">
+                                주요 설비 브러쉬 상태 실시간 모니터링
+                            </p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 md:hidden"></i>
+                    </a>
+                    <!-- Admin Link: Compact on mobile -->
+                    <a href="./brush-status/index.html"
+                        class="mt-4 md:mt-auto inline-flex items-center justify-center w-full py-2 md:py-2.5 rounded-xl bg-amber-50 text-amber-700 text-[10px] md:text-xs font-bold hover:bg-amber-100 transition-colors">
+                        <i data-lucide="settings" class="w-3 h-3 mr-1.5 md:mr-2"></i> 관리자 모드
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 3: Soot Blower -->
+            <a href="./soot-blower-app/index.html" class="group block">
+                <div
+                    class="app-card h-full p-5 md:p-8 rounded-3xl md:rounded-[2rem] border border-slate-200/60 md:border-slate-100 shadow-sm relative overflow-hidden flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-0">
+                    <div
+                        class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-blue-50 mb-0 md:mb-6 flex-shrink-0 flex items-center justify-center text-blue-600 md:group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="wind" class="w-6 h-6 md:w-7 md:h-7"></i>
+                    </div>
+                    <div class="flex-1 flex flex-col">
+                        <h2
+                            class="text-lg md:text-xl font-bold text-slate-900 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors">
+                            Soot Blower</h2>
+                        <p
+                            class="text-slate-500 text-xs md:text-sm leading-relaxed mb-0 md:mb-8 line-clamp-1 md:line-clamp-none">
+                            호기별 정비 이력 및 가동 현황 관리
+                        </p>
+                        <div
+                            class="mt-auto hidden md:flex items-center text-xs font-bold text-blue-600 uppercase tracking-wider">
+                            Open System <i data-lucide="arrow-right"
+                                class="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 md:hidden"></i>
+                </div>
+            </a>
+
+            <!-- Card 4: EP Manager -->
+            <a href="./tr/index.html" class="group block">
+                <div
+                    class="app-card h-full p-5 md:p-8 rounded-3xl md:rounded-[2rem] border border-slate-200/60 md:border-slate-100 shadow-sm relative overflow-hidden flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-0">
+                    <div
+                        class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-indigo-50 mb-0 md:mb-6 flex-shrink-0 flex items-center justify-center text-indigo-600 md:group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="cpu" class="w-6 h-6 md:w-7 md:h-7"></i>
+                    </div>
+                    <div class="flex-1 flex flex-col">
+                        <h2
+                            class="text-lg md:text-xl font-bold text-slate-900 mb-1 md:mb-2 group-hover:text-indigo-600 transition-colors">
+                            EP 설비 관리</h2>
+                        <p
+                            class="text-slate-500 text-xs md:text-sm leading-relaxed mb-0 md:mb-8 line-clamp-1 md:line-clamp-none">
+                            패널/모듈 상태 점검 및 고장 이력 관리
+                        </p>
+                        <div
+                            class="mt-auto hidden md:flex items-center text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                            Open System <i data-lucide="arrow-right"
+                                class="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 md:hidden"></i>
+                </div>
+            </a>
+
+            <!-- Future Cards auto-fit here -->
+
+        </div>
+
+        <footer class="mt-10 md:mt-20 border-t border-slate-100 pt-6 md:pt-8 text-center pb-8 md:pb-0">
+            <p class="text-slate-400 text-[10px] md:text-xs font-medium uppercase tracking-widest">
+                &copy; 2024 One Plant Corp. Integrated System.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
