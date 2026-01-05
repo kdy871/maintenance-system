@@ -518,23 +518,27 @@
                 </div>
                 <span class="bg-blue-500 text-[10px] font-bold px-2 py-1 rounded">작업 선택</span>
             </div>
-            <div class="p-4 grid grid-cols-1 gap-2">
+            
+            <!-- 메인 작업 목록 -->
+            <div id="actionMainList" class="p-4 grid grid-cols-1 gap-2">
                 <button onclick="submitAction('케이블 교체')"
                     class="w-full p-3 border rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">🔌</span> 1. 케이블 교체</button>
                 <button onclick="submitAction('전동기 소손')"
                     class="w-full p-3 border rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">🔥</span> 2. 전동기 소손</button>
-                <!-- [수정완료] 오타 수정됨: > 추가 -->
                 <button onclick="submitAction('전동기 베어링 교체')"
                     class="w-full p-3 border rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">⚙️</span> 3. 베어링 교체</button>
                 <button onclick="submitAction('전동기 역상')"
                     class="w-full p-3 border rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">⚠️</span> 4. 전동기 역상</button>
-                <button onclick="submitAction('리미트 정비 [회로]')"
+                
+                <!-- 리미트 정비 버튼 클릭 시 상세 선택지로 전환 -->
+                <button onclick="toggleLimitSubMenu(true)"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">⚡</span> 5. 리미트 정비 [회로]</button>
+                
                 <button onclick="submitAction('MOV 정비 [회로]')"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">🔋</span> 6. MOV 정비 [회로]</button>
@@ -548,6 +552,23 @@
                     class="w-full p-3 border rounded-xl hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">🔧</span> 9. 기계적 고착 [기계]</button>
             </div>
+
+            <!-- 리미트 정비 상세 선택 목록 (기본 숨김) -->
+            <div id="actionLimitSubList" class="p-4 hidden grid grid-cols-1 gap-2">
+                <button onclick="submitAction('리미트 정비 [회로] - 정비후 양호')"
+                    class="w-full p-4 border-2 border-green-200 rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    1. 정비후 양호
+                </button>
+                <button onclick="submitAction('리미트 정비 [회로] - 정비후 교체')"
+                    class="w-full p-4 border-2 border-red-200 rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    2. 정비후 교체
+                </button>
+                <button onclick="toggleLimitSubMenu(false)"
+                    class="w-full mt-4 p-2 text-slate-400 font-bold text-xs underline">
+                    이전으로 돌아가기
+                </button>
+            </div>
+
             <div class="bg-slate-50 p-3 text-center border-t cursor-pointer hover:bg-slate-100 transition-colors"
                 onclick="closeModal('actionModal')"><span class="text-slate-500 font-bold text-sm">닫기</span></div>
         </div>
@@ -666,8 +687,6 @@
                     totalDataRecords = JSON.parse(cachedTotal);
                     totalCounts = calculateTotalCounts(totalDataRecords);
                     renderTotalDashboard();
-                    // 캐시가 있으면 로딩 중 표시를 제거하되, 살짝 반투명하게 하거나 표시를 작게 할 수도 있음
-                    // 여기선 단순히 로더를 숨김
                     if (loadingEl) loadingEl.style.display = 'none';
                 } catch (e) { console.error("Total 캐시 파싱 에러:", e); }
             } else {
@@ -982,13 +1001,34 @@
             const displayGroup = currentSelection.group.split(' - ')[1] || currentSelection.group;
             document.getElementById('modalTitle').textContent = `No. ${d}`;
             document.getElementById('modalSubtitle').textContent = displayGroup;
+            
+            // 모달 열 때 항상 메인 목록이 보이도록 초기화
+            toggleLimitSubMenu(false);
+            
             document.getElementById('actionModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('actionModal').classList.add('flex'), 10);
         }
+
         function closeModal(id) {
             const modal = document.getElementById(id);
             modal.classList.remove('flex');
             setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        /**
+         * 리미트 정비 서브 메뉴 토글 함수
+         * @param {boolean} show - true면 상세 메뉴 표시, false면 메인 메뉴 표시
+         */
+        function toggleLimitSubMenu(show) {
+            const mainList = document.getElementById('actionMainList');
+            const subList = document.getElementById('actionLimitSubList');
+            if (show) {
+                mainList.classList.add('hidden');
+                subList.classList.remove('hidden');
+            } else {
+                mainList.classList.remove('hidden');
+                subList.classList.add('hidden');
+            }
         }
 
         // Optimistic Update Implementation
