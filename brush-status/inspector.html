@@ -47,23 +47,50 @@
         .unit-selector {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
         .unit-btn {
-            padding: 10px 30px;
-            font-size: 18px;
-            border: 2px solid #333;
-            background: #fff;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px 45px;
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            border-radius: 8px;
-            font-weight: bold;
+            color: #757575;
+            position: relative;
         }
 
-        .unit-btn.active {
-            background: #333;
-            color: #fff;
+        .unit-btn.unit-3 {
+            border-bottom: 4px solid #2962ff;
+        }
+
+        .unit-btn.unit-4 {
+            border-bottom: 4px solid #e03131;
+        }
+
+        .unit-btn.unit-3.active {
+            background: #eef2ff;
+            color: #2962ff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 98, 255, 0.15);
+        }
+
+        .unit-btn.unit-4.active {
+            background: #fff5f5;
+            color: #e03131;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(224, 49, 49, 0.15);
+        }
+
+        .unit-btn:hover:not(.active) {
+            background: #fafafa;
+            border-color: #ccc;
         }
 
         .main-container {
@@ -195,6 +222,130 @@
             font-size: 0.9rem;
             margin-bottom: 10px;
         }
+
+        /* [추가] 월별 통계 보드 스타일 */
+        .monthly-stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .monthly-stat-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 4px 15px;
+            min-width: 140px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-bottom: 2px solid #2962ff;
+        }
+
+        .monthly-stat-card.nav-card {
+            cursor: pointer;
+            background: #fcfcfc;
+            border-bottom-color: #e03131;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .monthly-stat-card.nav-card:hover {
+            background: #eef2ff;
+            border-bottom-color: #2962ff;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1px 0;
+        }
+
+        .stat-row:not(:last-child) {
+            border-bottom: 1px dashed #eee;
+        }
+
+        .month-label {
+            font-size: 12px;
+            color: #757575;
+            font-weight: 600;
+        }
+
+        .month-count {
+            font-size: 17px;
+            font-weight: 800;
+            color: #1a1a1a;
+        }
+
+        .month-count span {
+            font-size: 11px;
+            margin-left: 2px;
+            color: #2962ff;
+            font-weight: bold;
+        }
+
+        .nav-text {
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .nav-sub-text {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .stat-row.clickable:hover {
+            background: #f0f7ff;
+            color: #2962ff;
+        }
+
+        /* [추가] 아코디언 스타일 상세 내역 */
+        .accordion-content {
+            display: none;
+            padding: 10px 5px;
+            background: #fcfcfc;
+            border-top: 1px dashed #eee;
+            margin-top: 5px;
+            text-align: left;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .mini-btn-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .mini-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #444;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mini-btn strong {
+            color: #2962ff;
+        }
     </style>
 </head>
 
@@ -206,9 +357,12 @@
     <div id="loadingMsg">데이터 불러오는 중...</div>
 
     <div class="unit-selector">
-        <button class="unit-btn active" onclick="setUnit(3)">#3호기</button>
-        <button class="unit-btn" onclick="setUnit(4)">#4호기</button>
+        <button class="unit-btn unit-3 active" onclick="setUnit(3)">#3</button>
+        <button class="unit-btn unit-4" onclick="setUnit(4)">#4</button>
     </div>
+
+    <!-- [추가] 월별 교체 개수 보드 -->
+    <div id="monthly-stats-board" class="monthly-stats-container"></div>
 
     <div class="main-container">
         <div class="direction-section yard-theme">
@@ -345,15 +499,130 @@
             createGrid('grid-TY', 'T/Y', yardOrder);
             createGrid('grid-CB', 'C/B', boilerOrder);
             createGrid('grid-TB', 'T/B', boilerOrder);
+
+            // [추가] 월별 보드 업데이트
+            updateMonthlyBoard();
         }
 
         function setUnit(unit) {
             currentUnit = unit;
             document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+
+            // 클릭된 버튼을 찾아 active 추가 (이름 기반 또는 인덱스 기반)
+            const btns = document.querySelectorAll('.unit-btn');
+            if (unit === 3) btns[0].classList.add('active');
+            else btns[1].classList.add('active');
 
             // 호기를 바꾸면 화면을 다시 그려서 (3호기용/4호기용) 숫자를 업데이트합니다.
             init();
+        }
+
+        // [수정됨] 월별 교체 개수 집계 및 표시 함수 (2개 카드 레이아웃)
+        function updateMonthlyBoard() {
+            const board = document.getElementById('monthly-stats-board');
+            if (!board) return;
+            board.innerHTML = "";
+
+            // 1. 현재 호기 데이터 필터링 (날짜 데이터가 있는 것만)
+            const unitStats = globalStats.filter(item =>
+                item.unit == `${currentUnit}호기` && item.lastDate
+            );
+
+            // 2. 월별로 그룹화 (YYYY-MM 형식)
+            const monthlyCounts = {};
+            unitStats.forEach(item => {
+                const date = new Date(item.lastDate);
+                if (isNaN(date.getTime())) return;
+
+                const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                monthlyCounts[yearMonth] = (monthlyCounts[yearMonth] || 0) + 1;
+            });
+
+            // 3. 월 역순 정렬
+            const sortedMonths = Object.keys(monthlyCounts).sort().reverse();
+
+            // 현재 월과 이전 월 계산
+            const now = new Date();
+            const currKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const prevKey = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+
+            const currCount = monthlyCounts[currKey] || 0;
+            const prevCount = monthlyCounts[prevKey] || 0;
+
+            // 카드 1: 이번달/지난달 실적
+            const statCard = document.createElement('div');
+            statCard.className = 'monthly-stat-card';
+            statCard.innerHTML = `
+                <div class="stat-row clickable" onclick="toggleMonthlyDetail('curr', '${currKey}')">
+                    <span class="month-label">이번 달 (${now.getMonth() + 1}월)</span>
+                    <span class="month-count">${currCount}<span>개</span></span>
+                </div>
+                <div id="currDetailContainer" class="accordion-content"></div>
+                
+                <div class="stat-row clickable" onclick="toggleMonthlyDetail('prev', '${prevKey}')">
+                    <span class="month-label">지난 달 (${lastMonthDate.getMonth() + 1}월)</span>
+                    <span class="month-count">${prevCount}<span>개</span></span>
+                </div>
+                <div id="prevDetailContainer" class="accordion-content"></div>
+            `;
+            board.appendChild(statCard);
+
+            // 카드 2: 전체보기 버튼
+            const navCard = document.createElement('div');
+            navCard.className = 'monthly-stat-card nav-card';
+            navCard.innerHTML = `
+                <div class="nav-text">전체 통계 보기</div>
+                <div class="nav-sub-text">월별 교체 이력 확인 →</div>
+            `;
+            navCard.onclick = () => {
+                window.location.href = `./monthly_stats.html?unit=${currentUnit}`;
+            };
+            board.appendChild(navCard);
+        }
+
+        // [수정됨] 아코디언 방식으로 상세 내역 토글
+        function toggleMonthlyDetail(type, monthKey) {
+            const containerId = type === 'curr' ? 'currDetailContainer' : 'prevDetailContainer';
+            const container = document.getElementById(containerId);
+            const otherContainer = document.getElementById(type === 'curr' ? 'prevDetailContainer' : 'currDetailContainer');
+
+            // 다른 쪽이 열려있으면 닫기
+            if (otherContainer) otherContainer.classList.remove('active');
+
+            if (container.classList.contains('active')) {
+                container.classList.remove('active');
+                return;
+            }
+
+            // 실적 데이터 필터링
+            const details = globalStats.filter(item => {
+                if (item.unit != `${currentUnit}호기` || !item.lastDate) return false;
+                const d = new Date(item.lastDate);
+                const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                return k === monthKey;
+            });
+
+            if (details.length === 0) {
+                container.innerHTML = "<div style='font-size:11px; color:#999; text-align:center;'>내역 없음</div>";
+            } else {
+                details.sort((a, b) => new Date(b.lastDate) - new Date(a.lastDate));
+
+                let html = '<div class="mini-btn-container">';
+                details.forEach(item => {
+                    const d = new Date(item.lastDate);
+                    const dateStr = `${d.getMonth() + 1}.${d.getDate()}`;
+                    html += `
+                        <div class="mini-btn">
+                            <strong>${item.location}</strong> <span>(${dateStr})</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            container.classList.add('active');
         }
     </script>
 </body>

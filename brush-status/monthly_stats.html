@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Noto+Sans+KR:wght@300;400;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --accent: #e11d48;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --header-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        .header-wrapper {
+            background: var(--header-gradient);
+            padding: 40px 20px 60px;
+            text-align: center;
+            color: white;
+            position: relative;
+            margin-bottom: -40px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+        }
+
+        .back-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-3px);
+        }
+
+        .header-title {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-family: 'Montserrat', 'Noto Sans KR', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+            margin-bottom: 5px;
+        }
+
+        #unitDisplay {
+            color: #60a5fa;
+            font-weight: 900;
+        }
+
+        .header-msg {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        #loadingMsg {
+            text-align: center;
+            padding: 80px 0;
+            color: var(--text-gray);
+            font-size: 1.1rem;
+        }
+
+        .stats-table-container {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: transparent;
+        }
+
+        thead {
+            background: #f1f5f9;
+        }
+
+        th {
+            padding: 20px;
+            text-align: left;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-gray);
+            font-weight: 700;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:not(:last-child) {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        tr:hover {
+            background: rgba(241, 245, 249, 0.4);
+        }
+
+        td {
+            padding: 25px 20px;
+            vertical-align: middle;
+        }
+
+        .month-col {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1, 1rem;
+            width: 180px;
+        }
+
+        .location-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .loc-tag {
+            background: white;
+            color: var(--primary);
+            border: 1px solid #e2e8f0;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .loc-tag:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+        }
+
+        .loc-tag span {
+            font-weight: 400;
+            font-size: 0.75rem;
+            color: var(--text-gray);
+        }
+
+        .count-col {
+            text-align: right;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 2rem;
+            color: var(--text-dark);
+            width: 150px;
+            padding-right: 40px;
+        }
+
+        .count-unit {
+            font-size: 1rem;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 400;
+            color: var(--text-gray);
+            margin-left: 5px;
+        }
+
+        /* Responsive Mobile View (Card Layout) */
+        @media (max-width: 650px) {
+            .header-wrapper {
+                padding: 60px 20px 80px;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            .stats-table-container {
+                border-radius: 12px;
+            }
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tr {
+                padding: 15px 20px;
+                border-bottom: 2px solid #f1f5f9;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                /* Added for absolute positioning of count-col */
+            }
+
+            td {
+                padding: 8px 0;
+                width: 100% !important;
+                text-align: left;
+            }
+
+            /* Month and Count side-by-side on mobile */
+            .month-col {
+                font-size: 1.2rem;
+                color: var(--primary);
+                order: 1;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                width: 100% !important;
+                border-bottom: 1px solid #f1f5f9;
+                padding-bottom: 12px !important;
+                margin-bottom: 10px;
+            }
+
+            .count-col {
+                font-size: 1.4rem !important;
+                color: var(--text-dark);
+                text-align: right !important;
+                position: absolute;
+                right: 20px;
+                top: 20px;
+                width: auto !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+
+            .count-col::before {
+                display: none;
+            }
+
+            .count-unit {
+                font-size: 0.8rem;
+                margin-left: 2px;
+            }
+
+            .tags-col {
+                order: 2;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-wrapper">
+        <a href="javascript:history.back()" class="back-btn">← 뒤로가기</a>
+        <div class="header-title">
+            <h2><span id="unitDisplay">#3</span> Unit Statistics</h2>
+            <p class="header-msg">월별 브러쉬 교체 이력 리포트</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="loadingMsg">데이터를 분석하고 리포트를 생성 중입니다...</div>
+
+        <div id="statsWrapper" class="stats-table-container" style="display: none;">
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">교체 시기</th>
+                        <th>상세 교체 위치</th>
+                        <th style="text-align: right; padding-right: 40px;">월간 합계</th>
+                    </tr>
+                </thead>
+                <tbody id="statsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyn5VaSQ0Fd21EgY5OcHQRPc7-oRpwQTiGzoaJlXnWeNCPPpM3CWUynSGPnjYKb5LO7jg/exec";
+
+        const params = new URLSearchParams(window.location.search);
+        const unitNum = params.get('unit') || '3';
+        const targetUnit = unitNum + "호기";
+
+        document.getElementById('unitDisplay').innerText = "#" + unitNum;
+
+        window.onload = function () {
+            fetchStats();
+        };
+
+        function fetchStats() {
+            const cachedData = localStorage.getItem('brush_stats_cache');
+            if (cachedData) {
+                renderStats(JSON.parse(cachedData));
+            }
+
+            fetch(`${SCRIPT_URL}?action=getStats`)
+                .then(res => res.json())
+                .then(data => {
+                    localStorage.setItem('brush_stats_cache', JSON.stringify(data));
+                    renderStats(data);
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('loadingMsg').innerText = "데이터 연결 실패";
+                });
+        }
+
+        function renderStats(data) {
+            const loading = document.getElementById('loadingMsg');
+            const wrapper = document.getElementById('statsWrapper');
+            const body = document.getElementById('statsBody');
+
+            body.innerHTML = "";
+
+            const unitStats = data.filter(item =>
+                item.unit == targetUnit && item.lastDate
+            );
+
+            const monthlyData = {};
+            unitStats.forEach(item => {
+                const date = new Date(item.lastDate);
+                if (isNaN(date.getTime())) return;
+
+                const yearMonth = `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+                if (!monthlyData[yearMonth]) {
+                    monthlyData[yearMonth] = { count: 0, locations: [] };
+                }
+                monthlyData[yearMonth].count++;
+                monthlyData[yearMonth].locations.push({
+                    loc: item.location,
+                    date: date
+                });
+            });
+
+            const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
+                const parseDate = (str) => {
+                    const parts = str.match(/\d+/g);
+                    return new Date(parts[0], parts[1] - 1);
+                };
+                return parseDate(b) - parseDate(a);
+            });
+
+            if (sortedMonths.length === 0) {
+                loading.innerText = "교체 기록 데이터가 존재하지 않습니다.";
+                return;
+            }
+
+            loading.style.display = 'none';
+            wrapper.style.display = 'block';
+
+            sortedMonths.forEach(month => {
+                const info = monthlyData[month];
+                info.locations.sort((a, b) => b.date - a.date);
+
+                const tagsHtml = info.locations.map(l =>
+                    `<div class="loc-tag">${l.loc} <span>(${l.date.getMonth() + 1}.${l.date.getDate()})</span></div>`
+                ).join('');
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="month-col">${month}</td>
+                    <td class="tags-col">
+                        <div class="location-tags">${tagsHtml}</div>
+                    </td>
+                    <td class="count-col">${info.count}<span class="count-unit">건</span></td>
+                `;
+                body.appendChild(row);
+            });
+        }
+    </script>
+</body>
+
+</html>
