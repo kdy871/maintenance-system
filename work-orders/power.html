@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전력기기과 작업지시서 실시간 보드</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .loading-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .transition-all {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <div id="app" class="p-4 md:p-8">
+        <!-- Header 섹션 -->
+        <div class="max-w-5xl mx-auto mb-6">
+            <div class="flex items-center gap-4">
+                <!-- 뒤로가기 버튼 -->
+                <button id="back-button" onclick="setView('dashboard')"
+                    class="hidden p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                    <i data-lucide="arrow-left" class="w-6 h-6 text-slate-600"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <!-- 회사 로고 박스 (클릭 시 새로고침 실행) -->
+                    <div id="header-icon" onclick="location.reload()"
+                        class="w-12 h-12 bg-white border border-blue-200 rounded-2xl flex items-center justify-center shadow-sm transition-all overflow-hidden cursor-pointer hover:opacity-80 active:scale-95 ring-4 ring-blue-50">
+                        <span id="logo-placeholder" class="font-black text-blue-600">1P</span>
+                    </div>
+                    <!-- 숨겨진 파일 입력 필드 -->
+                    <input type="file" id="logo-input" class="hidden" accept="image/*"
+                        onchange="handleLogoChange(event)">
+
+                    <div>
+                        <h1 class="text-2xl font-black tracking-tight text-slate-900 leading-none">
+                            <span id="page-title">작업지시서 실시간 보드</span>
+                        </h1>
+                        <!-- 부서명 및 이미지 변경 버튼 영역 -->
+                        <div class="flex items-center gap-2 mt-1.5 ml-0.5">
+                            <p
+                                class="text-blue-600 text-[10px] font-bold tracking-tight uppercase bg-blue-50 px-2 py-0.5 rounded">
+                                원프랜트 전력기기과</p>
+                            <button onclick="clearCacheAndRefresh()"
+                                class="text-slate-500 hover:text-red-500 text-[10px] font-extrabold transition-colors cursor-pointer bg-slate-100 px-1.5 py-0.5 rounded shadow-sm">
+                                [캐시삭제]
+                            </button>
+                            <button id="upload-btn" onclick="triggerLogoUpload()"
+                                class="text-blue-500 hover:text-blue-700 text-[10px] font-extrabold transition-colors cursor-pointer bg-blue-50 px-1.5 py-0.5 rounded shadow-sm">
+                                [이미지변경]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. 대시보드 뷰 (2x2 그리드) -->
+            <div id="dashboard-view" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6"></div>
+
+            <!-- 2. 통합 현황/검색 뷰 -->
+            <div id="integrated-view" class="hidden mt-6">
+                <div class="relative w-full">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                    <input type="text" id="search-input" oninput="handleSearch()" placeholder="설계자, 작업명, 오더번호를 입력하세요..."
+                        class="w-full pl-12 pr-6 py-4 bg-white border-2 border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-base font-semibold">
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 데이터 리스트 영역 -->
+        <div class="max-w-5xl mx-auto">
+            <div id="list-header" class="mb-4 flex items-center justify-between px-1">
+                <h2 id="list-title"
+                    class="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="arrow-down-right" class="w-4 h-4 text-blue-500"></i>
+                    전체 미완료 리스트
+                </h2>
+                <div id="list-count-badge"
+                    class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full italic">0건</div>
+            </div>
+
+            <!-- 에러 컨테이너 -->
+            <div id="error-container"
+                class="hidden bg-red-50 border border-red-100 text-red-700 p-8 rounded-3xl text-center shadow-sm mb-6">
+                <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-4 text-red-300"></i>
+                <h3 class="text-xl font-black mb-2">연동 실패</h3>
+                <p id="error-message" class="opacity-80 mb-6 text-sm leading-relaxed">네트워크 오류가 발생했거나 구글 스크립트 설정에 문제가
+                    있습니다.</p>
+                <button onclick="fetchData()"
+                    class="bg-red-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-red-700 transition-colors">다시
+                    시도</button>
+            </div>
+
+            <div id="loader"
+                class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <i data-lucide="refresh-cw" class="w-12 h-12 text-blue-500 loading-spin mb-4"></i>
+                <p class="text-slate-500 font-bold text-lg">데이터 동기화 중...</p>
+            </div>
+
+            <div id="task-grid" class="flex flex-col gap-3 pb-20 mt-4"></div>
+
+            <div id="empty-state"
+                class="hidden text-center py-24 bg-white rounded-3xl border border-dashed border-slate-200 mt-4">
+                <p class="text-slate-400 font-bold text-lg italic">표시할 데이터가 없습니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwJJQj2kHIXFm4yjlV5hTQbNShlZ1lwVYZC37mXHOxnT_W5SHztcUkY9yEv-tNZnana/exec";
+        const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1EtIYppwVIcPW8zLqhd56bzMXRD4DAjHQtWENs_SCK2Y/edit?usp=sharing";
+
+        let allTasks = [];
+        let searchQuery = '';
+        let currentView = 'dashboard';
+        let dashboardFilter = 'pending';
+
+        function clearCacheAndRefresh() {
+            if (confirm("저장된 실시간 데이터를 삭제하고 시트에서 다시 불러오시겠습니까?")) {
+                localStorage.removeItem('task_data_cache_power');
+                localStorage.removeItem('logo_data_cache_power');
+                location.reload();
+            }
+        }
+
+        async function fetchData() {
+            if (!GAS_WEB_APP_URL) return;
+            const loader = document.getElementById('loader');
+            const grid = document.getElementById('task-grid');
+            const errorContainer = document.getElementById('error-container');
+            const errorMessage = document.getElementById('error-message');
+            const emptyState = document.getElementById('empty-state');
+
+            const cachedData = localStorage.getItem('task_data_cache_power');
+            const cachedLogo = localStorage.getItem('logo_data_cache_power');
+
+            if (cachedLogo) updateLogoUI(cachedLogo);
+
+            if (cachedData) {
+                try {
+                    allTasks = JSON.parse(cachedData);
+                    renderApp();
+                    grid.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                } catch (e) {
+                    console.error("캐시 데이터 파싱 에러:", e);
+                }
+            } else {
+                loader.classList.remove('hidden');
+                grid.classList.add('hidden');
+            }
+
+            errorContainer.classList.add('hidden');
+            emptyState.classList.add('hidden');
+
+            try {
+                const url = `${GAS_WEB_APP_URL}?_t=${new Date().getTime()}`;
+                const response = await fetch(url, {
+                    method: 'GET',
+                    redirect: 'follow',
+                    cache: 'no-cache'
+                });
+
+                if (!response.ok) throw new Error(`HTTP 오류! 상태: ${response.status}`);
+
+                const data = await response.json();
+
+                if (data.logoUrl) {
+                    updateLogoUI(data.logoUrl);
+                    localStorage.setItem('logo_data_cache_power', data.logoUrl);
+                }
+
+                let rawTasks = data.tasks || [];
+
+                rawTasks.sort((a, b) => {
+                    if (a.isUrgent !== b.isUrgent) return a.isUrgent ? -1 : 1;
+                    const aPending = String(a.status).includes("미완료");
+                    const bPending = String(b.status).includes("미완료");
+                    if (aPending !== bPending) return aPending ? -1 : 1;
+                    if (a.deadline === "기한없음" && b.deadline === "기한없음") return 0;
+                    if (a.deadline === "기한없음") return 1;
+                    if (b.deadline === "기한없음") return -1;
+                    const dateA = new Date(a.deadline);
+                    const dateB = new Date(b.deadline);
+                    return aPending ? dateA - dateB : dateB - dateA;
+                });
+
+                allTasks = rawTasks;
+                localStorage.setItem('task_data_cache_power', JSON.stringify(allTasks));
+
+                renderApp();
+                grid.classList.remove('hidden');
+            } catch (err) {
+                console.error("연동 실패:", err);
+                if (!allTasks || allTasks.length === 0) {
+                    errorContainer.classList.remove('hidden');
+                    errorMessage.innerText = `데이터를 불러올 수 없습니다: ${err.message}`;
+                }
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        async function saveLogoToGAS(base64Image) {
+            const btn = document.getElementById('upload-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "[저장 중...]";
+            btn.disabled = true;
+
+            try {
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ logoUrl: base64Image }),
+                    mode: 'no-cors'
+                });
+
+                updateLogoUI(base64Image);
+                btn.innerText = "[저장 완료]";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            } catch (err) {
+                alert("이미지 저장 실패: " + err.message);
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+
+        window.triggerLogoUpload = () => document.getElementById('logo-input').click();
+
+        window.handleLogoChange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 51200) {
+                    alert("이미지 용량이 너무 큽니다. 50KB 이하를 사용해주세요.");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => saveLogoToGAS(e.target.result);
+                reader.readAsDataURL(file);
+            }
+        };
+
+        function updateLogoUI(url) {
+            const icon = document.getElementById('header-icon');
+            icon.innerHTML = url ? `<img src="${url}" class="w-full h-full object-contain p-1.5" alt="로고">` : `<span class="font-black text-blue-600">1P</span>`;
+        }
+
+        window.handleSearch = () => { searchQuery = document.getElementById('search-input').value.trim().toLowerCase(); renderApp(); };
+        window.setDashboardFilter = (t) => { dashboardFilter = t; renderApp(); };
+
+        window.setView = (v) => {
+            currentView = v;
+            document.getElementById('dashboard-view').classList.toggle('hidden', v !== 'dashboard');
+            document.getElementById('integrated-view').classList.toggle('hidden', v !== 'integrated');
+            document.getElementById('back-button').classList.toggle('hidden', v === 'dashboard');
+            document.getElementById('list-header').classList.toggle('hidden', v !== 'dashboard');
+            document.getElementById('page-title').innerText = v === 'dashboard' ? "작업지시서 실시간 보드" : "통합 작업지시서 현황";
+            if (v === 'integrated') setTimeout(() => document.getElementById('search-input').focus(), 100);
+            lucide.createIcons();
+            renderApp();
+        };
+
+        function renderApp() {
+            const grid = document.getElementById('task-grid');
+            const empty = document.getElementById('empty-state');
+            const listTitle = document.getElementById('list-title');
+            const listCount = document.getElementById('list-count-badge');
+
+            let filtered = [];
+            if (currentView === 'dashboard') {
+                filtered = allTasks.filter(t => dashboardFilter === 'urgent' ? (t.isUrgent && String(t.status).includes("미완료")) : String(t.status).includes("미완료"));
+                listTitle.innerHTML = dashboardFilter === 'urgent' ? `<i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i> 긴급 마감 리스트` : `<i data-lucide="arrow-down-right" class="w-4 h-4 text-blue-500"></i> 전체 미완료 리스트`;
+                renderStats();
+            } else {
+                filtered = allTasks.filter(t => !searchQuery || [t.title, t.designer, t.orderNo].some(v => String(v).toLowerCase().includes(searchQuery)));
+            }
+
+            listCount.innerText = `${filtered.length}건`;
+            grid.innerHTML = '';
+            empty.classList.toggle('hidden', filtered.length > 0);
+
+            filtered.forEach(task => {
+                const isComp = String(task.status).includes("완료") && !String(task.status).includes("미완료");
+                const card = document.createElement('div');
+                card.className = `bg-white border p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md ${isComp ? 'opacity-60 bg-emerald-50/10' : (task.isUrgent ? 'border-red-100 shadow-sm' : 'border-slate-100')}`;
+
+                card.innerHTML = `
+                    <div class="flex-1 flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 rounded bg-slate-100 text-[10px] font-black text-slate-600">${task.sheet}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isComp ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-50 text-amber-600'}">#${task.status}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[9px] font-bold text-slate-400">오더: ${task.orderNo || '-'}</p>
+                            <h3 class="font-bold text-slate-900 text-sm md:text-base truncate">${task.title}</h3>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-3 md:pt-0">
+                        <div class="flex items-center gap-4 text-slate-600 text-xs font-bold">
+                            <div class="flex items-center gap-1.5"><i data-lucide="user" class="w-3 h-3 opacity-40"></i>${task.designer}</div>
+                            <div class="flex items-center gap-1.5 min-w-[85px]"><i data-lucide="calendar" class="w-3 h-3 opacity-40"></i><span class="${!isComp && task.isUrgent ? 'text-red-500' : ''}">${task.deadline}</span></div>
+                        </div>
+                        <div class="min-w-[50px] text-right">${!isComp && task.isUrgent ? `<span class="text-[10px] font-black text-red-500 italic">D-${task.daysLeft || 'DAY'}</span>` : ''}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function renderStats() {
+            const urg = allTasks.filter(t => t.isUrgent && String(t.status).includes("미완료")).length;
+            const pend = allTasks.filter(t => String(t.status).includes("미완료")).length;
+            document.getElementById('dashboard-view').innerHTML = `
+                <button onclick="setDashboardFilter('urgent')" class="bg-white p-6 rounded-3xl border transition-all ${dashboardFilter === 'urgent' ? 'border-red-500 shadow-lg ring-2 ring-red-500/10' : 'border-slate-200'} flex items-center gap-5">
+                    <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center"><i data-lucide="alert-circle"></i></div>
+                    <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">긴급 마감</p><p class="text-3xl font-black text-red-600">${urg}건</p></div>
+                </button>
+                <button onclick="setDashboardFilter('pending')" class="bg-white p-6 rounded-3xl border transition-all ${dashboardFilter === 'pending' ? 'border-blue-500 shadow-lg ring-2 ring-blue-500/10' : 'border-slate-200'} flex items-center gap-5">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><i data-lucide="clock"></i></div>
+                    <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">전체 미완료</p><p class="text-3xl font-black text-blue-600">${pend}건</p></div>
+                </button>
+                <a href="${SPREADSHEET_URL}" target="_blank" class="bg-blue-600 p-6 rounded-3xl flex items-center gap-5 shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all">
+                    <div class="w-12 h-12 bg-white/20 text-white rounded-xl flex items-center justify-center"><i data-lucide="file-spreadsheet"></i></div>
+                    <div><p class="text-[11px] font-bold text-blue-50 uppercase tracking-wider">데이터 관리</p><p class="text-xl font-black text-white">시트 바로가기</p></div>
+                </a>
+                <button onclick="setView('integrated')" class="bg-slate-700 p-6 rounded-3xl flex items-center gap-5 shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all">
+                    <div class="w-12 h-12 bg-white/20 text-white rounded-xl flex items-center justify-center"><i data-lucide="search"></i></div>
+                    <div><p class="text-[11px] font-bold text-slate-50 uppercase tracking-wider">통합 현황 검색</p><p class="text-xl font-black text-white">지시서 전체 검색</p></div>
+                </button>
+            `;
+            lucide.createIcons();
+        }
+
+        window.onload = fetchData;
+    </script>
+</body>
+
+</html>
