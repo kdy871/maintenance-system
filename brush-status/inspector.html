@@ -239,8 +239,10 @@
             background: white;
             border: 1px solid #e0e0e0;
             border-radius: 12px;
-            padding: 4px 15px;
-            min-width: 140px;
+            padding: 4px 12px;
+            min-width: 120px;
+            max-width: 180px;
+            flex: 1;
             text-align: center;
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
@@ -345,6 +347,40 @@
 
         .mini-btn strong {
             color: #2962ff;
+        }
+
+        /* 모바일 대응: 가로 배치 유지 및 컴팩트화 */
+        @media (max-width: 600px) {
+            .monthly-stats-container {
+                gap: 8px;
+                padding: 0 10px;
+                flex-wrap: nowrap;
+                /* 강제로 가로 배치 */
+            }
+
+            .monthly-stat-card {
+                min-width: 0;
+                /* min-width 해제하여 유연하게 조절 */
+                padding: 4px 8px;
+            }
+
+            .month-label {
+                font-size: 10px;
+                white-space: nowrap;
+            }
+
+            .month-count {
+                font-size: 15px;
+            }
+
+            .nav-text {
+                font-size: 11px;
+            }
+
+            .nav-sub-text {
+                display: none;
+                /* 모바일에서 서브 텍스트 숨김 */
+            }
         }
     </style>
 </head>
