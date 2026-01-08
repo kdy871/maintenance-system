@@ -70,7 +70,6 @@
             .list-panel {
                 width: 100%;
                 height: 25%;
-                /* 하단 25% (검색창 + 목록 1~2개 보일 정도) */
                 border-right: none;
                 border-top: 2px solid #ddd;
                 /* 경계선을 위쪽으로 이동 */
@@ -79,7 +78,6 @@
             .chart-panel {
                 width: 100%;
                 height: 75%;
-                /* 상단 75% (그래프 시원하게) */
                 padding: 10px;
             }
 
@@ -208,6 +206,7 @@
             </div>
         </div>
     </div>
+
     <script>
         // ▼▼▼ 본인의 구글 앱스 스크립트 주소 입력 (필수!) ▼▼▼
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyn5VaSQ0Fd21EgY5OcHQRPc7-oRpwQTiGzoaJlXnWeNCPPpM3CWUynSGPnjYKb5LO7jg/exec";
@@ -288,9 +287,6 @@
                 }
                 const li = document.createElement('li');
                 li.className = 'item-row';
-                li.setAttribute('data-unit', item.unit);
-                li.setAttribute('data-location', item.location);
-
                 li.onclick = () => loadHistory(item, li);
                 li.innerHTML = `
                     <div class="item-header">

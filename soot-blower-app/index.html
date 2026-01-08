@@ -76,16 +76,6 @@
             background-color: #334155;
         }
 
-        .dashboard-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .dashboard-card:active {
-            transform: scale(0.98);
-            background-color: #f1f5f9;
-        }
-
         /* 텍스트 스타일 */
         .card-title {
             font-size: 16px;
@@ -518,7 +508,7 @@
                 </div>
                 <span class="bg-blue-500 text-[10px] font-bold px-2 py-1 rounded">작업 선택</span>
             </div>
-            
+
             <!-- 메인 작업 목록 -->
             <div id="actionMainList" class="p-4 grid grid-cols-1 gap-2">
                 <button onclick="submitAction('케이블 교체')"
@@ -533,12 +523,12 @@
                 <button onclick="submitAction('전동기 역상')"
                     class="w-full p-3 border rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">⚠️</span> 4. 전동기 역상</button>
-                
+
                 <!-- 리미트 정비 버튼 클릭 시 상세 선택지로 전환 -->
                 <button onclick="toggleLimitSubMenu(true)"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">⚡</span> 5. 리미트 정비 [회로]</button>
-                
+
                 <button onclick="submitAction('MOV 정비 [회로]')"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
                         class="w-6 text-center mr-2">🔋</span> 6. MOV 정비 [회로]</button>
@@ -741,7 +731,7 @@
                 const barColor = count > 0 ? 'red' : 'dark';
 
                 const card = document.createElement('div');
-                card.className = `dashboard-card ${barColor} relative`;
+                card.className = `app-card dashboard-card ${barColor} relative`;
                 card.style.cursor = 'pointer';
                 card.onclick = () => openHistoryModal(cat.code, 'TOTAL');
 
@@ -810,7 +800,7 @@
                 section.groups.forEach((group, idx) => {
                     const btn = document.createElement('div');
                     const barColor = section.theme === 'blue' ? 'blue' : 'red';
-                    btn.className = `dashboard-card ${barColor}`;
+                    btn.className = `app-card dashboard-card ${barColor}`;
                     btn.innerHTML = `<div class="card-title">${group.name}</div>`;
                     btn.onclick = () => showDetail(section.id, idx);
                     listEl.appendChild(btn);
@@ -1001,10 +991,10 @@
             const displayGroup = currentSelection.group.split(' - ')[1] || currentSelection.group;
             document.getElementById('modalTitle').textContent = `No. ${d}`;
             document.getElementById('modalSubtitle').textContent = displayGroup;
-            
+
             // 모달 열 때 항상 메인 목록이 보이도록 초기화
             toggleLimitSubMenu(false);
-            
+
             document.getElementById('actionModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('actionModal').classList.add('flex'), 10);
         }

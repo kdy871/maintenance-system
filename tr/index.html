@@ -22,19 +22,24 @@
         }
     }
     </script>
-
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+        }
+
         .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #f1f5f9;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 4px;
+            border-radius: 10px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -86,9 +91,9 @@
     </script>
 
     <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+        import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { X, Save, Settings, Activity, Zap, AlertTriangle, CheckCircle, ArrowLeft, FileText, Database, ChevronRight, Download, RefreshCw, AlertCircle, ExternalLink, Trash2, History, Cloud, List, ClipboardList } from 'lucide-react';
+        import { X, Save, Settings, Activity, Zap, AlertTriangle, CheckCircle, ArrowLeft, FileText, Database, ChevronRight, Download, RefreshCw, AlertCircle, ExternalLink, Trash2, History, Cloud, List, ClipboardList, Cpu } from 'lucide-react';
 
         // --- Helper: Wait Function ---
         const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -244,47 +249,85 @@
                             <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full"><X size={20} className="text-gray-500" /></button>
                         </div>
                         <div className="flex-1 overflow-auto p-0 custom-scrollbar">
-                            <table className="w-full text-sm text-left text-gray-500">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0 z-10">
-                                    <tr>
-                                        <th className="px-6 py-3 w-1/5">일시</th>
-                                        <th className="px-6 py-3 w-1/12">상태</th>
-                                        <th className="px-6 py-3 w-1/12">작업자</th>
-                                        <th className="px-6 py-3">내용</th>
-                                        <th className="px-6 py-3 w-1/12 text-right">관리</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {!hasHistory ? (
-                                        <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">해당 모듈에 기록된 이력이 없습니다.</td></tr>
-                                    ) : (
-                                        module.history.map((item, index) => {
-                                            const style = getStatusStyle(item.status);
-                                            return (
-                                                <tr key={item.date + index} className="bg-white border-b hover:bg-gray-50">
-                                                    <td className="px-6 py-4 font-mono text-xs">{item.date}</td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>
-                                                            {item.status === 'NORMAL' ? '정상' : (item.status === 'CHECK' ? '모듈' : '기타')}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 font-medium text-gray-900">{item.tech || '-'}</td>
-                                                    <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap text-xs">{renderText(item.action)}</td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <button
-                                                            onClick={() => onShowConfirm(item)}
-                                                            className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
-                                                            title="이력 삭제"
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
+                            {/* PC 버전: 테이블 레이아웃 */}
+                            <div className="hidden md:block">
+                                <table className="w-full text-sm text-left text-gray-500">
+                                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0 z-10">
+                                        <tr>
+                                            <th className="px-6 py-3 w-1/4">일시</th>
+                                            <th className="px-6 py-3 w-24">상태</th>
+                                            <th className="px-6 py-3 w-32">작업자</th>
+                                            <th className="px-6 py-3">내용</th>
+                                            <th className="px-6 py-3 w-20 text-right">관리</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {!hasHistory ? (
+                                            <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">해당 모듈에 기록된 이력이 없습니다.</td></tr>
+                                        ) : (
+                                            module.history.map((item, index) => {
+                                                const style = getStatusStyle(item.status);
+                                                return (
+                                                    <tr key={item.date + index} className="bg-white border-b hover:bg-gray-50">
+                                                        <td className="px-6 py-4 font-mono text-xs whitespace-nowrap">{item.date}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>
+                                                                {item.status === 'NORMAL' ? '정상' : (item.status === 'CHECK' ? '모듈' : '기타')}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{item.tech || '-'}</td>
+                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap text-xs">{renderText(item.action)}</td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <button
+                                                                onClick={() => onShowConfirm(item)}
+                                                                className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
+                                                                title="이력 삭제"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* 모바일 버전: 카드 레이아웃 */}
+                            <div className="md:hidden p-4 space-y-4">
+                                {!hasHistory ? (
+                                    <div className="py-10 text-center text-gray-400">해당 모듈에 기록된 이력이 없습니다.</div>
+                                ) : (
+                                    module.history.map((item, index) => {
+                                        const style = getStatusStyle(item.status);
+                                        return (
+                                            <div key={item.date + index} className="app-card bg-white rounded-lg border border-gray-200 p-4 shadow-sm space-y-3 relative">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="space-y-1">
+                                                        <div className="text-[10px] font-mono text-gray-400">{item.date}</div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.bg} ${style.border} ${style.text}`}>
+                                                                {item.status === 'NORMAL' ? '정상' : (item.status === 'CHECK' ? '모듈' : '기타')}
+                                                            </span>
+                                                            <span className="text-xs font-bold text-gray-900">{item.tech || '-'}</span>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => onShowConfirm(item)}
+                                                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-full"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-wrap leading-relaxed italic">
+                                                    {renderText(item.action)}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -351,45 +394,86 @@
                             </div>
                         </div>
                         <div className="flex-1 overflow-auto p-0 custom-scrollbar">
-                            <table className="w-full text-sm text-left text-gray-500">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10">
-                                    <tr>
-                                        <th className="px-6 py-3 border-b">일시</th>
-                                        <th className="px-6 py-3 border-b">위치</th>
-                                        <th className="px-6 py-3 border-b">상태</th>
-                                        <th className="px-6 py-3 border-b">작업자</th>
-                                        <th className="px-6 py-3 border-b">내용</th>
-                                        <th className="px-6 py-3 border-b text-right">관리</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {allHistory.length === 0 ? (
-                                        <tr><td colSpan="6" className="px-6 py-10 text-center text-gray-400">기록이 없습니다.</td></tr>
-                                    ) : (
-                                        allHistory.map((item) => {
-                                            const style = getStatusStyle(item.status);
-                                            return (
-                                                <tr key={item.key} className="bg-white border-b hover:bg-gray-50">
-                                                    <td className="px-6 py-4 font-mono text-xs">{item.date}</td>
-                                                    <td className="px-6 py-4 font-bold text-slate-700">PNL-{item.panelId} / Mod-{item.moduleId}</td>
-                                                    <td className="px-6 py-4"><span className={`px-2 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
-                                                    <td className="px-6 py-4 font-medium text-gray-900">{item.tech || '-'}</td>
-                                                    <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap">{renderText(item.action)}</td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <button
-                                                            onClick={() => onShowConfirm({ panelId: item.panelId, moduleId: item.moduleId }, item)}
-                                                            className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
-                                                            title="이력 삭제"
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
+                            {/* PC 버전: 테이블 레이아웃 */}
+                            <div className="hidden md:block">
+                                <table className="w-full text-sm text-left text-gray-500">
+                                    <thead className="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10">
+                                        <tr>
+                                            <th className="px-6 py-3 border-b w-48">일시</th>
+                                            <th className="px-6 py-3 border-b w-40">위치</th>
+                                            <th className="px-6 py-3 border-b w-24">상태</th>
+                                            <th className="px-6 py-3 border-b w-32">작업자</th>
+                                            <th className="px-6 py-3 border-b">내용</th>
+                                            <th className="px-6 py-3 border-b w-20 text-right">관리</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {allHistory.length === 0 ? (
+                                            <tr><td colSpan="6" className="px-6 py-10 text-center text-gray-400">기록이 없습니다.</td></tr>
+                                        ) : (
+                                            allHistory.map((item) => {
+                                                const style = getStatusStyle(item.status);
+                                                return (
+                                                    <tr key={item.key} className="bg-white border-b hover:bg-gray-50">
+                                                        <td className="px-6 py-4 font-mono text-xs whitespace-nowrap">{item.date}</td>
+                                                        <td className="px-6 py-4 font-bold text-slate-700 whitespace-nowrap">PNL-{item.panelId} / Mod-{item.moduleId}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
+                                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{item.tech || '-'}</td>
+                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap">{renderText(item.action)}</td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <button
+                                                                onClick={() => onShowConfirm({ panelId: item.panelId, moduleId: item.moduleId }, item)}
+                                                                className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded"
+                                                                title="이력 삭제"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* 모바일 버전: 카드 레이아웃 */}
+                            <div className="md:hidden p-3 bg-gray-50 space-y-3">
+                                {allHistory.length === 0 ? (
+                                    <div className="py-10 text-center text-gray-400">기록이 없습니다.</div>
+                                ) : (
+                                    allHistory.map((item) => {
+                                        const style = getStatusStyle(item.status);
+                                        return (
+                                            <div key={item.key} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                                                <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-white">
+                                                    <div>
+                                                        <div className="text-[10px] font-mono text-slate-400">{item.date}</div>
+                                                        <div className="text-xs font-black text-slate-800">PNL-{item.panelId} / Mod-{item.moduleId}</div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => onShowConfirm({ panelId: item.panelId, moduleId: item.moduleId }, item)}
+                                                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-full"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                                <div className="p-3 space-y-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.bg} ${style.border} ${style.text}`}>
+                                                            {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}
+                                                        </span>
+                                                        <span className="text-xs font-bold text-slate-700">{item.tech || '-'}</span>
+                                                    </div>
+                                                    <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 whitespace-pre-wrap italic">
+                                                        {renderText(item.action)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -454,43 +538,82 @@
             return (
                 <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-xl w-full max-w-5xl h-[85vh] shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-800 text-white">
-                            <h2 className="text-xl font-bold flex items-center gap-2"><List size={20} />종합 이력 대장 (전체 구역)</h2>
+                        <div className="px-4 md:px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-800 text-white">
+                            <h2 className="text-lg md:text-xl font-bold flex items-center gap-2 md:gap-3">
+                                <List size={20} className="shrink-0" />
+                                <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 leading-tight">
+                                    <span>종합 이력 대장</span>
+                                    <span className="text-[10px] md:text-xs opacity-70 block md:inline-block font-medium">(전체 구역)</span>
+                                </div>
+                            </h2>
                             <div className="flex items-center gap-2">
                                 <button onClick={downloadCSV} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-md hover:bg-emerald-600 transition-colors shadow-sm"><Download size={14} /> 전체 엑셀 다운로드</button>
                                 <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-full"><X size={20} className="text-slate-300 hover:text-white" /></button>
                             </div>
                         </div>
                         <div className="flex-1 overflow-auto p-0 custom-scrollbar">
-                            <table className="w-full text-sm text-left text-gray-500">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10 shadow-sm">
-                                    <tr>
-                                        <th className="px-6 py-3 border-b">일시</th>
-                                        <th className="px-6 py-3 border-b">전체 위치</th>
-                                        <th className="px-6 py-3 border-b">상태</th>
-                                        <th className="px-6 py-3 border-b">작업자</th>
-                                        <th className="px-6 py-3 border-b">내용</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {allHistory.length === 0 ? (
-                                        <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">전체 기록이 없습니다.</td></tr>
-                                    ) : (
-                                        allHistory.map((item) => {
-                                            const style = getStatusStyle(item.status);
-                                            return (
-                                                <tr key={item.key} className="bg-white border-b hover:bg-gray-50">
-                                                    <td className="px-6 py-4 font-mono text-xs text-slate-500">{item.date}</td>
-                                                    <td className="px-6 py-4 font-bold text-slate-800">{item.fullLocation}</td>
-                                                    <td className="px-6 py-4"><span className={`px-2 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
-                                                    <td className="px-6 py-4 font-medium text-gray-900">{item.tech || '-'}</td>
-                                                    <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap">{renderText(item.action)}</td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
+                            {/* PC 버전: 테이블 레이아웃 */}
+                            <div className="hidden md:block">
+                                <table className="w-full text-sm text-left text-gray-500">
+                                    <thead className="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10 shadow-sm">
+                                        <tr>
+                                            <th className="px-6 py-3 border-b w-48">일시</th>
+                                            <th className="px-6 py-3 border-b w-64">전체 위치</th>
+                                            <th className="px-6 py-3 border-b w-24">상태</th>
+                                            <th className="px-6 py-3 border-b w-32">작업자</th>
+                                            <th className="px-6 py-3 border-b">내용</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {allHistory.length === 0 ? (
+                                            <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">전체 기록이 없습니다.</td></tr>
+                                        ) : (
+                                            allHistory.map((item) => {
+                                                const style = getStatusStyle(item.status);
+                                                return (
+                                                    <tr key={item.key} className="bg-white border-b hover:bg-gray-50">
+                                                        <td className="px-6 py-4 font-mono text-xs text-slate-500 whitespace-nowrap">{item.date}</td>
+                                                        <td className="px-6 py-4 font-bold text-slate-800 whitespace-nowrap">{item.fullLocation}</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
+                                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{item.tech || '-'}</td>
+                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap">{renderText(item.action)}</td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* 모바일 버전: 카드 레이아웃 */}
+                            <div className="md:hidden p-3 bg-gray-100 space-y-3">
+                                {allHistory.length === 0 ? (
+                                    <div className="py-10 text-center text-gray-400">전체 기록이 없습니다.</div>
+                                ) : (
+                                    allHistory.map((item) => {
+                                        const style = getStatusStyle(item.status);
+                                        return (
+                                            <div key={item.key} className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                                                <div className="p-3 border-b border-gray-100 bg-slate-50">
+                                                    <div className="text-[10px] font-mono text-slate-400">{item.date}</div>
+                                                    <div className="text-xs font-black text-slate-800 uppercase tracking-tight">{item.fullLocation}</div>
+                                                </div>
+                                                <div className="p-3 space-y-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.bg} ${style.border} ${style.text}`}>
+                                                            {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}
+                                                        </span>
+                                                        <span className="text-xs font-bold text-slate-700">{item.tech || '-'}</span>
+                                                    </div>
+                                                    <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 whitespace-pre-wrap leading-relaxed">
+                                                        {renderText(item.action)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
                         <div className="px-6 py-3 bg-gray-50 border-t text-xs text-right text-gray-500">
                             총 {allHistory.length}개의 이력이 조회되었습니다. (삭제는 상세 화면에서만 가능합니다)
@@ -827,21 +950,21 @@
 
 
             return (
-                <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-slate-200 relative fade-in">
-                    <button onClick={onBack} className="absolute top-8 left-8 p-2 rounded-full hover:bg-gray-100 text-slate-400 hover:text-slate-600 transition-colors z-40"><ArrowLeft size={24} /></button>
+                <div className="min-h-screen selection:bg-slate-200 relative fade-in">
+                    <button onClick={onBack} className="absolute top-8 left-8 p-3 rounded-full bg-white/50 backdrop-blur-md shadow-sm hover:bg-white text-slate-400 hover:text-slate-600 transition-all z-40 md:top-12 md:left-12"><ArrowLeft size={24} /></button>
 
-                    <div className="absolute top-8 right-8 z-40 flex items-center gap-2">
+                    <div className="absolute top-8 right-8 z-40 flex items-center gap-3 md:top-12 md:right-12">
                         {loading || bgSyncing ? (
-                            <span className="text-xs text-gray-400 flex items-center gap-1 animate-pulse transition-all"><RefreshCw size={12} className='animate-spin' /> {loading ? "로딩 중..." : "저장 중..."}</span>
+                            <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1.5 bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 animate-pulse transition-all"><RefreshCw size={12} className='animate-spin' /> {loading ? "로딩 중..." : "저장 중..."}</span>
                         ) : error ? (
-                            <span className="text-xs text-rose-500 font-bold flex items-center gap-1" title={error}><AlertTriangle size={12} /> 연결 불안정</span>
+                            <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1.5 bg-rose-50/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-rose-100" title={error}><AlertTriangle size={12} /> 연결 불안정</span>
                         ) : (
-                            <span className="text-xs text-emerald-600 font-bold flex items-center gap-1 transition-all"><Cloud size={12} /> 최신 상태</span>
+                            <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5 bg-emerald-50/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-100 transition-all"><Cloud size={12} /> 클라우드 동기화</span>
                         )}
-                        <button onClick={() => setShowHistorySheet(true)} className="px-4 py-2 bg-slate-800 text-white text-xs font-bold rounded-full shadow hover:bg-slate-700 transition-colors flex items-center gap-2"><FileText size={14} /> 이력 대장</button>
+                        <button onClick={() => setShowHistorySheet(true)} className="px-5 py-2.5 bg-slate-800 text-white text-xs font-bold rounded-full shadow-lg hover:bg-slate-700 hover:-translate-y-0.5 transition-all flex items-center gap-2"><FileText size={14} /> 이력 대장</button>
                     </div>
 
-                    <main className="max-w-7xl mx-auto p-8 pt-20">
+                    <div className="max-w-7xl mx-auto p-8 pt-20">
                         <div className="flex justify-between items-center mb-8">
                             <div className="bg-slate-100 p-1 rounded-lg inline-flex shadow-inner">
                                 <button onClick={() => setCurrentSide('A')} className={`px-8 py-2.5 rounded-md text-sm font-black transition-all ${currentSide === 'A' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}>A-SIDE</button>
@@ -853,18 +976,18 @@
                         </div>
 
                         {loading && !panels && (
-                            <div className="w-full h-96 flex flex-col items-center justify-center text-gray-400 gap-4">
-                                <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-                                <p className="text-sm font-medium">데이터를 불러오는 중입니다...</p>
+                            <div className="w-full h-96 flex flex-col items-center justify-center text-gray-300 gap-4">
+                                <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin"></div>
+                                <p className="text-sm font-bold text-slate-400">데이터 동기화 중...</p>
                             </div>
                         )}
 
                         {!loading && error && !panels && (
                             <div className="w-full h-96 flex flex-col items-center justify-center text-rose-500 gap-4 p-4 text-center">
-                                <AlertTriangle size={48} />
-                                <p className="text-lg font-bold">연결 실패</p>
-                                <p className="text-sm text-gray-600 break-all">{error}</p>
-                                <button onClick={() => window.location.reload()} className="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700">새로고침</button>
+                                <AlertTriangle size={48} className="opacity-20 mb-2" />
+                                <p className="text-xl font-black italic">DATABASE OFFLINE</p>
+                                <p className="text-sm text-gray-400 max-w-xs">{error}</p>
+                                <button onClick={() => window.location.reload()} className="mt-4 px-8 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-all font-bold">RECONNECT</button>
                             </div>
                         )}
 
@@ -878,7 +1001,7 @@
                                 </div>
                             </div>
                         )}
-                    </main>
+                    </div>
                     {selectedPanel && panels && <PanelPopup panelId={selectedPanel} data={panels[selectedPanel]} onClose={() => setSelectedPanel(null)} onModuleClick={setSelectedModule} />}
                     {selectedModule && <ModuleDialog module={selectedModule} onClose={() => setSelectedModule(null)} onUpdate={handleUpdate} onHistoryManagement={handleHistoryManagement} isUpdating={bgSyncing} />}
                     {showHistorySheet && <HistorySheet panels={panels} onClose={() => setShowHistorySheet(false)} onShowConfirm={handleGlobalHistoryDeleteConfirm} />}
@@ -1000,7 +1123,10 @@
             const zones = [{ id: 'ZONE 3', name: '#3', status: 'Normal' }, { id: 'ZONE 4', name: '#4', status: 'Error' }];
 
             return (
-                <div className="min-h-screen bg-white font-sans text-slate-900 relative overflow-hidden selection:bg-slate-200 fade-in">
+                <div className="min-h-screen bg-white font-sans text-slate-900 relative overflow-hidden selection:bg-slate-200">
+                    {/* Background mesh decor */}
+                    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[120px] opacity-60"></div>
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-slate-100 rounded-full blur-[120px] opacity-60"></div>
                     <main className="relative max-w-7xl mx-auto p-8 flex flex-col items-center justify-center min-h-screen">
                         <div className="w-full max-w-md space-y-8 flex flex-col items-center">
                             <div className="text-center space-y-2">
@@ -1048,6 +1174,11 @@
                                     </div>
                                 </div>
                             )}
+                            <footer className="mt-20 border-t border-slate-100 pt-8 text-center w-full max-w-sm">
+                                <p className="text-slate-300 text-[10px] font-bold uppercase tracking-[0.3em]">
+                                    &copy; 2024 One Plant Integrated System.
+                                </p>
+                            </footer>
                         </div>
                     </main>
 
@@ -1120,21 +1251,29 @@
             if (authLoading) return <LoadingScreen />;
 
             if (view === 'DETAIL') return (
-                <FieldLayout
-                    onBack={() => { setSelectedLayout(null); setView('MAIN'); }}
-                    layoutId={selectedLayout}
-                    user={user}
-                    globalData={globalData}
-                    updateGlobalData={updateGlobalData}
-                />
+                <div className="min-h-screen bg-slate-50 text-slate-900">
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+                        <FieldLayout
+                            onBack={() => { setSelectedLayout(null); setView('MAIN'); }}
+                            layoutId={selectedLayout}
+                            user={user}
+                            globalData={globalData}
+                            updateGlobalData={updateGlobalData}
+                        />
+                    </Suspense>
+                </div>
             );
             return (
-                <MainDashboard
-                    onSelectLayout={(layoutId) => { setSelectedLayout(layoutId); setView('DETAIL'); }}
-                    user={user}
-                    globalData={globalData}
-                    updateGlobalData={updateGlobalData}
-                />
+                <div className="min-h-screen bg-slate-50 text-slate-900">
+                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+                        <MainDashboard
+                            onSelectLayout={(layoutId) => { setSelectedLayout(layoutId); setView('DETAIL'); }}
+                            user={user}
+                            globalData={globalData}
+                            updateGlobalData={updateGlobalData}
+                        />
+                    </Suspense>
+                </div>
             );
         };
 
