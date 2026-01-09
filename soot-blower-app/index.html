@@ -509,41 +509,69 @@
                 <span class="bg-blue-500 text-[10px] font-bold px-2 py-1 rounded">작업 선택</span>
             </div>
 
-            <!-- 메인 작업 목록 -->
+            <!-- [메인 작업 목록] -->
             <div id="actionMainList" class="p-4 grid grid-cols-1 gap-2">
                 <button onclick="submitAction('케이블 교체')"
-                    class="w-full p-3 border rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">🔌</span> 1. 케이블 교체</button>
-                <button onclick="submitAction('전동기 소손')"
-                    class="w-full p-3 border rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">🔥</span> 2. 전동기 소손</button>
-                <button onclick="submitAction('전동기 베어링 교체')"
-                    class="w-full p-3 border rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">⚙️</span> 3. 베어링 교체</button>
-                <button onclick="submitAction('전동기 역상')"
-                    class="w-full p-3 border rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">⚠️</span> 4. 전동기 역상</button>
+                    class="w-full p-3 border rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">🔌</span> 1. 케이블 교체
+                </button>
+                
+                <button onclick="toggleMotorSubMenu(true)"
+                    class="w-full p-3 border rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">⚙️</span> 2. 전동기 점검 [선택]
+                </button>
 
-                <!-- 리미트 정비 버튼 클릭 시 상세 선택지로 전환 -->
+                <!-- [신규 추가] 3. 일반점검 -->
+                <button onclick="submitAction('일반점검')"
+                    class="w-full p-3 border rounded-xl hover:bg-slate-50 hover:border-slate-400 hover:text-slate-800 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">📋</span> 3. 일반점검
+                </button>
+
+                <!-- 번호 재조정됨 -->
                 <button onclick="toggleLimitSubMenu(true)"
-                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">⚡</span> 5. 리미트 정비 [회로]</button>
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">⚡</span> 4. 리미트 정비 [회로]
+                </button>
 
                 <button onclick="submitAction('MOV 정비 [회로]')"
-                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">🔋</span> 6. MOV 정비 [회로]</button>
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">🔋</span> 5. MOV 정비 [회로]
+                </button>
                 <button onclick="submitAction('단로기 정비 [회로]')"
-                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">💡</span> 7. 단로기 정비 [회로]</button>
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">💡</span> 6. 단로기 정비 [회로]
+                </button>
                 <button onclick="submitAction('MC 정비 [회로]')"
-                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">◻️</span> 8. MC 정비 [회로]</button>
+                    class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">◻️</span> 7. MC 정비 [회로]
+                </button>
                 <button onclick="submitAction('기계적 고착 [기계]')"
-                    class="w-full p-3 border rounded-xl hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center"><span
-                        class="w-6 text-center mr-2">🔧</span> 9. 기계적 고착 [기계]</button>
+                    class="w-full p-3 border rounded-xl hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
+                    <span class="w-6 text-center mr-2">🔧</span> 8. 기계적 고착 [기계]
+                </button>
             </div>
 
-            <!-- 리미트 정비 상세 선택 목록 (기본 숨김) -->
+            <!-- 전동기 점검 상세 선택 목록 -->
+            <div id="actionMotorSubList" class="p-4 hidden grid grid-cols-1 gap-2">
+                <button onclick="submitAction('전동기 소손')"
+                    class="w-full p-4 border-2 border-red-100 rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    1. 전동기 소손
+                </button>
+                <button onclick="submitAction('전동기 베어링 교체')"
+                    class="w-full p-4 border-2 border-orange-100 rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    2. 베어링 교체
+                </button>
+                <button onclick="submitAction('전동기 역상')"
+                    class="w-full p-4 border-2 border-yellow-100 rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    3. 전동기 역상
+                </button>
+                <button onclick="toggleMotorSubMenu(false)"
+                    class="w-full mt-4 p-2 text-slate-400 font-bold text-xs underline">
+                    이전으로 돌아가기
+                </button>
+            </div>
+
+            <!-- 리미트 정비 상세 선택 목록 -->
             <div id="actionLimitSubList" class="p-4 hidden grid grid-cols-1 gap-2">
                 <button onclick="submitAction('리미트 정비 [회로] - 정비후 양호')"
                     class="w-full p-4 border-2 border-green-200 rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-700 text-sm transition-all text-center">
@@ -618,6 +646,7 @@
             { code: 'MB', label: '전동기 소손' },
             { code: 'BR', label: '베어링 교체' },
             { code: 'RP', label: '전동기 역상' },
+            { code: 'GI', label: '일반점검' }, // [신규 추가]
             { code: 'LR', label: '리미트 정비' },
             { code: 'MV', label: 'MOV 정비' },
             { code: 'DS', label: '단로기 정비' },
@@ -635,6 +664,7 @@
             if (str.includes('소손')) return 'MB';
             if (str.includes('베어링')) return 'BR';
             if (str.includes('역상')) return 'RP';
+            if (str.includes('일반점검')) return 'GI'; // [신규 추가]
             if (str.includes('리미트')) return 'LR';
             if (str.includes('MOV')) return 'MV';
             if (str.includes('단로기')) return 'DS';
@@ -756,7 +786,7 @@
                     { name: "GROUP 1 (7F)", desc: "Bottom Area", devices: [{ no: 3, pos: 'left' }, { no: 2, pos: 'left' }, { no: 1, pos: 'left' }, { no: 10, pos: 'top' }, { no: 11, pos: 'top' }, { no: 12, pos: 'top' }, { no: 9, pos: 'right' }, { no: 8, pos: 'right' }, { no: 7, pos: 'right' }, { no: 6, pos: 'bottom' }, { no: 5, pos: 'bottom' }, { no: 4, pos: 'bottom' }] },
                     { name: "GROUP 2 (7.5F)", desc: "Lower Area", devices: [{ no: 13, pos: 'left' }, { no: 14, pos: 'left' }, { no: 15, pos: 'left' }, { no: 16, pos: 'left' }, { no: 17, pos: 'left' }, { no: 32, pos: 'top' }, { no: 31, pos: 'top' }, { no: 30, pos: 'top' }, { no: 29, pos: 'top' }, { no: 28, pos: 'top' }, { no: 23, pos: 'right' }, { no: 24, pos: 'right' }, { no: 25, pos: 'right' }, { no: 26, pos: 'right' }, { no: 27, pos: 'right' }, { no: 18, pos: 'bottom' }, { no: 19, pos: 'bottom' }, { no: 20, pos: 'bottom' }, { no: 21, pos: 'bottom' }, { no: 22, pos: 'bottom' }] },
                     { name: "GROUP 3 (8F)", desc: "Middle Area", devices: [{ no: 37, pos: 'left' }, { no: 36, pos: 'left' }, { no: 35, pos: 'left' }, { no: 34, pos: 'left' }, { no: 33, pos: 'left' }, { no: 48, pos: 'top' }, { no: 49, pos: 'top' }, { no: 50, pos: 'top' }, { no: 51, pos: 'top' }, { no: 52, pos: 'top' }, { no: 47, pos: 'right' }, { no: 46, pos: 'right' }, { no: 45, pos: 'right' }, { no: 44, pos: 'right' }, { no: 43, pos: 'right' }, { no: 42, pos: 'bottom' }, { no: 41, pos: 'bottom' }, { no: 40, pos: 'bottom' }, { no: 39, pos: 'bottom' }, { no: 38, pos: 'bottom' }] },
-                    { name: "GROUP 4 (8.5F)", desc: "Upper Area", devices: [{ no: 53, pos: 'left' }, { no: 54, pos: 'left' }, { no: 55, pos: 'left' }, { no: 56, pos: 'left' }, { no: 57, pos: 'left' }, { no: 72, pos: 'top' }, { no: 71, pos: 'top' }, { no: 70, pos: 'top' }, { no: 69, pos: 'top' }, { no: 68, pos: 'top' }, { no: 63, pos: 'right' }, { no: 64, pos: 'right' }, { no: 65, pos: 'right' }, { no: 66, pos: 'right' }, { no: 67, pos: 'right' }, { no: 58, pos: 'bottom' }, { no: 59, pos: 'bottom' }, { no: 60, pos: 'bottom' }, { no: 61, pos: 'bottom' }, { no: 62, pos: 'bottom' }] },
+                    { name: "GROUP 4 (8.5F)", desc: "Upper Area", devices: [{ no: 53, pos: 'left' }, { no: 54, pos: 'left' }, { no: 55, pos: 'left' }, { no: 56, pos: 'left' }, { no: 57, pos: 'left' }, { no: 72, pos: 'top' }, { no: 71, pos: 'top' }, { no: 70, pos: 'top' }, { no: 69, pos: 'top' }, { no: 68, pos: 'top' }, { no: 63, right: 'right' }, { no: 64, pos: 'right' }, { no: 65, pos: 'right' }, { no: 66, pos: 'right' }, { no: 67, pos: 'right' }, { no: 58, pos: 'bottom' }, { no: 59, pos: 'bottom' }, { no: 60, pos: 'bottom' }, { no: 61, pos: 'bottom' }, { no: 62, pos: 'bottom' }] },
                     { name: "GROUP 4.5 (9F)", desc: "NS Series", devices: [{ no: 'NS1', pos: 'left' }, { no: 'NS2', pos: 'left' }, { no: 'NS3', pos: 'left' }, { no: 'NS4', pos: 'left' }, { no: 'NS20', pos: 'top' }, { no: 'NS19', pos: 'top' }, { no: 'NS18', pos: 'top' }, { no: 'NS17', pos: 'top' }, { no: 'NS16', pos: 'top' }, { no: 'NS14', pos: 'right' }, { no: 'NS13', pos: 'right' }, { no: 'NS12', pos: 'right' }, { no: 'NS11', pos: 'right' }, { no: 'NS6', pos: 'bottom' }, { no: 'NS7', pos: 'bottom' }, { no: 'NS8', pos: 'bottom' }, { no: 'NS9', pos: 'bottom' }, { no: 'NS10', pos: 'bottom' }] }
                 ]
             },
@@ -992,8 +1022,9 @@
             document.getElementById('modalTitle').textContent = `No. ${d}`;
             document.getElementById('modalSubtitle').textContent = displayGroup;
 
-            // 모달 열 때 항상 메인 목록이 보이도록 초기화
+            // 모달 열 때 모든 서브 메뉴 초기화
             toggleLimitSubMenu(false);
+            toggleMotorSubMenu(false);
 
             document.getElementById('actionModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('actionModal').classList.add('flex'), 10);
@@ -1006,18 +1037,32 @@
         }
 
         /**
+         * [추가됨] 전동기 점검 서브 메뉴 토글 함수
+         */
+        function toggleMotorSubMenu(show) {
+            const mainList = document.getElementById('actionMainList');
+            const motorList = document.getElementById('actionMotorSubList');
+            if (show) {
+                mainList.classList.add('hidden');
+                motorList.classList.remove('hidden');
+            } else {
+                mainList.classList.remove('hidden');
+                motorList.classList.add('hidden');
+            }
+        }
+
+        /**
          * 리미트 정비 서브 메뉴 토글 함수
-         * @param {boolean} show - true면 상세 메뉴 표시, false면 메인 메뉴 표시
          */
         function toggleLimitSubMenu(show) {
             const mainList = document.getElementById('actionMainList');
-            const subList = document.getElementById('actionLimitSubList');
+            const limitList = document.getElementById('actionLimitSubList');
             if (show) {
                 mainList.classList.add('hidden');
-                subList.classList.remove('hidden');
+                limitList.classList.remove('hidden');
             } else {
                 mainList.classList.remove('hidden');
-                subList.classList.add('hidden');
+                limitList.classList.add('hidden');
             }
         }
 
