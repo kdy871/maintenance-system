@@ -269,8 +269,110 @@
         </footer>
     </div>
 
+    <!-- Background Sync Indicator -->
+    <div id="sync-indicator"
+        class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 flex items-center gap-3 bg-white/90 backdrop-blur-md px-4 py-3 md:px-6 md:py-3 rounded-2xl shadow-xl border border-white/50 transition-all duration-700 opacity-0 translate-y-10 pointer-events-none">
+        <div class="flex items-center gap-3">
+            <div class="relative w-4 h-4 md:w-5 md:h-5">
+                <div class="absolute inset-0 border-2 border-slate-200 rounded-full"></div>
+                <div class="absolute inset-0 border-2 border-blue-500 rounded-full border-t-transparent animate-spin">
+                </div>
+            </div>
+            <div class="flex flex-col">
+                <span
+                    class="text-[10px] md:text-[11px] font-black text-slate-900 uppercase tracking-tight leading-none">Background
+                    Sync</span>
+                <span class="text-[9px] text-slate-400 font-bold mt-1 leading-none" id="sync-status">Optimizing your
+                    experience...</span>
+            </div>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
+
+        // --- Data Pre-fetching Logic ---
+        const PRE_FETCH_CONFIG = [
+            { id: 'work_order_turbine', url: 'https://script.google.com/macros/s/AKfycbWHz_YXzcB1GK_2nuDrsoj0utHHKzuIOBxOwGb7GEDEf4d29yO5Sghia6H60g9kHDKUA/exec', cacheKey: 'task_data_cache', type: 'json_tasks' },
+            { id: 'work_order_boiler', url: 'https://script.google.com/macros/s/AKfycbztiL9SS1UnMbM00yKfiDLnNkLNjmAGCP1vwDs0mcjUohp9lgDy9NB9z47SvulvIeuGFQ/exec', cacheKey: 'task_data_cache_boiler', type: 'json_tasks' },
+            { id: 'work_order_power', url: 'https://script.google.com/macros/s/AKfycbwJJQj2kHIXFm4yjlV5hTQbNShlZ1lwVYZC37mXHOxnT_W5SHztcUkY9yEv-tNZnana/exec', cacheKey: 'task_data_cache_power', type: 'json_tasks' },
+            { id: 'work_order_electronics', url: 'https://script.google.com/macros/s/AKfycbwsP64-5IFbT8aqGm8sGqG4xbzJVX8lEhMS23coatKlcTlpgiwlw5xpU5Q1i4cQbCmU/exec', cacheKey: 'task_data_cache_electronics', type: 'json_tasks' },
+            { id: 'brush_status', url: 'https://script.google.com/macros/s/AKfycbyn5VaSQ0Fd21EgY5OcHQRPc7-oRpwQTiGzoaJlXnWeNCPPpM3CWUynSGPnjYKb5LO7jg/exec?action=getStats', cacheKey: 'brush_stats_cache', type: 'json' },
+            { id: 'soot_blower', url: 'https://script.google.com/macros/s/AKfycbwyJgKM4gfPmd3qHx7XuuazUENcOKMvQ_oBZ_6HpVOzV1WeHYMjbglkxSQ_pMB2BRno/exec', cacheKey: 'soot_blower_all_data', type: 'json' },
+            { id: 'ep_manager', url: 'https://script.google.com/macros/s/AKfycbxgS2_Quh2MCxGAebBf9Uydp7gR1UpKGoHfq4lt40H8LXh9zmTRfpFaEGVHnlhEVmetRA/exec', cacheKey: 'ep_manager_cache', type: 'ep_manager' }
+        ];
+
+        async function preFetchAllData() {
+            const indicator = document.getElementById('sync-indicator');
+            const statusText = document.getElementById('sync-status');
+
+            // Show indicator
+            indicator.classList.remove('opacity-0', 'translate-y-10');
+            indicator.classList.add('opacity-100', 'translate-y-0');
+
+            console.log('Starting background pre-fetch...');
+            let completedCount = 0;
+
+            const fetchPromises = PRE_FETCH_CONFIG.map(async (config) => {
+                try {
+                    statusText.innerText = `Synchronizing ${config.id.split('_').join(' ')}...`;
+                    if (config.type === 'ep_manager') {
+                        // EP Manager needs multiple fetches for different zones
+                        const zones = ['ZONE 3-A', 'ZONE 3-B', 'ZONE 4-A', 'ZONE 4-B'];
+                        const epCache = {};
+                        for (const zoneId of zones) {
+                            const response = await fetch(`${config.url}?id=${encodeURIComponent(zoneId)}&t=${Date.now()}`);
+                            if (response.ok) {
+                                const result = await response.json();
+                                if (result && !result.error && result.panels) {
+                                    epCache[zoneId] = result.panels;
+                                }
+                            }
+                        }
+                        if (Object.keys(epCache).length > 0) {
+                            localStorage.setItem(config.cacheKey, JSON.stringify(epCache));
+                        }
+                    } else {
+                        const response = await fetch(`${config.url}${config.url.includes('?') ? '&' : '?'}t=${Date.now()}`);
+                        if (!response.ok) return;
+                        const data = await response.json();
+
+                        if (config.type === 'json_tasks') {
+                            if (data.tasks) {
+                                localStorage.setItem(config.cacheKey, JSON.stringify(data.tasks));
+                                if (data.logoUrl) {
+                                    const logoKey = config.id === 'work_order_turbine' ? 'logo_data_cache' : `logo_data_cache${config.id.replace('work_order', '')}`;
+                                    localStorage.setItem(logoKey, data.logoUrl);
+                                }
+                            }
+                        } else {
+                            localStorage.setItem(config.cacheKey, JSON.stringify(data));
+                        }
+                    }
+                    completedCount++;
+                    console.log(`Pre-fetched: ${config.id} (${completedCount}/${PRE_FETCH_CONFIG.length})`);
+                } catch (e) {
+                    console.warn(`Pre-fetch failed for ${config.id}:`, e);
+                }
+            });
+
+            await Promise.all(fetchPromises);
+            console.log('Background pre-fetch completed.');
+
+            // Final status update
+            statusText.innerText = 'All systems ready. Fast load active ⚡';
+
+            // Hide indicator after a delay
+            setTimeout(() => {
+                indicator.classList.remove('opacity-100', 'translate-y-0');
+                indicator.classList.add('opacity-0', 'translate-y-10');
+            }, 3000);
+        }
+
+        window.addEventListener('load', () => {
+            // Delay pre-fetching slightly to not interfere with main page load
+            setTimeout(preFetchAllData, 1000);
+        });
     </script>
 </body>
 

@@ -515,7 +515,7 @@
                     class="w-full p-3 border rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
                     <span class="w-6 text-center mr-2">🔌</span> 1. 케이블 교체
                 </button>
-                
+
                 <button onclick="toggleMotorSubMenu(true)"
                     class="w-full p-3 border rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
                     <span class="w-6 text-center mr-2">⚙️</span> 2. 전동기 점검 [선택]
@@ -700,11 +700,19 @@
                 return;
             }
 
-            // 1. 캐시 시도
-            const cachedTotal = localStorage.getItem('sb_total_records_cache');
+            // 1. 캐시 시도 (Dashboard Pre-fetch 연동)
+            const cachedTotal = localStorage.getItem('soot_blower_all_data');
             if (cachedTotal) {
                 try {
-                    totalDataRecords = JSON.parse(cachedTotal);
+                    const parsedData = JSON.parse(cachedTotal);
+                    // Pre-fetcher가 저장한 원본 데이터에서 배열 추출
+                    let finalData = parsedData;
+                    if (!Array.isArray(parsedData)) {
+                        if (parsedData.result && Array.isArray(parsedData.result)) finalData = parsedData.result;
+                        else if (parsedData.data && Array.isArray(parsedData.data)) finalData = parsedData.data;
+                        else finalData = [];
+                    }
+                    totalDataRecords = finalData;
                     totalCounts = calculateTotalCounts(totalDataRecords);
                     renderTotalDashboard();
                     if (loadingEl) loadingEl.style.display = 'none';
@@ -733,7 +741,8 @@
 
                     totalDataRecords = finalData;
                     totalCounts = calculateTotalCounts(finalData);
-                    localStorage.setItem('sb_total_records_cache', JSON.stringify(finalData)); // 캐시 저장
+                    localStorage.setItem('soot_blower_all_data', JSON.stringify(data)); // 공통 캐시 키 사용
+                    localStorage.setItem('sb_total_records_cache', JSON.stringify(finalData)); // 기존 호환용
 
                     renderTotalDashboard();
                 })
