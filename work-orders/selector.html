@@ -200,18 +200,29 @@
                 <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 md:hidden ml-auto"></i>
             </a>
 
-            <!-- Statistics Board (Disabled/Placeholder) -->
-            <div
-                class="p-5 md:p-8 rounded-3xl md:rounded-[2rem] border-2 border-dashed border-slate-200 flex flex-row md:flex-col items-center md:items-start md:justify-center gap-4 md:gap-0 bg-slate-50/30 cursor-not-allowed opacity-70">
+            <!-- Statistics Board (Active) -->
+            <a href="./total_stats.html"
+                class="premium-card p-5 md:p-8 rounded-3xl md:rounded-[2rem] flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-0 group relative overflow-hidden">
                 <div
-                    class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-0 md:mb-4">
+                    class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-0 md:mb-6 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                     <i data-lucide="bar-chart-3" class="w-6 h-6 md:w-8 md:h-8"></i>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm md:text-base font-bold text-slate-400">통합 통계 현황</h4>
-                    <p class="text-[10px] md:text-xs text-slate-400 font-medium">통계 시스템 서비스 준비중</p>
+                    <h3
+                        class="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2 group-hover:text-indigo-600 transition-colors">
+                        통합 통계 현황
+                    </h3>
+                    <p
+                        class="text-slate-500 text-xs md:text-sm leading-relaxed mb-0 md:mb-6 line-clamp-1 md:line-clamp-none">
+                        전 부서 작업량 및 공량(M/H) 실시간 통합 분석</p>
                 </div>
-            </div>
+                <div
+                    class="mt-auto hidden md:flex items-center text-xs font-black text-indigo-600 uppercase tracking-wider">
+                    시스템 접속 <i data-lucide="arrow-right"
+                        class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 md:hidden ml-auto"></i>
+            </a>
 
         </div>
 

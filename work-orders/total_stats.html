@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통합 작업지시서 통계 현황</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+    <div id="app" class="p-4 md:p-8 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div class="flex items-center gap-4">
+                <a href="selector.html"
+                    class="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                    <i data-lucide="arrow-left" class="w-6 h-6 text-slate-600"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-black tracking-tight text-slate-900">통합 통계 현황 <span
+                            class="text-blue-600">Dashboard</span></h1>
+                    <p class="text-slate-500 font-bold text-sm tracking-wide uppercase mt-1">Plant Integrated Work
+                        Management System</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="fetchAllData()"
+                    class="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> 데이터 새로고침
+                </button>
+            </div>
+        </div>
+
+        <!-- summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">전체 누적 공량</p>
+                    <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="activity" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p id="total-mh" class="text-4xl font-black text-slate-900">0 <span
+                        class="text-lg text-slate-400">M/H</span></p>
+                <div class="mt-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full inline-block">
+                    Real-time Data</div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">전체 완료율</p>
+                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i data-lucide="check-circle"
+                            class="w-4 h-4"></i></div>
+                </div>
+                <p id="total-completion" class="text-4xl font-black text-slate-900">0 <span
+                        class="text-lg text-slate-400">%</span></p>
+                <div id="completion-bar" class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                    <div id="completion-fill" class="bg-emerald-500 h-full transition-all duration-1000"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">진행 중인 작업</p>
+                    <div class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="clock" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <p id="ongoing-tasks" class="text-4xl font-black text-slate-900">0 <span
+                        class="text-lg text-slate-400">건</span></p>
+                <p id="ongoing-subtitle" class="text-slate-400 text-[10px] font-bold mt-1">미완료 상태의 총 작업 수</p>
+            </div>
+            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">긴급(Urgent)</p>
+                    <div class="p-2 bg-red-50 text-red-600 rounded-lg"><i data-lucide="alert-triangle"
+                            class="w-4 h-4"></i></div>
+                </div>
+                <p id="urgent-tasks" class="text-4xl font-black text-red-600">0 <span
+                        class="text-lg text-red-300">건</span></p>
+                <p id="urgent-subtitle" class="text-red-400 text-[10px] font-bold mt-1">즉시 대응 필요한 긴급 건</p>
+            </div>
+        </div>
+
+        <!-- Main Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                    <i data-lucide="pie-chart" class="text-blue-500"></i> 부서별 공량 점유율
+                </h3>
+                <div class="h-[300px] flex items-center justify-center">
+                    <canvas id="deptMhChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+                <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                    <i data-lucide="bar-chart-3" class="text-indigo-500"></i> 담당자별 투입 공량 (Top 5)
+                </h3>
+                <div class="h-[300px]">
+                    <canvas id="designerChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Table Section -->
+        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
+            <div class="p-8 border-b border-slate-50 flex items-center justify-between">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <i data-lucide="list" class="text-purple-500"></i> 부서별 상세 가동 현황
+                </h3>
+                <span class="text-[10px] font-bold text-slate-400 italic">Data updated: ${new
+                    Date().toLocaleString()}</span>
+            </div>
+            <table class="w-full text-left">
+                <thead class="bg-slate-50/50">
+                    <tr>
+                        <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">부서명</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">전체 건수</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">완료 건수</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">누적 공량 (M/H)</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">가동률</th>
+                    </tr>
+                </thead>
+                <tbody id="dept-table-body" class="divide-y divide-slate-50">
+                    <!-- Dynamic rendering -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white transition-opacity duration-300">
+        <div class="relative w-24 h-24 mb-6">
+            <div class="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="text-xl font-black tracking-widest uppercase">Syncing Data...</p>
+        <p id="loading-progress" class="mt-2 text-blue-300 font-bold opacity-70">모든 부서의 데이터를 통합하는 중입니다.</p>
+    </div>
+
+    <script>
+        const DEPARTMENTS = [
+            { name: '터빈전기과', url: 'https://script.google.com/macros/s/AKfycbxWHz_YXzcB1GK_2nuDrsoj0utHHKzuIOBxOwGb7GEDEf4d29yO5Sghia6H60g9kHDKUA/exec', color: '#6366f1' },
+            { name: '보일러전기과', url: 'https://script.google.com/macros/s/AKfycbztiL9SS1UnMbM00yKfiDLnNkLNjmAGCP1vwDs0mcjUohp9lgDy9NB9z47SvulvIeuGFQ/exec', color: '#f97316' },
+            { name: '전력기기과', url: 'https://script.google.com/macros/s/AKfycbwJJQj2kHIXFm4yjlV5hTQbNShlZ1lwVYZC37mXHOxnT_W5SHztcUkY9yEv-tNZnana/exec', color: '#3b82f6' },
+            { name: '전자회로과', url: 'https://script.google.com/macros/s/AKfycbwsP64-5IFbT8aqGm8sGqG4xbzJVX8lEhMS23coatKlcTlpgiwlw5xpU5Q1i4cQbCmU/exec', color: '#a855f7' },
+            { name: '탈황전기과', url: 'https://script.google.com/macros/s/AKfycbyPvldzj-jHf2FP3NmyTCPCUV_P6v57FdxBPZEWGaNpfwTIKYfZkKYf13aWJEO0U72CZA/exec', color: '#10b981' }
+        ];
+
+        let allData = [];
+        let mhChart, dsChart;
+
+        async function fetchDeptData(dept) {
+            try {
+                const response = await fetch(`${dept.url}?_t=${Date.now()}`);
+                const data = await response.json();
+                return (data.tasks || []).map(t => ({ ...t, deptName: dept.name, color: dept.color }));
+            } catch (error) {
+                console.error(`${dept.name} 로드 실패:`, error);
+                return [];
+            }
+        }
+
+        async function fetchAllData() {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('hidden', 'opacity-0');
+
+            try {
+                const results = await Promise.all(DEPARTMENTS.map(fetchDeptData));
+                allData = results.flat();
+                renderDashboard();
+            } finally {
+                setTimeout(() => {
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                }, 500);
+            }
+        }
+
+        function renderDashboard() {
+            lucide.createIcons();
+
+            // 1. summary Stats
+            const totalTasks = allData.length;
+            const completedTasks = allData.filter(t => String(t.status).includes('완료') && !String(t.status).includes('미완료')).length;
+            const ongoingTasksList = allData.filter(t => String(t.status).includes('미완료'));
+            const urgentTasksCount = ongoingTasksList.filter(t => t.isUrgent).length;
+
+            // 공량 산출 (P열 데이터가 manHour 필드로 오고 있다고 가정)
+            const totalMh = allData.reduce((sum, t) => sum + (parseFloat(t.manHour) || 0), 0);
+            const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            document.getElementById('total-mh').innerHTML = `${totalMh.toLocaleString()} <span class="text-lg text-slate-400">M/H</span>`;
+            document.getElementById('total-completion').innerHTML = `${completionRate} <span class="text-lg text-slate-400">%</span>`;
+            document.getElementById('completion-fill').style.width = `${completionRate}%`;
+            document.getElementById('ongoing-tasks').innerHTML = `${ongoingTasksList.length} <span class="text-lg text-slate-400">건</span>`;
+            document.getElementById('urgent-tasks').innerHTML = `${urgentTasksCount} <span class="text-lg text-red-300">건</span>`;
+
+            // 2. Department Table
+            const deptStats = DEPARTMENTS.map(dept => {
+                const tasks = allData.filter(t => t.deptName === dept.name);
+                const comp = tasks.filter(t => String(t.status).includes('완료') && !String(t.status).includes('미완료')).length;
+                const mh = tasks.reduce((sum, t) => sum + (parseFloat(t.manHour) || 0), 0);
+                const rate = tasks.length > 0 ? Math.round((comp / tasks.length) * 100) : 0;
+                return { name: dept.name, total: tasks.length, comp, mh, rate, color: dept.color };
+            });
+
+            const tableBody = document.getElementById('dept-table-body');
+            tableBody.innerHTML = deptStats.map(s => `
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-8 py-5 border-l-4" style="border-left-color: ${s.color}">
+                        <div class="font-black text-slate-900">${s.name}</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">One Plant Maintenance</div>
+                    </td>
+                    <td class="px-8 py-5 text-sm font-bold text-slate-600">${s.total}건</td>
+                    <td class="px-8 py-5 text-sm font-bold text-emerald-600">${s.comp}건</td>
+                    <td class="px-8 py-5 text-sm font-black text-slate-900">${s.mh.toLocaleString()}</td>
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-black text-slate-800">${s.rate}%</span>
+                            <div class="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div class="h-full" style="width: ${s.rate}%; background-color: ${s.color}"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // 3. Doughnut Chart (Dept MH Share)
+            const ctx1 = document.getElementById('deptMhChart').getContext('2d');
+            if (mhChart) mhChart.destroy();
+            mhChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: deptStats.map(s => s.name),
+                    datasets: [{
+                        data: deptStats.map(s => s.mh),
+                        backgroundColor: deptStats.map(s => s.color),
+                        borderWidth: 0,
+                        hoverOffset: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, font: { weight: 'bold', size: 12 } } }
+                    }
+                }
+            });
+
+            // 4. Bar Chart (Top Designers by MH)
+            const designerMh = {};
+            allData.forEach(t => {
+                if (t.designer) {
+                    designerMh[t.designer] = (designerMh[t.designer] || 0) + (parseFloat(t.manHour) || 0);
+                }
+            });
+
+            const topDesigners = Object.entries(designerMh)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const ctx2 = document.getElementById('designerChart').getContext('2d');
+            if (dsChart) dsChart.destroy();
+            dsChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: topDesigners.map(d => d[0]),
+                    datasets: [{
+                        label: '공량 집계 (M/H)',
+                        data: topDesigners.map(d => d[1]),
+                        backgroundColor: '#6366f1',
+                        borderRadius: 12,
+                        barThickness: 32
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } },
+                        y: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
+                    }
+                }
+            });
+        }
+
+        window.onload = fetchAllData;
+    </script>
+</body>
+
+</html>
