@@ -233,8 +233,49 @@
         </footer>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay"
+        class="fixed inset-0 hidden items-center justify-center z-[9999] bg-white/80 backdrop-blur-md transition-opacity duration-300">
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-900 font-bold animate-pulse text-lg tracking-tight">시스템 접속 중...</p>
+            <p class="text-slate-400 text-xs font-medium mt-2">Connecting to Department Board</p>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
+
+        // Handle navigation with loading overlay
+        function handleNavigation(event) {
+            const link = event.currentTarget;
+            if (link.tagName === 'A' && link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+                event.preventDefault();
+                const url = link.href;
+
+                const overlay = document.getElementById('loading-overlay');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+
+                // Navigate after a short delay for smooth transition
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 300);
+            }
+        }
+
+        // Attach to all premium cards that are links
+        document.querySelectorAll('a.premium-card').forEach(link => {
+            link.addEventListener('click', handleNavigation);
+        });
+
+        // Hide overlay on page show (for back button support)
+        window.onpageshow = function (event) {
+            if (event.persisted) {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('loading-overlay').classList.remove('flex');
+            }
+        };
     </script>
 </body>
 

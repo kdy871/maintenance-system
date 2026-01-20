@@ -42,19 +42,22 @@
         </div>
 
         <!-- summary stats for analysis -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">중복 작업 그룹</p>
-                <p id="dup-groups" class="text-3xl font-black text-slate-900">0</p>
+        <div class="grid grid-cols-3 gap-2 md:gap-4 mb-8">
+            <div class="bg-white p-3 md:p-6 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm">
+                <p class="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">중복 작업 그룹
+                </p>
+                <p id="dup-groups" class="text-lg md:text-3xl font-black text-slate-900">0</p>
             </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">중복 발생 건수</p>
-                <p id="dup-total-count" class="text-3xl font-black text-blue-600">0</p>
+            <div class="bg-white p-3 md:p-6 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm">
+                <p class="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">중복발생 건수
+                </p>
+                <p id="dup-total-count" class="text-lg md:text-3xl font-black text-blue-600">0</p>
             </div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm col-span-2 md:col-span-1">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">중복 작업 총 공량</p>
-                <p id="dup-total-mh" class="text-3xl font-black text-slate-900">0 <span
-                        class="text-sm text-slate-400">M/H</span></p>
+            <div class="bg-white p-3 md:p-6 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm">
+                <p class="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">중복작업 총공량
+                </p>
+                <p id="dup-total-mh" class="text-lg md:text-3xl font-black text-slate-900">0 <span
+                        class="text-[10px] md:text-sm text-slate-400">M/H</span></p>
             </div>
         </div>
 
@@ -98,6 +101,7 @@
             }
 
             document.getElementById('target-dept-label').innerText = targetDeptName;
+            document.getElementById('dept-title').innerHTML = `${targetDeptName} <span class="text-blue-600">분석</span>`;
             const dept = DEPARTMENTS.find(d => d.name === targetDeptName);
             if (!dept) return;
 

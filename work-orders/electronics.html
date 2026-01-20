@@ -38,13 +38,23 @@
 
 <body class="bg-slate-50 text-slate-900 min-h-screen">
 
+    <div id="loading-overlay"
+        class="fixed inset-0 flex items-center justify-center z-[9999] bg-white/80 backdrop-blur-md transition-opacity duration-300">
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 border-4 border-purple-600/20 border-t-purple-600 rounded-full animate-spin mb-4">
+            </div>
+            <p class="text-slate-900 font-bold animate-pulse text-lg tracking-tight">데이터 동기화 중...</p>
+            <p class="text-slate-400 text-xs font-medium mt-2">Connecting to Electronics Board</p>
+        </div>
+    </div>
+
     <div id="app" class="p-4 md:p-8">
         <!-- Header 섹션 -->
         <div class="max-w-5xl mx-auto mb-6">
             <div class="flex items-center gap-4">
                 <!-- 뒤로가기 버튼 -->
-                <button id="back-button" onclick="setView('dashboard')"
-                    class="hidden p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                <button id="back-button" onclick="handleBack()"
+                    class="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
                     <i data-lucide="arrow-left" class="w-6 h-6 text-slate-600"></i>
                 </button>
                 <div class="flex items-center gap-3">
@@ -80,7 +90,7 @@
             </div>
 
             <!-- 1. 대시보드 뷰 (2x2 그리드) -->
-            <div id="dashboard-view" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6"></div>
+            <div id="dashboard-view" class="grid grid-cols-2 gap-3 mt-6"></div>
 
             <!-- 2. 통합 현황/검색 뷰 -->
             <div id="integrated-view" class="hidden mt-6">
@@ -223,6 +233,14 @@
                 }
             } finally {
                 loader.classList.add('hidden');
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('flex');
+                    }, 300);
+                }
             }
         }
 
@@ -272,6 +290,22 @@
             icon.innerHTML = url ? `<img src="${url}" class="w-full h-full object-contain p-1.5" alt="로고">` : `<span class="font-black text-purple-600">1P</span>`;
         }
 
+        window.handleBack = () => {
+            if (currentView === 'integrated') {
+                setView('dashboard');
+            } else {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+                    overlay.classList.remove('opacity-0');
+                }
+                setTimeout(() => {
+                    window.location.href = 'selector.html';
+                }, 300);
+            }
+        };
+
         window.handleSearch = () => { searchQuery = document.getElementById('search-input').value.trim().toLowerCase(); renderApp(); };
         window.setDashboardFilter = (t) => { dashboardFilter = t; renderApp(); };
 
@@ -279,7 +313,7 @@
             currentView = v;
             document.getElementById('dashboard-view').classList.toggle('hidden', v !== 'dashboard');
             document.getElementById('integrated-view').classList.toggle('hidden', v !== 'integrated');
-            document.getElementById('back-button').classList.toggle('hidden', v === 'dashboard');
+            // 뒤로가기 버튼은 항상 표시됨 (HTML에서 hidden을 제거함)
             document.getElementById('list-header').classList.toggle('hidden', v !== 'dashboard');
             document.getElementById('page-title').innerText = v === 'dashboard' ? "작업지시서 실시간 보드" : "통합 작업지시서 현황";
             if (v === 'integrated') setTimeout(() => document.getElementById('search-input').focus(), 100);
@@ -339,21 +373,21 @@
             const urg = allTasks.filter(t => t.isUrgent && String(t.status).includes("미완료")).length;
             const pend = allTasks.filter(t => String(t.status).includes("미완료")).length;
             document.getElementById('dashboard-view').innerHTML = `
-                <button onclick="setDashboardFilter('urgent')" class="bg-white p-6 rounded-3xl border transition-all ${dashboardFilter === 'urgent' ? 'border-red-500 shadow-lg ring-2 ring-red-500/10' : 'border-slate-200'} flex items-center gap-5">
-                    <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center"><i data-lucide="alert-circle"></i></div>
-                    <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">긴급 마감</p><p class="text-3xl font-black text-red-600">${urg}건</p></div>
+                <button onclick="setDashboardFilter('urgent')" class="bg-white p-3 md:p-6 rounded-2xl md:rounded-3xl border transition-all ${dashboardFilter === 'urgent' ? 'border-red-500 shadow-lg ring-2 ring-red-500/10' : 'border-slate-200'} flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-5 text-center md:text-left">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-red-50 text-red-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="alert-circle" class="w-5 h-5 md:w-6 md:h-6"></i></div>
+                    <div><p class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-tight">긴급 마감</p><p class="text-xl md:text-3xl font-black text-red-600">${urg}건</p></div>
                 </button>
-                <button onclick="setDashboardFilter('pending')" class="bg-white p-6 rounded-3xl border transition-all ${dashboardFilter === 'pending' ? 'border-purple-500 shadow-lg ring-2 ring-purple-500/10' : 'border-slate-200'} flex items-center gap-5">
-                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center"><i data-lucide="clock"></i></div>
-                    <div><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">전체 미완료</p><p class="text-3xl font-black text-purple-600">${pend}건</p></div>
+                <button onclick="setDashboardFilter('pending')" class="bg-white p-3 md:p-6 rounded-2xl md:rounded-3xl border transition-all ${dashboardFilter === 'pending' ? 'border-purple-500 shadow-lg ring-2 ring-purple-500/10' : 'border-slate-200'} flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-5 text-center md:text-left">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-50 text-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="clock" class="w-5 h-5 md:w-6 md:h-6"></i></div>
+                    <div><p class="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-tight">전체 미완료</p><p class="text-xl md:text-3xl font-black text-purple-600">${pend}건</p></div>
                 </button>
-                <a href="${SPREADSHEET_URL}" target="_blank" class="bg-purple-600 p-6 rounded-3xl flex items-center gap-5 shadow-lg shadow-purple-100 hover:bg-purple-700 transition-all">
-                    <div class="w-12 h-12 bg-white/20 text-white rounded-xl flex items-center justify-center"><i data-lucide="file-spreadsheet"></i></div>
-                    <div><p class="text-[11px] font-bold text-purple-50 uppercase tracking-wider">데이터 관리</p><p class="text-xl font-black text-white">시트 바로가기</p></div>
+                <a href="${SPREADSHEET_URL}" target="_blank" class="bg-purple-600 p-3 md:p-6 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-5 shadow-lg shadow-purple-100 hover:bg-purple-700 transition-all text-center md:text-left">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 text-white rounded-xl md:rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="file-spreadsheet" class="w-5 h-5 md:w-6 md:h-6"></i></div>
+                    <div><p class="text-[9px] md:text-[11px] font-bold text-purple-50 uppercase tracking-wider leading-tight">데이터 관리</p><p class="text-sm md:text-xl font-black text-white">시트 바로가기</p></div>
                 </a>
-                <button onclick="setView('integrated')" class="bg-slate-700 p-6 rounded-3xl flex items-center gap-5 shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all">
-                    <div class="w-12 h-12 bg-white/20 text-white rounded-xl flex items-center justify-center"><i data-lucide="search"></i></div>
-                    <div><p class="text-[11px] font-bold text-slate-50 uppercase tracking-wider">통합 현황 검색</p><p class="text-xl font-black text-white">지시서 전체 검색</p></div>
+                <button onclick="setView('integrated')" class="bg-slate-700 p-3 md:p-6 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-5 shadow-lg shadow-slate-100 hover:bg-slate-800 transition-all text-center md:text-left">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-white/20 text-white rounded-xl md:rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="search" class="w-5 h-5 md:w-6 md:h-6"></i></div>
+                    <div><p class="text-[9px] md:text-[11px] font-bold text-slate-50 uppercase tracking-wider leading-tight">통합 현황 검색</p><p class="text-sm md:text-xl font-black text-white">지시서 전체 검색</p></div>
                 </button>
             `;
             lucide.createIcons();

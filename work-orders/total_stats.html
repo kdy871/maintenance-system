@@ -76,7 +76,7 @@
                 <div class="flex items-center justify-between mb-4 px-2">
                     <div class="flex items-center gap-2">
                         <div id="detail-indicator" class="w-1.5 h-4 bg-blue-600 rounded-full"></div>
-                        <h4 id="detail-title" class="text-sm font-black text-slate-700 uppercase tracking-wider">부서별 세부
+                        <h4 id="detail-title" class="text-sm font-black text-slate-700 uppercase tracking-wider">세부
                             현황</h4>
                     </div>
                     <button onclick="closeDetail()" class="p-1 hover:bg-slate-200 rounded-full transition-colors">
@@ -123,7 +123,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <p
                             class="text-[9px] md:text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">
-                            부서별 완료율</p>
+                            종합 완료율</p>
                         <div
                             class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-all">
                             <i data-lucide="check-circle" class="w-3 h-3 md:w-4 md:h-4" id="chevron-completion"></i>
@@ -190,7 +190,7 @@
             <!-- Mobile Tab Navigation -->
             <div class="flex md:hidden border-b border-slate-100">
                 <button onclick="switchTab('mh')" id="tab-mh"
-                    class="flex-1 py-4 text-xs font-black text-slate-400 chart-tab-active">부서별 MH</button>
+                    class="flex-1 py-4 text-xs font-black text-slate-400 chart-tab-active">종합 MH</button>
                 <button onclick="switchTab('ds')" id="tab-ds" class="flex-1 py-4 text-xs font-black text-slate-400">담당자별
                     TOP5</button>
             </div>
@@ -199,7 +199,7 @@
             <div id="container-mh"
                 class="p-6 md:p-8 md:bg-white md:rounded-[2rem] md:border md:border-slate-100 md:shadow-sm">
                 <h3 class="hidden md:flex text-lg font-black text-slate-800 mb-6 items-center gap-2">
-                    <i data-lucide="pie-chart" class="text-blue-500"></i> 부서별 공량 점유율
+                    <i data-lucide="pie-chart" class="text-blue-500"></i> 공량 점유율
                 </h3>
                 <div class="h-[250px] md:h-[300px] flex items-center justify-center">
                     <canvas id="deptMhChart"></canvas>
@@ -223,7 +223,7 @@
             <div
                 class="p-6 md:p-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <h3 class="text-base md:text-lg font-black text-slate-800 flex items-center gap-2">
-                    <i data-lucide="list" class="text-purple-500"></i> 부서별 상세 가동 현황
+                    <i data-lucide="list" class="text-purple-500"></i> 상세 가동 현황
                 </h3>
                 <span class="text-[9px] md:text-[10px] font-bold text-slate-400 italic">Data updated: <span
                         id="last-update">--</span></span>
@@ -239,7 +239,7 @@
                             <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">완료 건수</th>
                             <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">누적 공량 (M/H)</th>
                             <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">가동률</th>
-                            <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase text-right">상세 이력</th>
+                            <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase text-center">상세 이력</th>
                         </tr>
                     </thead>
                     <tbody id="dept-table-body" class="divide-y divide-slate-50">
@@ -332,28 +332,28 @@
 
             const configs = {
                 mh: {
-                    title: '부서별 누적 공량 (M/H)',
+                    title: '종합 누적 공량 (M/H)',
                     color: '#3b82f6',
                     bgColor: 'rgba(59, 130, 246, 0.05)',
                     getValue: s => s.mh.toLocaleString(),
                     getLabel: s => 'M/H'
                 },
                 completion: {
-                    title: '부서별 작업 완료 현황 (완료/전체)',
+                    title: '종합 작업 완료 현황 (완료/전체)',
                     color: '#10b981',
                     bgColor: 'rgba(16, 185, 129, 0.05)',
                     getValue: s => `<span class="text-emerald-600">${s.comp}</span> / ${s.total}`,
                     getLabel: s => `${s.rate}% 완료`
                 },
                 ongoing: {
-                    title: '부서별 진행 중인 작업 수',
+                    title: '종합 진행 중인 작업 수',
                     color: '#f59e0b',
                     bgColor: 'rgba(245, 158, 11, 0.05)',
                     getValue: s => s.ongoingCount,
                     getLabel: s => '건'
                 },
                 urgent: {
-                    title: '부서별 긴급 대응 현황',
+                    title: '종합 긴급 대응 현황',
                     color: '#ef4444',
                     bgColor: 'rgba(239, 68, 68, 0.05)',
                     getValue: s => `<span class="text-red-600">${s.urgentCount}</span>`,
@@ -494,16 +494,16 @@
                             </div>
                         </div>
                     </td>
-                    <td class="px-8 py-5 text-right">
-                        <div class="flex items-center justify-end gap-3">
-                            <div class="flex flex-col items-end mr-2">
+                    <td class="px-8 py-5">
+                        <div class="flex items-center justify-center gap-4">
+                            <div class="flex flex-col items-center">
                                 <span class="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Detected</span>
                                 <span class="text-xs font-black ${s.dupCount > 0 ? 'text-blue-600' : 'text-slate-300'}">${s.dupCount}개 그룹</span>
                             </div>
                             <a href="history_analysis.html?dept=${encodeURIComponent(s.name)}" 
-                               class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-900 text-white text-[11px] font-black rounded-xl hover:bg-blue-600 hover:scale-105 transition-all shadow-md active:scale-95 group">
+                               class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-[11px] font-black rounded-xl hover:from-indigo-500 hover:to-blue-500 hover:scale-105 hover:shadow-lg hover:shadow-indigo-200 transition-all shadow-md active:scale-95 group ring-4 ring-indigo-50">
                                 <i data-lucide="scan-search" class="w-3.5 h-3.5 group-hover:rotate-12 transition-transform"></i>
-                                <span>중복 분석</span>
+                                <span class="leading-none">중복 분석</span>
                             </a>
                         </div>
                     </td>
@@ -518,10 +518,6 @@
                         <div class="flex items-center gap-2">
                             <div class="w-2 h-6 rounded-full" style="background-color: ${s.color}"></div>
                             <span class="font-black text-slate-800 text-sm">${s.name}</span>
-                        </div>
-                        <div class="flex flex-col items-end">
-                            <span class="text-[8px] font-black text-slate-400 uppercase leading-none mb-1">Detected</span>
-                            <span class="text-[10px] font-black ${s.dupCount > 0 ? 'text-blue-600' : 'text-slate-300'}">${s.dupCount}개 그룹</span>
                         </div>
                     </div>
 
@@ -540,17 +536,23 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-4">
                         <div class="flex-1">
                             <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                                 <div class="h-full transition-all duration-1000" style="width: ${s.rate}%; background-color: ${s.color}"></div>
                             </div>
                         </div>
-                        <a href="history_analysis.html?dept=${encodeURIComponent(s.name)}" 
-                           class="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-[10px] font-black rounded-xl hover:bg-blue-600 active:scale-95 transition-all shadow-md">
-                            <i data-lucide="scan-search" class="w-3.5 h-3.5"></i>
-                            <span>중복 분석</span>
-                        </a>
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col items-end whitespace-nowrap">
+                                <span class="text-[8px] font-black text-slate-400 uppercase leading-none mb-0.5">Detected</span>
+                                <span class="text-[10px] font-black ${s.dupCount > 0 ? 'text-blue-600' : 'text-slate-300'}">${s.dupCount}개 그룹</span>
+                            </div>
+                            <a href="history_analysis.html?dept=${encodeURIComponent(s.name)}" 
+                               class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-[10px] font-black rounded-xl hover:from-indigo-500 hover:to-blue-500 active:scale-95 transition-all shadow-md ring-4 ring-indigo-50">
+                                <i data-lucide="scan-search" class="w-3 h-3"></i>
+                                <span class="leading-none">중복 분석</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             `).join('');
