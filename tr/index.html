@@ -9,16 +9,15 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Babel (JSX 변환기) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Babel (JSX 변환기) - 특정 안정화 버전(7.23.10)으로 고정 -->
+    <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js" crossorigin></script>
 
-    <!-- Import Map -->
     <script type="importmap">
     {
         "imports": {
-            "react": "https://esm.sh/react@18.2.0",
-            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-            "lucide-react": "https://esm.sh/lucide-react@0.292.0"
+            "react": "https://esm.sh/react@18.2.0?dev",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+            "lucide-react": "https://esm.sh/lucide-react@0.454.0?deps=react@18.2.0"
         }
     }
     </script>
@@ -87,16 +86,48 @@
         const firebaseConfig = JSON.parse(typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : '{}');
 
         // 🚨 사용자님이 제공해주신 Apps Script URL 🚨
-        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxgS2_Quh2MCxGAebBf9Uydp7gR1UpKGoHfq4lt40H8LXh9zmTRfpFaEGVHnlhEVmetRA/exec"; 
+        const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxgS2_Quh2MCxGAebBf9Uydp7gR1UpKGoHfq4lt40H8LXh9zmTRfpFaEGVHnlhEVmetRA/exec";
+
+        // --- Error Overlay for Debugging (Global) ---
+        const showGlobalError = (msg, stack) => {
+            const div = document.createElement('div');
+            div.id = 'debug-error-overlay';
+            div.className = 'fixed inset-0 z-[9999] bg-rose-600/95 text-white p-6 flex flex-col items-center justify-center text-center overflow-auto';
+            div.innerHTML = `
+                <div class="max-w-2xl w-full">
+                    <h1 class="text-3xl font-black mb-2">CRITICAL ERROR</h1>
+                    <div class="bg-black/20 p-4 rounded-lg mb-6 text-left">
+                        <p class="text-lg font-bold mb-2">${msg}</p>
+                        ${stack ? `<pre class="text-[10px] opacity-70 overflow-x-auto whitespace-pre-wrap max-h-40 border-t border-white/20 pt-2">${stack}</pre>` : ''}
+                    </div>
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        <button onclick="localStorage.clear(); window.location.reload();" class="px-6 py-3 bg-white text-rose-600 rounded-xl font-bold shadow-lg hover:bg-rose-50 transition-colors">캐시 초기화 및 새로고침</button>
+                        <button onclick="window.location.reload();" class="px-6 py-3 bg-rose-800 text-white rounded-xl font-bold hover:bg-rose-900 transition-colors">단순 새로고침</button>
+                    </div>
+                    <p class="mt-8 text-xs opacity-50 font-medium">위 에러 내용을 캡처해서 전달해주시면 더 빠른 해결이 가능합니다.</p>
+                </div>
+            `;
+            document.body.appendChild(div);
+        };
+
+        window.onerror = (msg, url, line, col, error) => {
+            console.error("Global Error Caught:", msg, error);
+            showGlobalError(`${msg} (${line}:${col})`, error?.stack);
+            return false;
+        };
+
+        console.log("System script initialized.");
     </script>
 
-    <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
+    <script type="text/babel" data-type="module" data-presets="react">
+        import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { X, Save, Settings, Activity, Zap, AlertTriangle, CheckCircle, ArrowLeft, FileText, Database, ChevronRight, Download, RefreshCw, AlertCircle, ExternalLink, Trash2, History, Cloud, List, ClipboardList, Cpu } from 'lucide-react';
+        import { X, Save, Settings, Activity, Zap, TriangleAlert, CircleCheck, ArrowLeft, FileText, Database, ChevronRight, Download, RefreshCw, CircleAlert, ExternalLink, Trash2, History, Cloud, List, ClipboardList, Cpu } from 'lucide-react';
 
         // --- Helper: Wait Function ---
         const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        console.log("Babel script starting...");
 
         // --- Sheets API Service using Fetch ---
         const SheetsAPIService = {
@@ -188,11 +219,30 @@
 
         const getStatusStyle = (status) => {
             switch (status) {
-                case 'NORMAL': return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', indicator: 'bg-emerald-500', icon: <CheckCircle size={14} />, ring: 'focus:ring-emerald-500' };
-                case 'CHECK': return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', indicator: 'bg-amber-500', icon: <Activity size={14} />, ring: 'focus:ring-amber-500' };
-                case 'ERROR': return { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', indicator: 'bg-rose-600', icon: <AlertTriangle size={14} />, ring: 'focus:ring-rose-500' };
-                default: return { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-600', indicator: 'bg-gray-500', icon: null, ring: 'focus:ring-gray-500' };
+                case 'NORMAL': return { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', indicator: 'bg-emerald-500', ring: 'focus:ring-emerald-500' };
+                case 'CHECK': return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', indicator: 'bg-amber-500', ring: 'focus:ring-amber-500' };
+                case 'ERROR': return { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', indicator: 'bg-rose-600', ring: 'focus:ring-rose-500' };
+                default: return { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-600', indicator: 'bg-gray-500', ring: 'focus:ring-gray-500' };
             }
+        };
+
+        const getStatusIcon = (status, size = 14) => {
+            switch (status) {
+                case 'NORMAL': return <CircleCheck size={size} />;
+                case 'CHECK': return <Activity size={size} />;
+                case 'ERROR': return <TriangleAlert size={size} />;
+                default: return null;
+            }
+        };
+
+        const SafeText = ({ value, fallback = "내용없음" }) => {
+            if (value === null || value === undefined || value === '') return <span className="text-gray-400">{fallback}</span>;
+            if (typeof value === 'object') {
+                if (value.$$typeof) return value; // It's an element
+                return JSON.stringify(value);
+            }
+            if (value === '내용없음' || value === '초기화됨') return <span className="text-gray-400">{value}</span>;
+            return value;
         };
 
         const CHECK_CODES = [
@@ -209,7 +259,7 @@
             { code: 'E04', label: '내부 문제' },
         ];
 
-        const CustomConfirm = ({ message, onConfirm, onClose, title = "확인 필요", confirmLabel = "확인", confirmColor = "bg-rose-600", icon = <AlertCircle size={20} /> }) => (
+        const CustomConfirm = ({ message, onConfirm, onClose, title = "확인 필요", confirmLabel = "확인", confirmColor = "bg-rose-600", icon = <CircleAlert size={20} /> }) => (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                 <div className="bg-white rounded-xl w-full max-w-sm shadow-2xl border border-gray-200 overflow-hidden">
                     <div className={`px-6 py-4 border-b border-gray-100 flex justify-between items-center ${confirmColor.includes('rose') ? 'bg-rose-50' : 'bg-slate-50'}`}>
@@ -227,13 +277,6 @@
             </div>
         );
 
-        // [Helper] 텍스트가 '내용없음', '초기화됨' 또는 비어있으면 회색 스타일 적용
-        const renderText = (text) => {
-            if (!text || text === '내용없음' || text === '초기화됨') {
-                return <span className="text-gray-400">내용없음</span>;
-            }
-            return text;
-        };
 
         const ModuleHistoryManager = ({ module, onClose, onDeleteHistory, onShowConfirm }) => {
             const hasHistory = module.history && module.history.length > 0;
@@ -275,8 +318,8 @@
                                                                 {item.status === 'NORMAL' ? '정상' : (item.status === 'CHECK' ? '모듈' : '기타')}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{item.tech || '-'}</td>
-                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap text-xs">{renderText(item.action)}</td>
+                                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><SafeText value={item.tech} fallback="-" /></td>
+                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap text-xs"><SafeText value={item.action} /></td>
                                                         <td className="px-6 py-4 text-right">
                                                             <button
                                                                 onClick={() => onShowConfirm(item)}
@@ -310,7 +353,7 @@
                                                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.bg} ${style.border} ${style.text}`}>
                                                                 {item.status === 'NORMAL' ? '정상' : (item.status === 'CHECK' ? '모듈' : '기타')}
                                                             </span>
-                                                            <span className="text-xs font-bold text-gray-900">{item.tech || '-'}</span>
+                                                            <span className="text-xs font-bold text-gray-900"><SafeText value={item.tech} fallback="-" /></span>
                                                         </div>
                                                     </div>
                                                     <button
@@ -321,7 +364,7 @@
                                                     </button>
                                                 </div>
                                                 <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-wrap leading-relaxed italic">
-                                                    {renderText(item.action)}
+                                                    <SafeText value={item.action} />
                                                 </div>
                                             </div>
                                         );
@@ -417,9 +460,9 @@
                                                     <tr key={item.key} className="bg-white border-b hover:bg-gray-50">
                                                         <td className="px-6 py-4 font-mono text-xs whitespace-nowrap">{item.date}</td>
                                                         <td className="px-6 py-4 font-bold text-slate-700 whitespace-nowrap">PNL-{item.panelId} / Mod-{item.moduleId}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
+                                                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{getStatusIcon(item.status)} {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
                                                         <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{item.tech || '-'}</td>
-                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap">{renderText(item.action)}</td>
+                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap"><SafeText value={item.action} /></td>
                                                         <td className="px-6 py-4 text-right">
                                                             <button
                                                                 onClick={() => onShowConfirm({ panelId: item.panelId, moduleId: item.moduleId }, item)}
@@ -461,12 +504,12 @@
                                                 <div className="p-3 space-y-2">
                                                     <div className="flex items-center gap-2">
                                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.bg} ${style.border} ${style.text}`}>
-                                                            {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}
+                                                            {getStatusIcon(item.status)} {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}
                                                         </span>
                                                         <span className="text-xs font-bold text-slate-700">{item.tech || '-'}</span>
                                                     </div>
                                                     <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 whitespace-pre-wrap italic">
-                                                        {renderText(item.action)}
+                                                        <SafeText value={item.action} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -573,10 +616,10 @@
                                                 return (
                                                     <tr key={item.key} className="bg-white border-b hover:bg-gray-50">
                                                         <td className="px-6 py-4 font-mono text-xs text-slate-500 whitespace-nowrap">{item.date}</td>
-                                                        <td className="px-6 py-4 font-bold text-slate-800 whitespace-nowrap">{item.fullLocation}</td>
-                                                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
-                                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{item.tech || '-'}</td>
-                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap">{renderText(item.action)}</td>
+                                                        <td className="px-6 py-4 font-bold text-slate-800 whitespace-nowrap"><SafeText value={item.fullLocation} /></td>
+                                                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-3 py-1 rounded-full text-xs font-bold border ${style.bg} ${style.border} ${style.text}`}>{getStatusIcon(item.status)} {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}</span></td>
+                                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><SafeText value={item.tech} fallback="-" /></td>
+                                                        <td className="px-6 py-4 text-gray-600 whitespace-pre-wrap"><SafeText value={item.action} /></td>
                                                     </tr>
                                                 );
                                             })
@@ -601,12 +644,12 @@
                                                 <div className="p-3 space-y-2">
                                                     <div className="flex items-center gap-2">
                                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${style.bg} ${style.border} ${style.text}`}>
-                                                            {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}
+                                                            {getStatusIcon(item.status)} {item.status === 'NORMAL' ? '정상' : item.status === 'CHECK' ? '모듈' : '기타'}
                                                         </span>
-                                                        <span className="text-xs font-bold text-slate-700">{item.tech || '-'}</span>
+                                                        <span className="text-xs font-bold text-slate-700"><SafeText value={item.tech} fallback="-" /></span>
                                                     </div>
                                                     <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 whitespace-pre-wrap leading-relaxed">
-                                                        {renderText(item.action)}
+                                                        <SafeText value={item.action} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -635,7 +678,7 @@
             return (
                 <button onClick={onClick} className={`relative w-full aspect-[4/3] p-5 rounded-lg border-2 transition-all text-left group flex flex-col justify-between ${borderColor} ${bgColor} ${shadow} hover:-translate-y-1`}>
                     <div className="flex justify-between items-start w-full">
-                        <h3 className="font-black text-3xl text-slate-800 tracking-tight">PNL-{id}</h3>
+                        <h3 className="font-black text-3xl text-slate-800 tracking-tight">PNL-<SafeText value={id} /></h3>
                         <div className={`w-4 h-4 rounded-full border-2 ${isClean ? 'bg-emerald-500 border-emerald-600' : errorCount > 0 ? 'bg-rose-500 border-rose-600 animate-pulse' : 'bg-amber-500 border-amber-600'}`}></div>
                     </div>
                     <div className="w-full">
@@ -664,8 +707,8 @@
                                 let statusText = module.status === 'CHECK' ? '모듈 고장' : (module.status === 'ERROR' ? '기타 고장' : module.status);
                                 return (
                                     <button key={module.id} onClick={() => onModuleClick(module)} className={`relative aspect-square rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-all hover:shadow-md hover:-translate-y-1 ${style.ring} ${style.bg} ${style.border}`}>
-                                        <span className={`text-2xl font-black tabular-nums ${style.text}`}>{module.moduleId}</span>
-                                        <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${style.text}`}>{statusText}</span>
+                                        <span className={`text-2xl font-black tabular-nums ${style.text}`}><SafeText value={module.moduleId} /></span>
+                                        <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${style.text}`}>{getStatusIcon(module.status, 10)} {statusText}</span>
                                         {module.status === 'ERROR' && <span className="absolute -top-1 -right-1 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span></span>}
                                     </button>
                                 )
@@ -916,7 +959,7 @@
                     errorCode: formData.errorCode || ''
                 };
 
-                list[idx] = { ...list[idx], ...formData, history: [newHistoryItem, ...list[idx].history] };
+                list[idx] = { ...list[idx], ...formData, history: [newHistoryItem, ...(oldModule.history || [])] };
 
                 // 전역 상태 업데이트 -> 화면 즉시 반영
                 updateGlobalData(docId, newPanels);
@@ -957,7 +1000,7 @@
                         {loading || bgSyncing ? (
                             <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1.5 bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/50 animate-pulse transition-all"><RefreshCw size={12} className='animate-spin' /> {loading ? "로딩 중..." : "저장 중..."}</span>
                         ) : error ? (
-                            <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1.5 bg-rose-50/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-rose-100" title={error}><AlertTriangle size={12} /> 연결 불안정</span>
+                            <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1.5 bg-rose-50/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-rose-100" title={error}><TriangleAlert size={12} /> 연결 불안정</span>
                         ) : (
                             <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5 bg-emerald-50/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-100 transition-all"><Cloud size={12} /> 클라우드 동기화</span>
                         )}
@@ -984,7 +1027,7 @@
 
                         {!loading && error && !panels && (
                             <div className="w-full h-96 flex flex-col items-center justify-center text-rose-500 gap-4 p-4 text-center">
-                                <AlertTriangle size={48} className="opacity-20 mb-2" />
+                                <TriangleAlert size={48} className="opacity-20 mb-2" />
                                 <p className="text-xl font-black italic">DATABASE OFFLINE</p>
                                 <p className="text-sm text-gray-400 max-w-xs">{error}</p>
                                 <button onClick={() => window.location.reload()} className="mt-4 px-8 py-3 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-all font-bold">RECONNECT</button>
@@ -1077,13 +1120,13 @@
 
                 for (const targetId of monitorTargets) {
                     try {
-                        let data = await SheetsAPIService.getDoc(targetId);
-                        if (!data) {
-                            data = generateData(targetId.split('-')[0]);
+                        let result = await SheetsAPIService.getDoc(targetId);
+                        if (!result) {
+                            result = generateData(targetId.split('-')[0]);
                         }
-                        if (data) {
+                        if (result && result.panels) {
                             // 전역 상태 업데이트 -> 화면 즉시 반영
-                            updateGlobalData(targetId, data.panels);
+                            updateGlobalData(targetId, result.panels);
                         }
                     } catch (e) {
                         console.warn(`Failed to fetch ${targetId}:`, e);
@@ -1149,9 +1192,9 @@
                             {/* [변경] grid-cols-2 (2x2 배치) */}
                             <div className="grid grid-cols-2 gap-4">
                                 <SummaryCard title="종합 이력 대장" count={summary.totalHistoryCount} color="blue" onClick={() => setShowGlobalHistory(true)} icon={ClipboardList} />
-                                <SummaryCard title="이상 TR (Panel)" count={summary.panelIssues.size} color="rose" onClick={() => setSelectedIssueType(prev => prev === 'PANEL' ? null : 'PANEL')} isSelected={selectedIssueType === 'PANEL'} />
-                                <SummaryCard title="모듈 고장" count={summary.moduleErrorCount} color="amber" onClick={() => setSelectedIssueType(prev => prev === 'MODULE' ? null : 'MODULE')} isSelected={selectedIssueType === 'MODULE'} />
-                                <SummaryCard title="기타 고장" count={summary.otherErrorCount} color="rose" onClick={() => setSelectedIssueType(prev => prev === 'OTHER' ? null : 'OTHER')} isSelected={selectedIssueType === 'OTHER'} />
+                                <SummaryCard title="이상 TR (Panel)" count={summary.panelIssues.size} color="rose" onClick={() => setSelectedIssueType(prev => prev === 'PANEL' ? null : 'PANEL')} isSelected={selectedIssueType === 'PANEL'} icon={Zap} />
+                                <SummaryCard title="이상 TR (모듈)" count={summary.moduleErrorCount} color="amber" onClick={() => setSelectedIssueType(prev => prev === 'MODULE' ? null : 'MODULE')} isSelected={selectedIssueType === 'MODULE'} icon={Activity} />
+                                <SummaryCard title="기타 정비 (Note)" count={summary.otherErrorCount} color="slate" onClick={() => setSelectedIssueType(prev => prev === 'OTHER' ? null : 'OTHER')} isSelected={selectedIssueType === 'OTHER'} icon={Settings} />
                             </div>
                             {selectedIssueType && (
                                 <div className="mt-6 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
@@ -1165,7 +1208,7 @@
                                                         <div className="text-xs font-bold text-slate-800 flex items-center gap-1">
                                                             {item.zone.replace('ZONE ', '#')} - {item.side} SIDE <ChevronRight size={10} className="text-gray-300" /> PNL-{item.panelId} {!item.isPanelSummary && ` / Mod-${item.moduleId}`}
                                                         </div>
-                                                        <div className="text-[10px] text-gray-500 mt-0.5">{item.desc || (item.isPanelSummary ? '확인 필요' : '')}</div>
+                                                        <div className="text-[10px] text-gray-500 mt-0.5 max-w-[180px] break-words"><SafeText value={item.desc} fallback={item.isPanelSummary ? '확인 필요' : ''} /></div>
                                                     </div>
                                                 </div>
                                                 <button onClick={() => onSelectLayout(item.zone)} className="px-2 py-1 bg-slate-50 text-slate-600 text-[10px] font-bold rounded border border-slate-200 hover:bg-white hover:text-blue-600 transition-colors">이동</button>
@@ -1225,60 +1268,78 @@
 
             // [전역 상태] 모든 뷰에서 공유하는 데이터 캐시
             const [globalData, setGlobalData] = useState(() => {
-                // 초기 로드 시 로컬 스토리지 확인
                 try {
                     const saved = localStorage.getItem('ep_manager_cache');
-                    return saved ? JSON.parse(saved) : {};
+                    if (saved && saved !== 'undefined' && saved !== 'null') {
+                        const parsed = JSON.parse(saved);
+                        return (parsed && typeof parsed === 'object') ? parsed : {};
+                    }
                 } catch (e) {
-                    return {};
+                    console.error("Cache init error:", e);
                 }
+                return {};
             });
 
             // 데이터 업데이트 및 로컬 스토리지 동기화 함수
             const updateGlobalData = useCallback((key, data) => {
+                if (!key || !data) return;
                 setGlobalData(prev => {
                     const next = { ...prev, [key]: data };
-                    // 비동기로 스토리지 저장 (성능 저하 방지)
-                    setTimeout(() => localStorage.setItem('ep_manager_cache', JSON.stringify(next)), 0);
+                    setTimeout(() => {
+                        try {
+                            localStorage.setItem('ep_manager_cache', JSON.stringify(next));
+                        } catch (e) {
+                            console.error("Cache save error:", e);
+                        }
+                    }, 0);
                     return next;
                 });
             }, []);
 
-            const user = { uid: 'sheets-api-user' };
-            const authLoading = false;
-
             if (!isValid) return <SetupRequiredScreen />;
-            if (authLoading) return <LoadingScreen />;
 
-            if (view === 'DETAIL') return (
+            return (
                 <div className="min-h-screen bg-slate-50 text-slate-900">
-                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+                    <button
+                        onClick={() => { if (confirm('결과 캐시를 삭제하고 다시 로드하시겠습니까?')) { localStorage.removeItem('ep_manager_cache'); window.location.reload(); } }}
+                        className="fixed bottom-4 right-4 z-[100] p-2 bg-slate-200/50 hover:bg-slate-300 text-[10px] text-slate-500 rounded-md transition-all font-bold opacity-30 hover:opacity-100"
+                    >
+                        캐시 삭제
+                    </button>
+                    {view === 'DETAIL' ? (
                         <FieldLayout
                             onBack={() => { setSelectedLayout(null); setView('MAIN'); }}
                             layoutId={selectedLayout}
-                            user={user}
                             globalData={globalData}
                             updateGlobalData={updateGlobalData}
                         />
-                    </Suspense>
-                </div>
-            );
-            return (
-                <div className="min-h-screen bg-slate-50 text-slate-900">
-                    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+                    ) : (
                         <MainDashboard
                             onSelectLayout={(layoutId) => { setSelectedLayout(layoutId); setView('DETAIL'); }}
-                            user={user}
                             globalData={globalData}
                             updateGlobalData={updateGlobalData}
                         />
-                    </Suspense>
+                    )}
                 </div>
             );
         };
 
-        const root = createRoot(document.getElementById('root'));
-        root.render(<App />);
+        try {
+            console.log("Initializing React root...");
+            const container = document.getElementById('root');
+            if (!container) throw new Error("Root element not found!");
+            const root = createRoot(container);
+            root.render(<App />);
+            console.log("React render call completed.");
+        } catch (err) {
+            console.error("Critical Render Error:", err);
+            if (typeof showGlobalError === 'function') {
+                showGlobalError(`컴포넌트 렌더링 실패: ${err.message}`, err.stack);
+            } else {
+                alert(`Critical Render Error: ${err.message}\n\n${err.stack}`);
+            }
+        }
+        console.log("Babel script execution finished.");
     </script>
 </body>
 
