@@ -9,6 +9,10 @@
     <!-- 폰트: 프리텐다드 -->
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (Excel Download) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Pretendard', sans-serif;
@@ -18,14 +22,84 @@
 
         /* 화면 전환 애니메이션 */
         .page-section {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            display: none !important;
         }
 
         .page-section.active {
-            display: block;
-            opacity: 1;
+            display: block !important;
+        }
+
+        /* =========================================
+           Print Styles
+           ========================================= */
+        @media print {
+            body {
+                visibility: hidden;
+                overflow: visible !important;
+            }
+
+            /* Identify the print target */
+            #history-section-container {
+                visibility: visible;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto !important;
+                margin: 0;
+                padding: 0;
+                background: white;
+                z-index: 9999;
+                border: none;
+                box-shadow: none;
+            }
+
+            /* Make inner content visible */
+            #history-section-container * {
+                visibility: visible;
+            }
+
+            /* Hide Controls */
+            #history-section-container button,
+            #history-section-container select,
+            #history-section-container header,
+            .no-print {
+                display: none !important;
+            }
+
+            /* Force expansion of scrolling containers */
+            #history-section-container .overflow-y-auto,
+            #history-section-container .overflow-hidden,
+            #history-section-container div {
+                overflow: visible !important;
+                height: auto !important;
+                max-height: none !important;
+                display: block !important;
+            }
+
+            /* Table Styling */
+            table {
+                width: 100% !important;
+                table-layout: auto !important;
+                border-collapse: collapse;
+            }
+
+            thead {
+                display: table-header-group;
+                /* Repeat header on each page */
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+
+            th,
+            td {
+                border: 1px solid #ccc !important;
+                padding: 6px !important;
+                font-size: 10pt !important;
+                color: black !important;
+            }
         }
 
         /* =========================================
@@ -356,10 +430,23 @@
             background-color: #ef4444;
         }
 
-        /* 새로운 대시보드 그리드 (3열) */
+        /* 새로운 대시보드 그리드 (3열 -> PC 6열) */
         #total-dashboard-grid {
+            display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
+        }
+
+        @media (min-width: 768px) {
+            #total-dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #total-dashboard-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
         }
 
         #total-dashboard-grid .dashboard-card {
@@ -370,130 +457,302 @@
     </style>
 </head>
 
-<body class="max-w-md mx-auto min-h-screen flex flex-col pb-6">
+<body class="max-w-7xl mx-auto min-h-screen pb-6 bg-slate-50 shadow-2xl transition-all duration-300">
 
     <!-- ================= PAGE 0: 호기 선택 ================= -->
-    <div id="page-unit-selection" class="page-section active p-5">
-        <header class="mb-10 mt-8 text-center">
-            <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Soot Blower <span
-                    class="text-blue-600">Manager</span></h1>
-            <p class="text-slate-400 text-xs mt-2 font-medium">관리할 호기(Unit)를 선택해주세요</p>
-        </header>
+    <!-- ================= PAGE 0: 호기 선택 ================= -->
+    <div id="page-unit-selection" class="page-section active p-5 min-h-screen bg-slate-50">
+        <div class="flex flex-col justify-center items-center h-full">
 
-        <div class="dashboard-grid mb-10">
-            <!-- 호기 선택 버튼 -->
-            <div class="dashboard-card unit-card blue" onclick="selectUnit('UNIT 3')">
-                <div class="unit-title">#3</div>
-                <div class="card-desc">3호기 설비</div>
-            </div>
-            <div class="dashboard-card unit-card red" onclick="selectUnit('UNIT 4')">
-                <div class="unit-title">#4</div>
-                <div class="card-desc">4호기 설비</div>
-            </div>
-        </div>
+            <!-- PC: 2-Column Split Layout Container -->
+            <div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
 
-        <!-- ================= 전체 작업 현황 대시보드 ================= -->
-        <div id="total-summary-section" class="mt-4">
-            <div class="flex items-center mb-3 pl-1">
-                <div class="w-1 h-3 bg-red-600 rounded-full mr-2"></div>
-                <h2 class="text-xs font-bold text-red-600 uppercase tracking-widest">전체 작업 현황 (누적)</h2>
-            </div>
-            <div id="total-dashboard-grid" class="dashboard-grid">
-                <!-- Summary cards will be injected here -->
-                <div class="col-span-2 text-center py-10 text-slate-400" id="totalSummaryLoading">
-                    <div class="flex items-center justify-center h-full text-slate-300 text-xs">
-                        <div
-                            class="animate-spin mr-2 rounded-full border-2 border-slate-300 border-t-slate-500 h-4 w-4">
+                <!-- Left Col: Unit Selection (MD: 4/12) -->
+                <div class="md:col-span-4 lg:col-span-3 flex flex-col space-y-6">
+                    <header class="text-center md:text-left">
+                        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">
+                            Soot Blower <br />
+                            <span class="text-blue-600">Manager</span>
+                        </h1>
+                        <p class="text-slate-400 text-sm mt-3 font-medium">
+                            스마트 발전소 설비 관리 시스템<br>
+                            관리할 호기(Unit)를 선택하세요
+                        </p>
+                    </header>
+
+                    <div class="grid grid-cols-2 md:grid-cols-1 gap-4">
+                        <!-- 호기 선택 버튼 -->
+                        <div class="dashboard-card unit-card blue cursor-pointer transform transition hover:scale-105"
+                            onclick="selectUnit('UNIT 3')">
+                            <div class="unit-title text-2xl">#3</div>
+                            <div class="card-desc font-bold">3호기 설비</div>
                         </div>
-                        데이터 로드 중...
+                        <div class="dashboard-card unit-card red cursor-pointer transform transition hover:scale-105"
+                            onclick="selectUnit('UNIT 4')">
+                            <div class="unit-title text-2xl">#4</div>
+                            <div class="card-desc font-bold">4호기 설비</div>
+                        </div>
+                    </div>
+
+                    <!-- 통합 분석 버튼이 여기에 있다면 좋겠지만 지금은 Dashboard Grid 안에 있음 -->
+                </div>
+
+                <!-- Right Col: Status Dashboard (MD: 8/12) -->
+                <div id="total-summary-section"
+                    class="md:col-span-8 lg:col-span-9 bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
+                    <div class="flex items-center mb-6 pl-2 border-b border-slate-100 pb-4">
+                        <div class="w-1.5 h-4 bg-red-600 rounded-full mr-3"></div>
+                        <h2 class="text-sm font-bold text-red-600 uppercase tracking-widest">전체 작업 현황 (누적)</h2>
+                    </div>
+
+                    <div id="total-dashboard-grid" class="dashboard-grid">
+                        <!-- Summary cards will be injected here -->
+                        <div class="col-span-full text-center py-20 text-slate-400" id="totalSummaryLoading">
+                            <div class="flex flex-col items-center justify-center h-full text-slate-300 text-sm">
+                                <div
+                                    class="animate-spin mb-3 rounded-full border-4 border-slate-200 border-t-slate-500 h-8 w-8">
+                                </div>
+                                <span>데이터 로드 중...</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 
     <!-- ================= PAGE 1: 그룹 선택 ================= -->
-    <div id="page-group-selection" class="page-section p-5">
-        <header class="mb-6 mt-4 flex items-center justify-between">
+    <div id="page-group-selection" class="page-section p-5 max-w-5xl mx-auto">
+        <header class="mb-8 mt-4 flex items-center justify-between border-b border-slate-200 pb-4">
             <button onclick="goUnitSelection()"
-                class="text-slate-400 hover:text-slate-600 font-bold text-xs px-2 py-1 border border-slate-200 rounded">
+                class="text-slate-500 hover:text-slate-800 font-bold text-xs px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm transition-colors">
                 ◀ 호기 변경
             </button>
-            <div class="text-center flex-1 mr-12">
-                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight" id="headerUnitTitle">#3호기</h1>
+            <div class="text-center flex-1 mr-20">
+                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight" id="headerUnitTitle">#3호기</h1>
+                <p class="text-[10px] text-slate-400 font-bold mt-1">SELECT GROUP</p>
             </div>
         </header>
 
         <!-- Short Section -->
-        <div class="mb-8">
-            <div class="flex items-center mb-3 pl-1">
-                <div class="w-1 h-3 bg-blue-600 rounded-full mr-2"></div>
-                <h2 class="text-xs font-bold text-blue-600 uppercase tracking-widest">Short Blower (G1-G4.5)</h2>
+        <div class="mb-10">
+            <div class="flex items-center mb-4 pl-1">
+                <div class="w-1.5 h-4 bg-blue-600 rounded-full mr-2"></div>
+                <h2 class="text-sm font-bold text-blue-600 uppercase tracking-widest">Short Blower (G1-G4.5)</h2>
             </div>
-            <div id="list-short" class="dashboard-grid"></div>
+
+            <!-- List Container: Mobile(Stack) -> PC(Grid) -->
+            <div id="list-short" class="grid grid-cols-2 gap-3 lg:grid-cols-3">
+                <!-- Javascript will populate buttons here -->
+            </div>
         </div>
 
         <!-- Long Section -->
-        <div>
-            <div class="flex items-center mb-3 pl-1">
-                <div class="w-1 h-3 bg-red-600 rounded-full mr-2"></div>
-                <h2 class="text-xs font-bold text-red-600 uppercase tracking-widest">Long Blower (G5-G9)</h2>
+        <div class="mb-12">
+            <div class="flex items-center mb-4 pl-1">
+                <div class="w-1.5 h-4 bg-green-600 rounded-full mr-2"></div>
+                <h2 class="text-sm font-bold text-green-600 uppercase tracking-widest">Long Blower (G5-G8)</h2>
             </div>
-            <div id="list-long" class="dashboard-grid"></div>
+
+            <!-- List Container: Mobile(Stack) -> PC(Grid) -->
+            <div id="list-long" class="grid grid-cols-2 gap-3 lg:grid-cols-3">
+                <!-- Javascript will populate buttons here -->
+            </div>
         </div>
     </div>
 
-    <!-- ================= PAGE 2: 상세 화면 ================= -->
-    <div id="page-detail" class="page-section p-4 h-screen flex flex-col pb-10 overflow-y-auto">
-        <!-- 상단 네비게이션 -->
-        <div class="flex justify-between items-center mb-6 px-2">
-            <button onclick="goGroupSelection()"
-                class="flex items-center text-slate-500 hover:text-slate-800 font-bold text-sm transition-colors">
-                ◀ 그룹 선택
+    <!-- ================= PAGE Analysis: 통합 분석 ================= -->
+    <div id="page-analysis" class="page-section p-5 bg-slate-50 min-h-screen overflow-y-auto w-full">
+        <header class="mb-6 mt-4 flex items-center justify-between max-w-7xl mx-auto w-full px-4">
+            <button onclick="closeAnalysis()"
+                class="text-slate-500 hover:text-slate-800 font-bold text-sm flex items-center bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm transition-colors hover:bg-slate-50">
+                ◀ 돌아가기
             </button>
-            <div class="text-right">
-                <h2 id="detail-title" class="font-extrabold text-xl text-slate-800 tracking-tight">GROUP 1</h2>
-                <p id="detail-desc" class="text-[10px] text-slate-400 font-bold uppercase tracking-wide hidden"></p>
+            <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">통합 분석 대시보드</h1>
+        </header>
+
+        <!-- 그리드 레이아웃 컨테이너 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto pb-20 px-4">
+
+            <!-- 1. 호기별 비교 -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between">
+                <h3 class="text-sm font-bold text-slate-600 mb-4 flex items-center">
+                    <span class="mr-2">🏭</span> 호기별 고장 빈도
+                </h3>
+                <div class="relative h-48 w-full flex justify-center items-center">
+                    <canvas id="chartUnit"></canvas>
+                </div>
+                <div id="unitStatText"
+                    class="mt-4 text-center text-xs text-slate-500 font-medium bg-slate-50 p-2 rounded-lg">
+                    데이터 분석 중...
+                </div>
             </div>
-        </div>
 
-        <!-- 메인 보일러 컨테이너 -->
-        <div class="flex-none flex items-center justify-center">
-            <div class="boiler-container w-full">
-                <div class="corner-number cn-1">1</div>
-                <div class="corner-number cn-2">2</div>
-                <div class="corner-number cn-3">3</div>
-                <div class="corner-number cn-4">4</div>
+            <!-- 2. 그룹별 비교 -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-bold text-slate-600 flex items-center">
+                        <span class="mr-2">📊</span> 그룹별 고장 현황
+                    </h3>
+                    <!-- 필터 버튼 -->
+                    <div class="flex bg-slate-100 rounded-lg p-0.5">
+                        <button onclick="setGroupChartFilter('ALL')" id="chart-btn-ALL"
+                            class="px-2 py-1 text-[10px] font-bold rounded bg-white shadow text-slate-800 transition-colors">전체</button>
+                        <button onclick="setGroupChartFilter('3')" id="chart-btn-3"
+                            class="px-2 py-1 text-[10px] font-bold rounded text-slate-500 hover:text-slate-700 transition-colors">3호기</button>
+                        <button onclick="setGroupChartFilter('4')" id="chart-btn-4"
+                            class="px-2 py-1 text-[10px] font-bold rounded text-slate-500 hover:text-slate-700 transition-colors">4호기</button>
+                    </div>
+                </div>
+                <div class="relative h-64 w-full flex-1">
+                    <canvas id="chartGroup"></canvas>
+                </div>
+            </div>
 
-                <div class="boiler-grid">
-                    <!-- 중앙 상태창 -->
-                    <div class="center-status-box" id="centerBox">
-                        <!-- 초기 로딩 상태 -->
+            <!-- 3. 고장 유형별 TOP 5 -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 lg:col-span-2 xl:col-span-1">
+                <h3 class="text-sm font-bold text-slate-600 mb-4 flex items-center">
+                    <span class="mr-2">🏆</span> 주요 고장 유형 (TOP 5)
+                </h3>
+                <div class="relative h-56 w-full flex justify-center items-center">
+                    <canvas id="chartType"></canvas>
+                </div>
+                <div id="typeStatText"
+                    class="mt-4 text-center text-xs text-slate-500 font-medium bg-slate-50 p-2 rounded-lg">
+                    데이터 분석 중...
+                </div>
+            </div>
+
+            <!-- 4. 상세 정비 이력 (PC에서는 꽉 차게 - col-span-full) -->
+            <!-- Detailed History Section -->
+            <div id="history-section-container"
+                class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden col-span-1 lg:col-span-2 xl:col-span-3">
+                <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between">
+                    <h3 class="text-sm font-bold text-slate-600 flex items-center mb-4 md:mb-0">
+                        <span class="mr-2">📝</span> 상세 정비 이력
+                    </h3>
+
+                    <div
+                        class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3 items-start md:items-center">
+                        <!-- 탭 메뉴 -->
+                        <div class="flex space-x-1 bg-slate-100 p-1 rounded-lg">
+                            <button onclick="setHistoryFilter('ALL')" id="tab-ALL"
+                                class="px-4 py-2 text-xs font-bold rounded-md transition-all bg-white shadow text-slate-800">전체</button>
+                            <button onclick="setHistoryFilter('3')" id="tab-3"
+                                class="px-4 py-2 text-xs font-bold rounded-md transition-all text-slate-500 hover:text-slate-700">3호기</button>
+                            <button onclick="setHistoryFilter('4')" id="tab-4"
+                                class="px-4 py-2 text-xs font-bold rounded-md transition-all text-slate-500 hover:text-slate-700">4호기</button>
+                            <button onclick="setHistoryFilter('GROUP')" id="tab-GROUP"
+                                class="px-4 py-2 text-xs font-bold rounded-md transition-all text-slate-500 hover:text-slate-700">그룹별</button>
+                        </div>
+
+                        <!-- 그룹 선택 셀렉터 -->
+                        <div id="historyGroupSelector" class="hidden flex space-x-2">
+                            <select id="historyGroupSelect" onchange="renderHistoryTable()"
+                                class="w-40 text-xs font-bold p-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700 outline-none focus:border-blue-500">
+                                <option value="ALL">모든 그룹 보기</option>
+                            </select>
+                            <select id="historyUnitSelect" onchange="renderHistoryTable()"
+                                class="w-24 text-xs font-bold p-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700 outline-none focus:border-blue-500">
+                                <option value="ALL">전체</option>
+                                <option value="3">3호기</option>
+                                <option value="4">4호기</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div id="area-top" class="side-container side-top"></div>
-                    <div id="area-bottom" class="side-container side-bottom"></div>
-                    <div id="area-left" class="side-container side-left"></div>
-                    <div id="area-right" class="side-container side-right"></div>
+                    <!-- [NEW] Export Buttons -->
+                    <div class="flex space-x-2 mt-4 md:mt-0">
+                        <button onclick="exportHistoryToExcel()"
+                            class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center transition-colors">
+                            <span class="mr-1">📊</span> 엑셀 저장
+                        </button>
+                        <button onclick="printHistory()"
+                            class="px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-sm flex items-center transition-colors">
+                            <span class="mr-1">🖨️</span> 인쇄
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 리스트 테이블 -->
+                <div class="overflow-x-auto max-h-[500px]">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-4 w-32">날짜</th>
+                                <th class="px-4 py-4 w-48">위치/기기</th>
+                                <th class="px-6 py-4">정비 내용</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analysisHistoryBody" class="text-slate-700 divide-y divide-slate-100">
+                            <!-- 데이터 로드됨 -->
+                        </tbody>
+                    </table>
+                    <div id="analysisNoData" class="hidden p-20 text-center text-slate-400 text-sm">
+                        데이터가 없습니다.
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 특이사항 메모장 -->
-        <div class="memo-container">
-            <h3 class="text-sm font-bold text-slate-600 mb-2 flex items-center">
-                <span class="mr-2">📝</span> 현장 특이사항 / 피드백
-            </h3>
-            <textarea id="memoInput" class="memo-input" placeholder="예) 3번 기기 소음 발생, 비계 설치 필요 등"></textarea>
-            <button onclick="submitMemo()" class="memo-btn">메모 저장</button>
-
-            <button id="memoSummaryButton" onclick="openHistoryModal('NOTE', 'GROUP')" class="memo-summary-btn">
-                <span>특이사항 종합 확인</span>
-                <span id="memoCountBadge" class="memo-count-badge">0건</span>
-            </button>
-        </div>
-
         <div class="h-10"></div>
+    </div>
+
+    <!-- ================= PAGE 2: 상세 화면 ================= -->
+    <div id="page-detail" class="page-section p-4 pb-10">
+        <div class="flex flex-col h-full">
+            <!-- 상단 네비게이션 -->
+            <div class="flex justify-between items-center mb-6 px-2">
+                <button onclick="goGroupSelection()"
+                    class="flex items-center text-slate-500 hover:text-slate-800 font-bold text-sm transition-colors">
+                    ◀ 그룹 선택
+                </button>
+                <div class="text-right">
+                    <h2 id="detail-title" class="font-extrabold text-xl text-slate-800 tracking-tight">GROUP 1</h2>
+                    <p id="detail-desc" class="text-[10px] text-slate-400 font-bold uppercase tracking-wide hidden">
+                    </p>
+                </div>
+            </div>
+
+            <!-- 메인 보일러 컨테이너 -->
+            <div class="flex-none flex items-center justify-center">
+                <div class="boiler-container w-full">
+                    <div class="corner-number cn-1">1</div>
+                    <div class="corner-number cn-2">2</div>
+                    <div class="corner-number cn-3">3</div>
+                    <div class="corner-number cn-4">4</div>
+
+                    <div class="boiler-grid">
+                        <!-- 중앙 상태창 -->
+                        <div class="center-status-box" id="centerBox">
+                            <!-- 초기 로딩 상태 -->
+                        </div>
+
+                        <div id="area-top" class="side-container side-top"></div>
+                        <div id="area-bottom" class="side-container side-bottom"></div>
+                        <div id="area-left" class="side-container side-left"></div>
+                        <div id="area-right" class="side-container side-right"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 특이사항 메모장 -->
+            <div class="memo-container">
+                <h3 class="text-sm font-bold text-slate-600 mb-2 flex items-center">
+                    <span class="mr-2">📝</span> 현장 특이사항 / 피드백
+                </h3>
+                <textarea id="memoInput" class="memo-input" placeholder="예) 3번 기기 소음 발생, 비계 설치 필요 등"></textarea>
+                <button onclick="submitMemo()" class="memo-btn">메모 저장</button>
+
+                <button id="memoSummaryButton" onclick="openHistoryModal('NOTE', 'GROUP')" class="memo-summary-btn">
+                    <span>특이사항 종합 확인</span>
+                    <span id="memoCountBadge" class="memo-count-badge">0건</span>
+                </button>
+            </div>
+
+            <div class="h-10"></div>
+        </div>
     </div>
 
     <!-- ================= 작업 입력 모달 ================= -->
@@ -588,7 +847,8 @@
             </div>
 
             <div class="bg-slate-50 p-3 text-center border-t cursor-pointer hover:bg-slate-100 transition-colors"
-                onclick="closeModal('actionModal')"><span class="text-slate-500 font-bold text-sm">닫기</span></div>
+                onclick="closeModal('actionModal')"><span class="text-slate-500 font-bold text-sm">닫기</span>
+            </div>
         </div>
     </div>
 
@@ -610,9 +870,11 @@
                             <th class="px-4 py-3">내용</th>
                         </tr>
                     </thead>
-                    <tbody id="historyListBody" class="text-slate-700 divide-y divide-slate-200 bg-white"></tbody>
+                    <tbody id="historyListBody" class="text-slate-700 divide-y divide-slate-200 bg-white">
+                    </tbody>
                 </table>
-                <div id="noHistoryMsg" class="hidden p-10 text-center text-slate-400 text-sm">기록된 이력이 없습니다.</div>
+                <div id="noHistoryMsg" class="hidden p-10 text-center text-slate-400 text-sm">기록된 이력이 없습니다.
+                </div>
             </div>
         </div>
     </div>
@@ -786,7 +1048,482 @@
                 `;
                 grid.appendChild(card);
             });
+
+            // [추가] 통합 분석 버튼
+            const analysisBtn = document.createElement('div');
+            analysisBtn.className = `app-card dashboard-card relative border-2 border-blue-100 bg-blue-50`;
+            analysisBtn.style.cursor = 'pointer';
+            analysisBtn.onclick = goToAnalysis;
+            analysisBtn.innerHTML = `
+                <div class="absolute inset-0 flex flex-col items-center justify-center p-2">
+                    <div class="text-center">
+                        <div class="card-title text-sm whitespace-nowrap text-blue-800">📊 통합 분석</div>
+                        <div class="text-xs text-blue-500 mt-1 font-bold">Data Insight</div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(analysisBtn);
         }
+
+        // ================= 분석 페이지 로직 =================
+        let charts = {}; // 차트 인스턴스 저장
+
+        function goToAnalysis() {
+            if (!totalDataRecords || totalDataRecords.length === 0) {
+                showToast("데이터가 없습니다.");
+                return;
+            }
+
+            // 페이지 전환
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-analysis').classList.add('active');
+            setTimeout(() => window.scrollTo(0, 0), 0);
+
+            // 차트 렌더링 (약간의 지연 후 실행하여 DOM 렌더링 확보)
+            setTimeout(renderAnalysisCharts, 100);
+        }
+
+        function closeAnalysis() {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-unit-selection').classList.add('active');
+        }
+
+        function processAnalysisData() {
+            const unitCounts = { '3': 0, '4': 0 };
+            const groupCounts = {}; // Key: Group Name
+            const typeCounts = {};  // Key: Action Type
+
+            totalDataRecords.forEach(item => {
+                if (item.device === 'NOTE') return; // 메모 제외
+
+                // 1. 호기별 집계 (item.group = "UNIT 3 - GROUP 1" 형태 가정)
+                if (item.group && item.group.includes('UNIT 3')) unitCounts['3']++;
+                else if (item.group && item.group.includes('UNIT 4')) unitCounts['4']++;
+
+                // 2. 그룹별 집계
+                // "UNIT 3 - GROUP 1 (7F)" -> "GROUP 1" 추출 시도
+                let groupName = "기타";
+                const parts = item.group.split(' - ');
+                if (parts.length > 1) {
+                    // "GROUP 1 (7F)" 에서 앞부분만 따거나 전체 사용
+                    groupName = parts[1].split(' (')[0];
+                }
+                groupCounts[groupName] = (groupCounts[groupName] || 0) + 1;
+
+                // 3. 유형별 집계
+                const actionName = item.action;
+                typeCounts[actionName] = (typeCounts[actionName] || 0) + 1;
+            });
+
+            return { unitCounts, groupCounts, typeCounts };
+        }
+
+        function renderAnalysisCharts() {
+            const data = processAnalysisData();
+
+            // 기존 차트 파괴 (메모리 누수 방지)
+            if (charts['unit']) charts['unit'].destroy();
+            if (charts['group']) charts['group'].destroy();
+            if (charts['type']) charts['type'].destroy();
+
+            // 1. 호기별 차트 (Doughnut)
+            const ctxUnit = document.getElementById('chartUnit').getContext('2d');
+            charts['unit'] = new Chart(ctxUnit, {
+                type: 'doughnut',
+                data: {
+                    labels: ['3호기', '4호기'],
+                    datasets: [{
+                        data: [data.unitCounts['3'], data.unitCounts['4']],
+                        backgroundColor: ['#3b82f6', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // 텍스트 업데이트
+            const total = data.unitCounts['3'] + data.unitCounts['4'];
+            document.getElementById('unitStatText').innerHTML =
+                `총 <span class="font-bold text-slate-800">${total}</span>건 중 <span class="text-blue-600">3호기 ${data.unitCounts['3']}</span> / <span class="text-red-500">4호기 ${data.unitCounts['4']}</span>`;
+
+
+            // 2. 그룹별 차트 (초기 렌더링 - 전체)
+            renderGroupChartOnly('ALL');
+
+            // 3. 유형별 차트 (Bar - Horizontal, Top 5)
+            const sortedTypes = Object.entries(data.typeCounts)
+                .sort((a, b) => b[1] - a[1]) // 내림차순
+                .slice(0, 5); // Top 5
+
+            // [UX 개선] 이모지 매핑 정의
+            const ACTION_EMOJIS = {
+                '케이블 교체': '🔌',
+                '전동기 소손': '🔥',
+                '전동기 베어링 교체': '⚙️', // '전동기 베어링 교체' 전체 매칭
+                '베어링 교체': '⚙️',       // '베어링 교체' 단축
+                '전동기 역상': '🔄',
+                '일반점검': '📋',
+                '리미트 정비 [회로] - 정비후 양호': '⚡',
+                '리미트 정비 [회로] - 정비후 교체': '⚡',
+                '리미트 정비': '⚡',
+                '특이사항 메모': '📝',
+                '기타': '❓'
+            };
+
+            // 라벨 변환 (긴 텍스트 -> 이모지)
+            const emojiLabels = sortedTypes.map(d => {
+                const text = d[0];
+                // 정확한 매칭 시도 후, 포함 여부 확인
+                if (ACTION_EMOJIS[text]) return ACTION_EMOJIS[text];
+
+                // 부분 일치 검색
+                for (const [key, emoji] of Object.entries(ACTION_EMOJIS)) {
+                    if (text.includes(key) || key.includes(text)) return emoji;
+                }
+                return '🔧'; // 기본값
+            });
+
+            // [Helper] 이모지 가져오기
+            const getDefectEmoji = (text) => {
+                if (ACTION_EMOJIS[text]) return ACTION_EMOJIS[text];
+                for (const [key, emoji] of Object.entries(ACTION_EMOJIS)) {
+                    if (text.includes(key) || key.includes(text)) return emoji;
+                }
+                return '🔧';
+            };
+
+            const ctxType = document.getElementById('chartType').getContext('2d');
+            charts['type'] = new Chart(ctxType, {
+                type: 'pie', // [변경] 꽉 찬 파이 차트
+                data: {
+                    labels: sortedTypes.map(d => d[0]),
+                    datasets: [{
+                        data: sortedTypes.map(d => d[1]),
+                        backgroundColor: [
+                            '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    onHover: (event, elements) => {
+                        const textEl = document.getElementById('typeStatText');
+                        if (elements && elements.length > 0) {
+                            const index = elements[0].index;
+                            const typeName = sortedTypes[index][0];
+                            const count = sortedTypes[index][1];
+                            const percent = ((count / total) * 100).toFixed(1);
+                            const emoji = getDefectEmoji(typeName); // 이모지 적용
+
+                            textEl.innerHTML = `<span class="text-lg mr-1">${emoji}</span> <span class="font-bold text-slate-800">${typeName}</span>: <span class="font-bold text-blue-600">${count}건</span> <span class="text-slate-400 text-xs">(${percent}%)</span>`;
+                        } else {
+                            setTop1Text();
+                        }
+                    }
+                }
+            });
+
+            // 초기 텍스트 설정을 위한 함수
+            function setTop1Text() {
+                const textEl = document.getElementById('typeStatText');
+                if (sortedTypes.length > 0) {
+                    const topItem = sortedTypes[0];
+                    const percent = ((topItem[1] / total) * 100).toFixed(1);
+                    const emoji = getDefectEmoji(topItem[0]);
+
+                    // [변경] "1위" -> "TOP 1" (부정적 뉘앙스 고려)
+                    textEl.innerHTML = `<span class="font-black text-red-500 mr-2">TOP 1</span><span class="text-lg mr-1">${emoji}</span><span class="font-bold text-slate-800">${topItem[0]}</span>: <span class="font-bold text-red-600">${topItem[1]}건</span>`;
+                } else {
+                    textEl.innerHTML = "데이터 없음";
+                }
+            }
+
+            // 초기 실행
+            setTop1Text();
+
+            setTop1Text();
+            setTop1Text();
+
+            // 초기 필터 적용
+            renderHistoryTable();
+        }
+
+        // [추가] 그룹 차트 전용 필터링 및 렌더링
+        let currentGroupChartFilter = 'ALL';
+
+        function setGroupChartFilter(filter) {
+            currentGroupChartFilter = filter;
+
+            // 버튼 스타일 업데이트
+            ['ALL', '3', '4'].forEach(t => {
+                const btn = document.getElementById(`chart-btn-${t}`);
+                if (t === filter) {
+                    btn.classList.remove('text-slate-500');
+                    btn.classList.add('bg-white', 'shadow', 'text-slate-800');
+                } else {
+                    btn.classList.add('text-slate-500');
+                    btn.classList.remove('bg-white', 'shadow', 'text-slate-800');
+                }
+            });
+
+            renderGroupChartOnly(filter);
+        }
+
+        function renderGroupChartOnly(filter) {
+            // 데이터 필터링 및 집계
+            const groupCounts = {};
+
+            totalDataRecords.forEach(item => {
+                if (item.device === 'NOTE') return;
+
+                // 호기 필터 확인
+                if (filter === '3' && !item.group.includes('UNIT 3')) return;
+                if (filter === '4' && !item.group.includes('UNIT 4')) return;
+
+                // 그룹명 추출
+                let groupName = "기타";
+                const parts = item.group.split(' - ');
+                if (parts.length > 1) {
+                    groupName = parts[1].split(' (')[0];
+                }
+                groupCounts[groupName] = (groupCounts[groupName] || 0) + 1;
+            });
+
+            const sortedGroups = Object.keys(groupCounts).sort();
+
+            // 기존 차트 있으면 파괴
+            if (charts['group']) charts['group'].destroy();
+
+            const ctxGroup = document.getElementById('chartGroup').getContext('2d');
+            charts['group'] = new Chart(ctxGroup, {
+                type: 'bar',
+                data: {
+                    labels: sortedGroups,
+                    datasets: [{
+                        label: '고장 건수',
+                        data: sortedGroups.map(k => groupCounts[k]),
+                        backgroundColor: filter === '3' ? '#3b82f6' : (filter === '4' ? '#ef4444' : '#64748b'),
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 500 },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: true } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+
+
+        // ================= 상세 정비 이력 로직 =================
+        let currentHistoryFilter = 'ALL';
+
+        function setHistoryFilter(filter) {
+            currentHistoryFilter = filter;
+
+            // 탭 스타일 업데이트
+            ['ALL', '3', '4', 'GROUP'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === filter) {
+                    btn.classList.remove('text-slate-500', 'bg-transparent');
+                    btn.classList.add('bg-white', 'shadow', 'text-slate-800');
+                } else {
+                    btn.classList.add('text-slate-500', 'bg-transparent');
+                    btn.classList.remove('bg-white', 'shadow', 'text-slate-800');
+                }
+            });
+
+            // 그룹 셀렉터 표시 여부
+            const groupSelector = document.getElementById('historyGroupSelector');
+            if (filter === 'GROUP') {
+                groupSelector.classList.remove('hidden');
+                updateGroupSelectOptions();
+            } else {
+                groupSelector.classList.add('hidden');
+            }
+
+            renderHistoryTable();
+        }
+
+        // 그룹 옵션 채우기 (데이터 기반)
+        function updateGroupSelectOptions() {
+            const select = document.getElementById('historyGroupSelect');
+            const groups = new Set();
+
+            totalDataRecords.forEach(item => {
+                if (item.device === 'NOTE') return;
+                // "UNIT 3 - GROUP 1 (7F)" -> "GROUP 1"
+                const parts = item.group.split(' - ');
+                if (parts.length > 1) {
+                    const gName = parts[1].split(' (')[0];
+                    groups.add(gName);
+                }
+            });
+
+            // 기존 옵션 초기화 (ALL은 유지)
+            select.innerHTML = '<option value="ALL">모든 그룹 보기</option>';
+            Array.from(groups).sort().forEach(g => {
+                select.innerHTML += `<option value="${g}">${g}</option>`;
+            });
+        }
+
+        // 엑셀 다운로드 기능
+        function exportHistoryToExcel() {
+            // 현재 필터링된 데이터 가져오기 (화면에 보이는 그대로)
+            let filtered = totalDataRecords.filter(item => {
+                if (item.device === 'NOTE') return false;
+
+                if (currentHistoryFilter === 'ALL') return true;
+                if (currentHistoryFilter === '3') return item.group.includes('UNIT 3');
+                if (currentHistoryFilter === '4') return item.group.includes('UNIT 4');
+
+                if (currentHistoryFilter === 'GROUP') {
+                    const selectedGroup = document.getElementById('historyGroupSelect').value;
+                    let groupMatch = true;
+                    if (selectedGroup !== 'ALL') groupMatch = item.group.includes(selectedGroup);
+
+                    const selectedUnit = document.getElementById('historyUnitSelect').value;
+                    let unitMatch = true;
+                    if (selectedUnit === '3') unitMatch = item.group.includes('UNIT 3');
+                    else if (selectedUnit === '4') unitMatch = item.group.includes('UNIT 4');
+
+                    return groupMatch && unitMatch;
+                }
+                return true;
+            });
+
+            // 최신순 정렬
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                alert("저장할 데이터가 없습니다.");
+                return;
+            }
+
+            // 데이터 가공 (엑셀용)
+            const excelData = filtered.map(item => ({
+                '날짜': item.date,
+                '설비명': item.group,
+                '작업 내용': item.action,
+                '상세': item.device
+            }));
+
+            // 워크시트 생성
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            // 컬럼 너비 자동 조정
+            const wscols = [
+                { wch: 15 }, // 날짜
+                { wch: 30 }, // 설비명
+                { wch: 30 }, // 작업 내용
+                { wch: 15 }  // 상세
+            ];
+            ws['!cols'] = wscols;
+
+            // 워크북 생성
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "정비이력");
+
+            // 파일명 생성
+            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+            XLSX.writeFile(wb, `SootBlower_History_${dateStr}.xlsx`);
+        }
+
+        // 인쇄 기능
+        function printHistory() {
+            window.print();
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('analysisHistoryBody');
+            const noData = document.getElementById('analysisNoData');
+            tbody.innerHTML = '';
+
+            // 필터링
+            let filtered = totalDataRecords.filter(item => {
+                if (item.device === 'NOTE') return false; // 일단 메모는 제외
+
+                if (currentHistoryFilter === 'ALL') return true;
+                if (currentHistoryFilter === '3') return item.group.includes('UNIT 3');
+                if (currentHistoryFilter === '4') return item.group.includes('UNIT 4');
+
+                if (currentHistoryFilter === 'GROUP') {
+                    // 1. 그룹 필터
+                    const selectedGroup = document.getElementById('historyGroupSelect').value;
+                    let groupMatch = true;
+                    if (selectedGroup !== 'ALL') {
+                        groupMatch = item.group.includes(selectedGroup);
+                    }
+
+                    // 2. 호기 필터 (그룹 탭 내)
+                    const selectedUnit = document.getElementById('historyUnitSelect').value;
+                    let unitMatch = true;
+                    if (selectedUnit === '3') unitMatch = item.group.includes('UNIT 3');
+                    else if (selectedUnit === '4') unitMatch = item.group.includes('UNIT 4');
+
+                    return groupMatch && unitMatch;
+                }
+                return true;
+            });
+
+            // 최신순 정렬
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                noData.classList.remove('hidden');
+            } else {
+                noData.classList.add('hidden');
+                filtered.forEach(item => {
+                    const dateDisplay = item.date.substring(5); // MM-DD
+
+                    // 표시용 위치 문자열 가공
+                    let locDisplay = item.group;
+                    // 예: "UNIT 3 - GROUP 1 (7F)" -> "3호기 G1" 처럼 줄이기
+                    if (item.group.includes('UNIT 3')) locDisplay = item.group.replace('UNIT 3 - ', '3호기 ');
+                    if (item.group.includes('UNIT 4')) locDisplay = item.group.replace('UNIT 4 - ', '4호기 ');
+
+                    // 너무 길면 줄임
+                    const parts = locDisplay.split(' (');
+                    if (parts.length > 0) locDisplay = parts[0];
+
+                    const deviceNum = item.device === 'NOTE' ? '📝' : `No.${item.device}`;
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+                            <td class="px-4 py-3 font-medium text-slate-500 whitespace-nowrap text-xs">${dateDisplay}</td>
+                            <td class="px-2 py-3">
+                                <div class="font-bold text-slate-700 text-xs">${locDisplay}</div>
+                                <div class="text-[10px] text-blue-500 font-bold">${deviceNum}</div>
+                            </td>
+                            <td class="px-4 py-3 text-slate-600 text-xs font-medium break-keep">
+                                ${item.action}
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
 
         const SECTIONS = [
             {
@@ -847,6 +1584,8 @@
             });
             document.getElementById('page-unit-selection').classList.remove('active');
             document.getElementById('page-group-selection').classList.add('active');
+            // DOM 렌더링 후 스크롤 이동 보장
+            setTimeout(() => window.scrollTo(0, 0), 0);
         }
 
         function goUnitSelection() {
@@ -854,12 +1593,14 @@
             document.getElementById('page-unit-selection').classList.add('active');
             currentUnit = null;
             fetchTotalSummary();
+            setTimeout(() => window.scrollTo(0, 0), 0);
         }
 
         function goGroupSelection() {
             document.getElementById('page-detail').classList.remove('active');
             document.getElementById('page-group-selection').classList.add('active');
             document.getElementById('memoInput').value = '';
+            setTimeout(() => window.scrollTo(0, 0), 0);
         }
 
         function showDetail(sectionId, groupIdx) {
@@ -902,7 +1643,7 @@
             fetchGroupData(fullGroupName);
             document.getElementById('page-group-selection').classList.remove('active');
             document.getElementById('page-detail').classList.add('active');
-            window.scrollTo(0, 0);
+            setTimeout(() => window.scrollTo(0, 0), 0);
         }
 
         function fetchGroupData(fullGroupName) {
