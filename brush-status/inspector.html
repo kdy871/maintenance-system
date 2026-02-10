@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>브러쉬 이력 조회 (확인용)</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
+
         /* 스타일은 기존과 동일하되, 텍스트 스타일 추가 */
         :root {
             --yard-bg: #f3e5f5;
@@ -16,82 +18,387 @@
             --btn-hover: #e3f2fd;
         }
 
+        /* Eco-Friendly Mesh Gradient Background */
         body {
-            font-family: 'Malgun Gothic', sans-serif;
-            padding: 20px;
-            background: #fafafa;
+            font-family: 'Malgun Gothic', 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 50px;
+            /* 맨 아래 여백 추가 */
+            background-color: #f8fafc;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(186, 230, 253, 0.5) 0px, transparent 50%),
+                /* Sky Blue */
+                radial-gradient(at 100% 0%, rgba(187, 247, 208, 0.5) 0px, transparent 50%),
+                /* Nature Green */
+                radial-gradient(at 100% 100%, rgba(224, 242, 254, 0.5) 0px, transparent 50%),
+                /* Light Blue */
+                radial-gradient(at 0% 100%, rgba(220, 252, 231, 0.5) 0px, transparent 50%);
+            /* Light Green */
+            background-attachment: fixed;
+            /* Keeps gradient stable during scroll */
+            color: #333;
+            min-height: 100vh;
         }
 
-        /* [수정됨] 헤더 스타일 변경 */
         h2 {
             text-align: center;
-            margin-bottom: 20px;
-            font-family: 'Arial', 'Helvetica', sans-serif;
-            /* 깔끔한 고딕 폰트 */
-            font-weight: 800;
-            /* 아주 굵게 */
-            font-size: 2.2rem;
-            /* 폰트 크기 키움 */
-            color: #1a1a1a;
-            /* 기본 진한 검정색 */
-            letter-spacing: -0.5px;
-            /* 자간 살짝 좁게 */
+            margin-bottom: 30px;
         }
 
-        /* [추가됨] Manager 텍스트를 위한 파란색 스타일 */
-        .title-highlight {
-            color: #2962ff;
-            /* 쨍한 파란색 */
+        /* [NEW] Header Styles matching One Plant Design */
+        .header-container {
+            text-align: center;
+            margin-top: 60px;
+            /* 창 위쪽 여백 조정 (100px -> 60px) - 최적 위치 */
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
         }
 
-        .unit-selector {
-            display: flex;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-logo-link {
+            display: inline-flex;
+            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px 60px;
+            /* Wider padding for watermark look */
+            border-radius: 9999px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            /* Essential for watermark cropping */
+        }
+
+        .header-logo-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Watermark Logo Style */
+        .watermark-logo {
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            width: 100px;
+            /* Adjust size as needed */
+            height: 100px;
+            opacity: 0.1;
+            transform: rotate(12deg);
+            pointer-events: none;
+            filter: grayscale(100%);
+            transition: transform 0.5s ease;
+            z-index: 0;
+        }
+
+        .header-logo-link:hover .watermark-logo {
+            transform: scale(1.1) rotate(6deg);
+        }
+
+        .header-logo-img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .header-text-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+            gap: 5px;
+            position: relative;
+            z-index: 10;
+            /* Ensure text is above watermark */
+        }
+
+        .brand-text-main {
+            font-size: 2.5rem;
+            font-family: 'Arial', sans-serif;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+            white-space: nowrap;
+        }
+
+        .brand-text-sub {
+            font-size: 0.9rem;
+            font-family: 'Arial', sans-serif;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            white-space: nowrap;
+        }
+
+        /* [NEW] 통합 컨트롤 그리드 (4개 버튼: 3호기, 4호기, 이번달, 전체통계) */
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-bottom: 25px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 10px;
         }
 
-        .unit-btn {
+        .control-card {
             background: white;
-            border: 1px solid #e0e0e0;
             border-radius: 12px;
-            padding: 10px 45px;
+            padding: 12px 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px;
+            /* 높이 축소 */
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            border-bottom-width: 5px;
+            /* 하단 포인트 강조 */
+        }
+
+        .control-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 아이콘 스타일 */
+        /* .card-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .control-card:hover .card-icon {
+            transform: scale(1.1);
+        } */
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #555;
+            letter-spacing: -0.5px;
+            margin-bottom: 2px;
+        }
+
+        .card-value {
             font-size: 20px;
             font-weight: 800;
-            text-align: center;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            color: #757575;
-            position: relative;
+            color: #1a1a1a;
+            font-family: 'Arial', sans-serif;
         }
 
-        .unit-btn.unit-3 {
-            border-bottom: 4px solid #2962ff;
+        .card-sub {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+            font-weight: 500;
         }
 
-        .unit-btn.unit-4 {
-            border-bottom: 4px solid #e03131;
+        /* 1, 2번 카드: 호기 선택 */
+        .unit-card {
+            border-bottom: 4px solid transparent;
         }
 
-        .unit-btn.unit-3.active {
+        /* [NEW] Generator Unit 3/4 텍스트 스타일 (Black to Gray Gradient) */
+        .unit-card .card-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 0;
+            line-height: 1.2;
+            font-family: 'Arial', sans-serif;
+
+            /* Text Gradient Effect */
+            background: linear-gradient(180deg, #000000 0%, #7d7d7d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        .unit-card.active {
             background: #eef2ff;
+            border-color: #2962ff;
+            /* 전체 테두리도 색상 변경 */
+            border-bottom-width: 6px;
+        }
+
+        /* Active State Text Color Overrides */
+        .unit-card.unit-3-style.active .card-title {
+            color: #000000;
+            /* 검은색 유지 (요청사항) 또는 테마색? -> "찐한 검은색" 요청이 있었으므로 검은색 유지 */
+        }
+
+        .unit-card.unit-4-style.active .card-title {
+            color: #000000;
+        }
+
+        /* .unit-card.active .card-title {
+            color: #2962ff; 
+        } -> Removed to keep black as requested */
+
+        /* ------------------------------------------------------------- */
+        /* [스타일] 3호기 카드 (Blue Theme) */
+        /* ------------------------------------------------------------- */
+        .unit-card.unit-3-style {
+            border-bottom-color: #2962ff;
+        }
+
+        /* .unit-card.unit-3-style .card-icon {
             color: #2962ff;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(41, 98, 255, 0.15);
+        } */
+
+        /* Active State */
+        .unit-card.unit-3-style.active {
+            background: #eef2ff;
+            border-color: #2962ff;
+            /* 전체 테두리도 색상 변경 */
+            border-bottom-width: 6px;
         }
 
-        .unit-btn.unit-4.active {
-            background: #fff5f5;
+        .unit-card.unit-3-style.active .card-value {
+            color: #2962ff;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* [스타일] 4호기 카드 (Red Theme) */
+        /* ------------------------------------------------------------- */
+        .unit-card.unit-4-style {
+            border-bottom-color: #e03131;
+        }
+
+        /* .unit-card.unit-4-style .card-icon {
             color: #e03131;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(224, 49, 49, 0.15);
+        } */
+
+        /* Active State */
+        .unit-card.unit-4-style.active {
+            background: #fff5f5;
+            border-color: #e03131;
+            border-bottom-width: 6px;
         }
 
-        .unit-btn:hover:not(.active) {
-            background: #fafafa;
-            border-color: #ccc;
+        .unit-card.unit-4-style.active .card-value {
+            color: #e03131;
         }
+
+        /* ------------------------------------------------------------- */
+        /* [스타일] 월별 통계 (Monthly) */
+        /* ------------------------------------------------------------- */
+        .stats-card {
+            border-bottom-color: #f59f00;
+            /* Orange Accent */
+        }
+
+        /* .stats-card .card-icon {
+            filter: grayscale(100%);
+            opacity: 0.5;
+        }
+
+        .stats-card:hover .card-icon {
+            filter: none;
+            opacity: 1;
+        }
+
+        .stats-card:hover {
+            border-color: #ffc9c9;
+        } */
+
+        .stats-card .card-value {
+            color: #f59f00;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* [스타일] 전체 통계 (Total Link) */
+        /* ------------------------------------------------------------- */
+        .link-card {
+            border-bottom-color: #2f9e44;
+            /* Green Accent */
+            background: #f8fff9;
+        }
+
+        /* .link-card .card-icon {
+            color: #16a34a;
+        } */
+
+        .link-card .card-title {
+            color: #2b8a3e;
+        }
+
+        .link-card:hover {
+            background: #ebfbee;
+        }
+
+        /* .link-card:hover .card-title,
+        .link-card:hover .card-icon {
+            color: white;
+        } */
+
+        /* ------------------------------------------------------------- */
+
+        /* 아코디언 상세 내역 (3번 카드 하단에 붙음? 아니면 팝업? -> 여기선 기존처럼 카드 내부 or 별도 영역. 
+           공간 제약상 별도 영역인 'accordion-area'를 그리드 아래두는게 깔끔함) */
+        .accordion-area {
+            max-width: 1400px;
+            margin: 0 auto 20px auto;
+        }
+
+        /* 모바일 대응: 2x2 그리드 */
+        @media (max-width: 768px) {
+            .control-grid {
+                gap: 10px;
+                /* 모바일은 2x2 유지 (HTML 구조상 자동 적용됨, grid-template-columns는 위에서 처리) */
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .control-card {
+                padding: 10px;
+                min-height: 70px;
+            }
+
+            .card-title {
+                font-size: 13px;
+            }
+
+            .card-value {
+                font-size: 18px;
+            }
+
+            /* .card-icon {
+                font-size: 22px;
+                margin-bottom: 4px;
+            } */
+        }
+
+        /* ... (Existing styles below) ... */
 
         .main-container {
             max-width: 1400px;
@@ -223,103 +530,30 @@
             margin-bottom: 10px;
         }
 
-        /* [추가] 월별 통계 보드 스타일 */
-        .monthly-stats-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .monthly-stat-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 4px 12px;
-            min-width: 120px;
-            max-width: 180px;
-            flex: 1;
-            text-align: center;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border-bottom: 2px solid #2962ff;
-        }
-
-        .monthly-stat-card.nav-card {
-            cursor: pointer;
-            background: #fcfcfc;
-            border-bottom-color: #e03131;
-            justify-content: center;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .monthly-stat-card.nav-card:hover {
-            background: #eef2ff;
-            border-bottom-color: #2962ff;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1px 0;
-        }
-
-        .stat-row:not(:last-child) {
-            border-bottom: 1px dashed #eee;
-        }
-
-        .month-label {
-            font-size: 12px;
-            color: #757575;
-            font-weight: 600;
-        }
-
-        .month-count {
-            font-size: 17px;
-            font-weight: 800;
-            color: #1a1a1a;
-        }
-
-        .month-count span {
-            font-size: 11px;
-            margin-left: 2px;
-            color: #2962ff;
-            font-weight: bold;
-        }
-
-        .nav-text {
-            font-weight: bold;
-            color: #333;
-            font-size: 13px;
-        }
-
-        .nav-sub-text {
-            font-size: 10px;
-            color: #888;
-        }
-
-        .stat-row.clickable:hover {
-            background: #f0f7ff;
-            color: #2962ff;
-        }
-
-        /* [추가] 아코디언 스타일 상세 내역 */
+        /* 상세 내역 영역 (아코디언) */
         .accordion-content {
             display: none;
-            padding: 10px 5px;
-            background: #fcfcfc;
-            border-top: 1px dashed #eee;
-            margin-top: 5px;
+            padding: 15px;
+            background: #fbfbfb;
+            border: 1px dashed #ddd;
+            border-radius: 8px;
+            margin-top: 10px;
             text-align: left;
+            animation: slideDown 0.3s ease-out;
+            border-left: 4px solid #f59f00;
+            /* Orange Accent */
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .accordion-content.active {
@@ -351,36 +585,7 @@
 
         /* 모바일 대응: 가로 배치 유지 및 컴팩트화 */
         @media (max-width: 600px) {
-            .monthly-stats-container {
-                gap: 8px;
-                padding: 0 10px;
-                flex-wrap: nowrap;
-                /* 강제로 가로 배치 */
-            }
-
-            .monthly-stat-card {
-                min-width: 0;
-                /* min-width 해제하여 유연하게 조절 */
-                padding: 4px 8px;
-            }
-
-            .month-label {
-                font-size: 10px;
-                white-space: nowrap;
-            }
-
-            .month-count {
-                font-size: 15px;
-            }
-
-            .nav-text {
-                font-size: 11px;
-            }
-
-            .nav-sub-text {
-                display: none;
-                /* 모바일에서 서브 텍스트 숨김 */
-            }
+            /* .monthly-stats-container Removed */
         }
     </style>
 </head>
@@ -388,17 +593,52 @@
 <body>
 
     <!-- [수정됨] 텍스트 및 스타일 적용 -->
-    <h2>Generator Brush <span class="title-highlight">Manager</span></h2>
+    <header class="header-container">
+        <a href="../index.html" class="header-logo-link">
+            <!-- [CHANGED] Watermark Logo (Background) -->
+            <img src="../logo.png" alt="Logo" class="watermark-logo">
+
+            <div class="header-text-col">
+                <span class="brand-text-main">ONE PLANT</span>
+                <span class="brand-text-sub">Generator Brush</span>
+            </div>
+        </a>
+    </header>
 
     <div id="loadingMsg">데이터 불러오는 중...</div>
 
-    <div class="unit-selector">
-        <button class="unit-btn unit-3 active" onclick="setUnit(3)">#3</button>
-        <button class="unit-btn unit-4" onclick="setUnit(4)">#4</button>
+    <!-- [NEW] 심플 & 하단 포인트 스타일 컨트롤 그리드 -->
+    <div class="control-grid">
+        <!-- 1. 3호기 버튼 (Blue Theme) -->
+        <div id="btn-unit-3" class="control-card unit-card unit-3-style active" onclick="setUnit(3)">
+            <div class="card-title">Generator Unit 3</div>
+        </div>
+
+        <!-- 2. 4호기 버튼 (Red Theme) -->
+        <div id="btn-unit-4" class="control-card unit-card unit-4-style" onclick="setUnit(4)">
+            <div class="card-title">Generator Unit 4</div>
+        </div>
+
+        <!-- 3. 월별 교체 현황 카드 (Orange Theme) -->
+        <div id="stats-card-block" class="control-card stats-card" onclick="toggleMonthlyDetail()">
+            <div class="card-title">이번 달 교체</div>
+            <div id="current-month-count" class="card-value">-</div>
+            <div id="prev-month-text" class="card-sub" style="font-size:11px; opacity:0.6;">지난달 -개</div>
+        </div>
+
+        <!-- 4. 전체 통계 이동 버튼 (Green Theme) -->
+        <div class="control-card link-card" onclick="location.href='./monthly_stats.html?unit=' + currentUnit">
+            <div class="card-title">전체 통계 보기</div>
+            <div class="card-sub">Click to View</div>
+        </div>
     </div>
 
-    <!-- [추가] 월별 교체 개수 보드 -->
-    <div id="monthly-stats-board" class="monthly-stats-container"></div>
+    <!-- 상세 내역 아코디언 (그리드 바로 아래) -->
+    <div class="accordion-area">
+        <div id="currDetailContainer" class="accordion-content">
+            <!-- 상세 내역이 여기에 렌더링 됩니다 -->
+        </div>
+    </div>
 
     <div class="main-container">
         <div class="direction-section yard-theme">
@@ -536,48 +776,49 @@
             createGrid('grid-CB', 'C/B', boilerOrder);
             createGrid('grid-TB', 'T/B', boilerOrder);
 
-            // [추가] 월별 보드 업데이트
-            updateMonthlyBoard();
+            // [추가] 월별 보드 업데이트 - 이제 4번 카드 업데이트
+            updateMonthlyCard();
         }
 
         function setUnit(unit) {
             currentUnit = unit;
-            document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
 
-            // 클릭된 버튼을 찾아 active 추가 (이름 기반 또는 인덱스 기반)
-            const btns = document.querySelectorAll('.unit-btn');
-            if (unit === 3) btns[0].classList.add('active');
-            else btns[1].classList.add('active');
+            // 호기 선택 버튼 Active 처리
+            const btn3 = document.getElementById('btn-unit-3');
+            const btn4 = document.getElementById('btn-unit-4');
+
+            if (unit === 3) {
+                btn3.classList.add('active');
+                btn4.classList.remove('active');
+            } else {
+                btn3.classList.remove('active');
+                btn4.classList.add('active');
+            }
 
             // 호기를 바꾸면 화면을 다시 그려서 (3호기용/4호기용) 숫자를 업데이트합니다.
             init();
+
+            // 아코디언이 열려있다면 닫아줍니다 (단위가 바뀌었으므로)
+            document.getElementById('currDetailContainer').classList.remove('active');
         }
 
-        // [수정됨] 월별 교체 개수 집계 및 표시 함수 (2개 카드 레이아웃)
-        function updateMonthlyBoard() {
-            const board = document.getElementById('monthly-stats-board');
-            if (!board) return;
-            board.innerHTML = "";
-
-            // 1. 현재 호기 데이터 필터링 (날짜 데이터가 있는 것만)
+        // [New] 월별 통계 카드 업데이트 (3번 카드)
+        function updateMonthlyCard() {
+            // 1. 현재 호기 데이터 필터링
             const unitStats = globalStats.filter(item =>
                 item.unit == `${currentUnit}호기` && item.lastDate
             );
 
-            // 2. 월별로 그룹화 (YYYY-MM 형식)
+            // 2. 월별로 그룹화
             const monthlyCounts = {};
             unitStats.forEach(item => {
                 const date = new Date(item.lastDate);
                 if (isNaN(date.getTime())) return;
-
                 const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                 monthlyCounts[yearMonth] = (monthlyCounts[yearMonth] || 0) + 1;
             });
 
-            // 3. 월 역순 정렬
-            const sortedMonths = Object.keys(monthlyCounts).sort().reverse();
-
-            // 현재 월과 이전 월 계산
+            // 3. 이번달/지난달 계산
             const now = new Date();
             const currKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -586,61 +827,34 @@
             const currCount = monthlyCounts[currKey] || 0;
             const prevCount = monthlyCounts[prevKey] || 0;
 
-            // 카드 1: 이번달/지난달 실적
-            const statCard = document.createElement('div');
-            statCard.className = 'monthly-stat-card';
-            statCard.innerHTML = `
-                <div class="stat-row clickable" onclick="toggleMonthlyDetail('curr', '${currKey}')">
-                    <span class="month-label">이번 달 (${now.getMonth() + 1}월)</span>
-                    <span class="month-count">${currCount}<span>개</span></span>
-                </div>
-                <div id="currDetailContainer" class="accordion-content"></div>
-                
-                <div class="stat-row clickable" onclick="toggleMonthlyDetail('prev', '${prevKey}')">
-                    <span class="month-label">지난 달 (${lastMonthDate.getMonth() + 1}월)</span>
-                    <span class="month-count">${prevCount}<span>개</span></span>
-                </div>
-                <div id="prevDetailContainer" class="accordion-content"></div>
-            `;
-            board.appendChild(statCard);
-
-            // 카드 2: 전체보기 버튼
-            const navCard = document.createElement('div');
-            navCard.className = 'monthly-stat-card nav-card';
-            navCard.innerHTML = `
-                <div class="nav-text">전체 통계 보기</div>
-                <div class="nav-sub-text">월별 교체 이력 확인 →</div>
-            `;
-            navCard.onclick = () => {
-                window.location.href = `./monthly_stats.html?unit=${currentUnit}`;
-            };
-            board.appendChild(navCard);
+            // DOM 업데이트
+            document.getElementById('current-month-count').innerText = `${currCount}개`;
+            document.getElementById('prev-month-text').innerText = `지난달 ${prevCount}개`;
         }
 
-        // [수정됨] 아코디언 방식으로 상세 내역 토글
-        function toggleMonthlyDetail(type, monthKey) {
-            const containerId = type === 'curr' ? 'currDetailContainer' : 'prevDetailContainer';
-            const container = document.getElementById(containerId);
-            const otherContainer = document.getElementById(type === 'curr' ? 'prevDetailContainer' : 'currDetailContainer');
-
-            // 다른 쪽이 열려있으면 닫기
-            if (otherContainer) otherContainer.classList.remove('active');
+        // [New] 아코디언 토글 (3번 카드 클릭시)
+        function toggleMonthlyDetail() {
+            const container = document.getElementById('currDetailContainer');
 
             if (container.classList.contains('active')) {
                 container.classList.remove('active');
                 return;
             }
 
-            // 실적 데이터 필터링
+            // 현재 월 키 생성
+            const now = new Date();
+            const currKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            // 데이터 필터링 (이번달)
             const details = globalStats.filter(item => {
                 if (item.unit != `${currentUnit}호기` || !item.lastDate) return false;
                 const d = new Date(item.lastDate);
                 const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                return k === monthKey;
+                return k === currKey;
             });
 
             if (details.length === 0) {
-                container.innerHTML = "<div style='font-size:11px; color:#999; text-align:center;'>내역 없음</div>";
+                container.innerHTML = "<div style='font-size:12px; color:#999; text-align:center;'>이번 달 교체 내역이 없습니다.</div>";
             } else {
                 details.sort((a, b) => new Date(b.lastDate) - new Date(a.lastDate));
 
