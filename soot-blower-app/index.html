@@ -13,11 +13,43 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- SheetJS (Excel Download) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
             font-family: 'Pretendard', sans-serif;
             background-color: #f8fafc;
-            color: #334155;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(186, 230, 253, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(187, 247, 208, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(224, 242, 254, 0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(220, 252, 231, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .brand-text {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
         /* 화면 전환 애니메이션 */
@@ -461,24 +493,40 @@
 
     <!-- ================= PAGE 0: 호기 선택 ================= -->
     <!-- ================= PAGE 0: 호기 선택 ================= -->
-    <div id="page-unit-selection" class="page-section active p-5 min-h-screen bg-slate-50">
-        <div class="flex flex-col justify-center items-center h-full">
+    <div id="page-unit-selection"
+        class="page-section active p-5 min-h-screen flex flex-col justify-center items-center">
+        <div class="flex flex-col w-full max-w-7xl items-center pb-20">
+
+            <!-- Header (Centered & Resized) -->
+            <header class="text-center mb-6 md:mb-12 animate-fade-in">
+                <!-- Logo Main Title (Compact Style) - Link to Dashboard -->
+                <a href="../index.html"
+                    class="group inline-flex justify-center items-center gap-4 md:gap-5 bg-white/90 backdrop-blur-md px-8 py-5 md:px-10 md:py-6 rounded-full shadow-lg border border-white/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer active:scale-95 no-underline relative overflow-visible mx-auto max-w-[95%]">
+                    <img src="../logo.png" alt="Logo" class="w-14 h-14 md:w-16 md:h-16 object-contain">
+                    <div class="flex flex-col items-center leading-none gap-2 md:gap-3">
+                        <span
+                            class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter brand-text whitespace-nowrap">ONE
+                            PLANT</span>
+                        <span
+                            class="text-sm md:text-lg font-bold text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em] whitespace-nowrap">Soot
+                            Blower</span>
+                    </div>
+                    <!-- Stylish Home Indicator (Floating) -->
+                    <div
+                        class="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-white shadow-xl rounded-full border border-blue-50 opacity-0 group-hover:opacity-100 group-hover:-bottom-3 transition-all duration-300 whitespace-nowrap">
+                        <i data-lucide="home" class="w-3 h-3 text-blue-500"></i>
+                        <span class="text-[9px] md:text-xs font-bold text-slate-600 uppercase tracking-wider">Main
+                            Dashboard</span>
+                    </div>
+                </a>
+            </header>
 
             <!-- PC: 2-Column Split Layout Container -->
             <div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
 
                 <!-- Left Col: Unit Selection (MD: 4/12) -->
                 <div class="md:col-span-4 lg:col-span-3 flex flex-col space-y-6">
-                    <header class="text-center md:text-left">
-                        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">
-                            Soot Blower <br />
-                            <span class="text-blue-600">Manager</span>
-                        </h1>
-                        <p class="text-slate-400 text-sm mt-3 font-medium">
-                            스마트 발전소 설비 관리 시스템<br>
-                            관리할 호기(Unit)를 선택하세요
-                        </p>
-                    </header>
+
 
                     <div class="grid grid-cols-2 md:grid-cols-1 gap-4">
                         <!-- 호기 선택 버튼 -->
@@ -493,6 +541,10 @@
                             <div class="card-desc font-bold">4호기 설비</div>
                         </div>
                     </div>
+
+                    <p class="text-slate-500 text-sm text-center font-medium animate-pulse">
+                        관리할 호기(Unit)를 선택하세요.
+                    </p>
 
                     <!-- 통합 분석 버튼이 여기에 있다면 좋겠지만 지금은 Dashboard Grid 안에 있음 -->
                 </div>
@@ -524,14 +576,25 @@
 
     <!-- ================= PAGE 1: 그룹 선택 ================= -->
     <div id="page-group-selection" class="page-section p-5 max-w-5xl mx-auto">
-        <header class="mb-8 mt-4 flex items-center justify-between border-b border-slate-200 pb-4">
+        <header class="mb-8 mt-4 flex items-center justify-between border-b border-white/20 pb-4 relative">
             <button onclick="goUnitSelection()"
-                class="text-slate-500 hover:text-slate-800 font-bold text-xs px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm transition-colors">
+                class="absolute left-0 z-10 text-slate-500 hover:text-slate-800 font-bold text-xs px-3 py-2 bg-white/80 border border-slate-200 rounded-lg shadow-sm transition-colors backdrop-blur-sm">
                 ◀ 호기 변경
             </button>
-            <div class="text-center flex-1 mr-20">
-                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight" id="headerUnitTitle">#3호기</h1>
-                <p class="text-[10px] text-slate-400 font-bold mt-1">SELECT GROUP</p>
+            <div class="w-full flex justify-center">
+                <div
+                    class="group relative inline-flex flex-col justify-center items-center gap-0.5 bg-white/90 backdrop-blur-md px-12 py-5 rounded-full shadow-lg border border-white/50 overflow-hidden">
+                    <!-- Stylish Background Logo (Watermark) -->
+                    <img src="../logo.png" alt="Logo"
+                        class="absolute -right-4 -bottom-4 w-24 h-24 opacity-10 rotate-12 pointer-events-none grayscale transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+
+                    <span
+                        class="text-4xl font-black text-slate-900 tracking-tighter whitespace-nowrap leading-none relative z-10 drop-shadow-sm transition-transform duration-300 group-hover:-translate-y-0.5"
+                        id="headerUnitTitle">UNIT ?</span>
+                    <span
+                        class="text-[0.65rem] md:text-xs font-bold text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap relative z-10">Group
+                        Selection</span>
+                </div>
             </div>
         </header>
 
@@ -781,9 +844,13 @@
                 </button>
 
                 <!-- [신규 추가] 3. 일반점검 -->
-                <button onclick="submitAction('일반점검')"
+                <button onclick="submitAction('일반점검(MTR 건전성)')"
                     class="w-full p-3 border rounded-xl hover:bg-slate-50 hover:border-slate-400 hover:text-slate-800 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
-                    <span class="w-6 text-center mr-2">📋</span> 3. 일반점검
+                    <span class="w-6 text-center mr-2">📋</span>
+                    <div class="flex flex-col md:flex-row md:items-center md:gap-1">
+                        <span>3. 일반점검</span>
+                        <span class="text-xs md:text-sm text-slate-500 md:text-slate-600">(MTR 건전성)</span>
+                    </div>
                 </button>
 
                 <!-- 번호 재조정됨 -->
@@ -908,7 +975,7 @@
             { code: 'MB', label: '전동기 소손' },
             { code: 'BR', label: '베어링 교체' },
             { code: 'RP', label: '전동기 역상' },
-            { code: 'GI', label: '일반점검' }, // [신규 추가]
+            { code: 'GI', label: '일반점검(MTR 건전성)' }, // [신규 추가]
             { code: 'LR', label: '리미트 정비' },
             { code: 'MV', label: 'MOV 정비' },
             { code: 'DS', label: '단로기 정비' },
@@ -1036,10 +1103,22 @@
                 card.style.cursor = 'pointer';
                 card.onclick = () => openHistoryModal(cat.code, 'TOTAL');
 
+                // [Mobile Layout Fix] 일반점검(MTR 건전성) 줄바꿈 처리
+                let labelHtml = `<span class="whitespace-nowrap">${cat.label}</span>`;
+                if (cat.code === 'GI') {
+                    labelHtml = `
+                        <div class="flex flex-col items-center justify-center md:block">
+                            <span class="md:hidden leading-tight">일반점검</span>
+                            <span class="md:hidden text-[10px] font-normal opacity-80 mt-0.5">(MTR 건전성)</span>
+                            <span class="hidden md:inline whitespace-nowrap">${cat.label}</span>
+                        </div>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div class="absolute inset-0 flex flex-col items-center justify-center p-2">
-                        <div class="text-center">
-                            <div class="card-title text-sm whitespace-nowrap">${cat.label}</div>
+                        <div class="text-center w-full">
+                            <div class="card-title text-sm flex justify-center items-center">${labelHtml}</div>
                             <div class="text-xl font-extrabold mt-1 ${count > 0 ? 'text-red-600' : 'text-slate-500'}">
                                 ${count}<span class="text-xs font-normal ml-1">건</span>
                             </div>
@@ -1111,7 +1190,11 @@
                 groupCounts[groupName] = (groupCounts[groupName] || 0) + 1;
 
                 // 3. 유형별 집계
-                const actionName = item.action;
+                let actionName = item.action;
+                // [Data Normalization] 일반점검 -> 일반점검(MTR 건전성)
+                if (actionName === '일반점검' || actionName === '일반점검(MTR 건전성)') {
+                    actionName = '일반점검(MTR 건전성)';
+                }
                 typeCounts[actionName] = (typeCounts[actionName] || 0) + 1;
             });
 
@@ -1168,7 +1251,7 @@
                 '전동기 베어링 교체': '⚙️', // '전동기 베어링 교체' 전체 매칭
                 '베어링 교체': '⚙️',       // '베어링 교체' 단축
                 '전동기 역상': '🔄',
-                '일반점검': '📋',
+                '일반점검(MTR 건전성)': '📋',
                 '리미트 정비 [회로] - 정비후 양호': '⚡',
                 '리미트 정비 [회로] - 정비후 교체': '⚡',
                 '리미트 정비': '⚡',
@@ -1516,7 +1599,7 @@
                                 <div class="text-[10px] text-blue-500 font-bold">${deviceNum}</div>
                             </td>
                             <td class="px-4 py-3 text-slate-600 text-xs font-medium break-keep">
-                                ${item.action}
+                                ${item.action === '일반점검' ? '일반점검(MTR 건전성)' : item.action}
                             </td>
                         </tr>
                     `;
@@ -1565,11 +1648,14 @@
         function initDashboard() {
             document.getElementById('page-unit-selection').classList.add('active');
             fetchTotalSummary();
+            try { lucide.createIcons(); } catch (e) { }
         }
 
         function selectUnit(unitName) {
             currentUnit = unitName;
-            document.getElementById('headerUnitTitle').textContent = `#${unitName.split(' ')[1]}호기 그룹 선택`;
+            // [Update] Header Title -> "UNIT 3" or "UNIT 4"
+            const unitNum = unitName.split(' ')[1];
+            document.getElementById('headerUnitTitle').textContent = `UNIT ${unitNum}`;
             SECTIONS.forEach(section => {
                 const listEl = document.getElementById(section.id === 'short' ? 'list-short' : 'list-long');
                 listEl.innerHTML = '';
@@ -1751,7 +1837,8 @@
                         deviceLocationDisplay = item.device === 'NOTE' ? '메모' : `No.${item.device}`;
                     }
 
-                    const actionDisplay = item.action;
+                    let actionDisplay = item.action;
+                    if (actionDisplay === '일반점검') actionDisplay = '일반점검(MTR 건전성)';
 
                     tbody.innerHTML += `<tr>
                         <td class="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">${dateDisplay}</td>
