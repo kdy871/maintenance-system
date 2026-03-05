@@ -108,12 +108,16 @@ function doGet(e) {
             return b._day - a._day;
         });
 
-        // 잔액은 철저하게 '총 수입 - 총 지출' 로 수학적 계산만 반환
-        let totalBalance = incomeTotal - expenseTotal;
+        // [수정] 수학적 계산 대신 스프레드시트의 셀 값을 직접 가져옴 (찬조금 등 반영을 위해)
+        let totalIncomeRaw = sheet.getRange('T44').getDisplayValue();
+        let totalBalanceRaw = sheet.getRange('T46').getDisplayValue();
+
+        let parsedIncomeTotal = Number(totalIncomeRaw.replace(/,/g, '')) || incomeTotal; // T44가 비어있으면 기존 합계 사용
+        let parsedTotalBalance = Number(totalBalanceRaw.replace(/,/g, '')) || 0;
 
         const responseData = {
-            totalBalance: totalBalance,
-            incomeTotal: incomeTotal,
+            totalBalance: parsedTotalBalance,
+            incomeTotal: parsedIncomeTotal,
             expenseTotal: expenseTotal,
             transactions: transactions,
             members: members
