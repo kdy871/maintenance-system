@@ -921,56 +921,53 @@
                     <span class="w-6 text-center mr-2">⚙️</span> 2. 전동기 점검 [선택]
                 </button>
 
-                <!-- [신규 추가] 3. 일반점검 -->
-                <button onclick="submitAction('일반점검(MTR 건전성)')"
-                    class="w-full p-3 border rounded-xl hover:bg-slate-50 hover:border-slate-400 hover:text-slate-800 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
-                    <span class="w-6 text-center mr-2">📋</span>
-                    <div class="flex flex-col md:flex-row md:items-center md:gap-1">
-                        <span>3. 일반점검</span>
-                        <span class="text-xs md:text-sm text-slate-500 md:text-slate-600">(MTR 건전성)</span>
-                    </div>
-                </button>
-
-                <!-- 번호 재조정됨 -->
                 <button onclick="toggleLimitSubMenu(true)"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
-                    <span class="w-6 text-center mr-2">⚡</span> 4. 리미트 정비 [회로]
+                    <span class="w-6 text-center mr-2">⚡</span> 3. 리미트 정비 [회로]
                 </button>
 
                 <button onclick="submitAction('MOV 정비 [회로]')"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
-                    <span class="w-6 text-center mr-2">🔋</span> 5. MOV 정비 [회로]
+                    <span class="w-6 text-center mr-2">🔋</span> 4. MOV 정비 [회로]
                 </button>
                 <button onclick="submitAction('단로기 정비 [회로]')"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
-                    <span class="w-6 text-center mr-2">💡</span> 6. 단로기 정비 [회로]
+                    <span class="w-6 text-center mr-2">💡</span> 5. 단로기 정비 [회로]
                 </button>
                 <button onclick="submitAction('MC 정비 [회로]')"
                     class="w-full p-3 border rounded-xl hover:bg-green-50 hover:border-green-500 hover:text-green-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
-                    <span class="w-6 text-center mr-2">◻️</span> 7. MC 정비 [회로]
+                    <span class="w-6 text-center mr-2">◻️</span> 6. MC 정비 [회로]
                 </button>
                 <button onclick="submitAction('기계적 고착 [기계]')"
                     class="w-full p-3 border rounded-xl hover:bg-purple-50 hover:border-purple-500 hover:text-purple-700 font-bold text-slate-600 text-sm transition-all text-left flex items-center">
-                    <span class="w-6 text-center mr-2">🔧</span> 8. 기계적 고착 [기계]
+                    <span class="w-6 text-center mr-2">🔧</span> 7. 기계적 고착 [기계]
                 </button>
             </div>
 
             <!-- 전동기 점검 상세 선택 목록 -->
             <div id="actionMotorSubList" class="p-4 hidden grid grid-cols-1 gap-2">
                 <button onclick="submitAction('전동기 소손')"
-                    class="w-full p-4 border-2 border-red-100 rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    class="w-full p-3 border-2 border-red-100 rounded-xl hover:bg-red-50 hover:border-red-500 hover:text-red-700 font-bold text-slate-700 text-sm transition-all text-center">
                     1. 전동기 소손
                 </button>
                 <button onclick="submitAction('전동기 베어링 교체')"
-                    class="w-full p-4 border-2 border-orange-100 rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    class="w-full p-3 border-2 border-orange-100 rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-700 font-bold text-slate-700 text-sm transition-all text-center">
                     2. 베어링 교체
                 </button>
                 <button onclick="submitAction('전동기 역상')"
-                    class="w-full p-4 border-2 border-yellow-100 rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    class="w-full p-3 border-2 border-yellow-100 rounded-xl hover:bg-yellow-50 hover:border-yellow-500 hover:text-yellow-700 font-bold text-slate-700 text-sm transition-all text-center">
                     3. 전동기 역상
                 </button>
+                <button onclick="submitAction('전동기 절연,선간저항 측정')"
+                    class="w-full p-3 border-2 border-blue-100 rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    4. 전동기 절연,선간저항 측정
+                </button>
+                <button onclick="submitAction('전동기 Key 파손')"
+                    class="w-full p-3 border-2 border-red-100 rounded-xl hover:bg-red-50 hover:border-red-400 hover:text-red-700 font-bold text-slate-700 text-sm transition-all text-center">
+                    5. 전동기 Key 파손
+                </button>
                 <button onclick="toggleMotorSubMenu(false)"
-                    class="w-full mt-4 p-2 text-slate-400 font-bold text-xs underline">
+                    class="w-full mt-2 p-2 text-slate-400 font-bold text-xs underline">
                     이전으로 돌아가기
                 </button>
             </div>
@@ -1053,7 +1050,8 @@
             { code: 'MB', label: '전동기 소손' },
             { code: 'BR', label: '베어링 교체' },
             { code: 'RP', label: '전동기 역상' },
-            { code: 'GI', label: '일반점검(MTR 건전성)' }, // [신규 추가]
+            { code: 'GI', label: '전동기 절연,선간저항 측정' },
+            { code: 'MK', label: '전동기 Key 파손' },
             { code: 'LR', label: '리미트 정비' },
             { code: 'MV', label: 'MOV 정비' },
             { code: 'DS', label: '단로기 정비' },
@@ -1071,7 +1069,8 @@
             if (str.includes('소손')) return 'MB';
             if (str.includes('베어링')) return 'BR';
             if (str.includes('역상')) return 'RP';
-            if (str.includes('일반점검')) return 'GI'; // [신규 추가]
+            if (str.includes('절연') || str.includes('선간저항') || str.includes('일반점검')) return 'GI';
+            if (str.includes('Key') || str.includes('파손')) return 'MK';
             if (str.includes('리미트')) return 'LR';
             if (str.includes('MOV')) return 'MV';
             if (str.includes('단로기')) return 'DS';
@@ -1181,13 +1180,13 @@
                 card.style.cursor = 'pointer';
                 card.onclick = () => openHistoryModal(cat.code, 'TOTAL');
 
-                // [Mobile Layout Fix] 일반점검(MTR 건전성) 줄바꿈 처리
+                // [Mobile Layout Fix] 일반점검(MTR절연,선간저항 측정) 줄바꿈 처리
                 let labelHtml = `<span class="whitespace-nowrap">${cat.label}</span>`;
                 if (cat.code === 'GI') {
                     labelHtml = `
                         <div class="flex flex-col items-center justify-center md:block">
                             <span class="md:hidden leading-tight">일반점검</span>
-                            <span class="md:hidden text-[10px] font-normal opacity-80 mt-0.5">(MTR 건전성)</span>
+                            <span class="md:hidden text-[10px] font-normal opacity-80 mt-0.5">(MTR절연,선간저항 측정)</span>
                             <span class="hidden md:inline whitespace-nowrap">${cat.label}</span>
                         </div>
                     `;
@@ -1269,9 +1268,12 @@
 
                 // 3. 유형별 집계
                 let actionName = item.action;
-                // [Data Normalization] 일반점검 -> 일반점검(MTR 건전성)
-                if (actionName === '일반점검' || actionName === '일반점검(MTR 건전성)') {
-                    actionName = '일반점검(MTR 건전성)';
+                // [Data Normalization] 이전 데이터 일관성 정규화
+                if (actionName === '일반점검' || actionName === '일반점검(MTR 건전성)' || actionName === '일반점검(MTR절연,선간저항 측정)' || actionName === '전동기 절연,선간저항 측정') {
+                    actionName = '전동기 절연,선간저항 측정';
+                }
+                if (actionName === 'MTR Key 파손' || actionName === '전동기 Key 파손') {
+                    actionName = '전동기 Key 파손';
                 }
                 typeCounts[actionName] = (typeCounts[actionName] || 0) + 1;
             });
@@ -1329,7 +1331,11 @@
                 '전동기 베어링 교체': '⚙️', // '전동기 베어링 교체' 전체 매칭
                 '베어링 교체': '⚙️',       // '베어링 교체' 단축
                 '전동기 역상': '🔄',
+                '전동기 절연,선간저항 측정': '📋',
+                '일반점검(MTR절연,선간저항 측정)': '📋',
                 '일반점검(MTR 건전성)': '📋',
+                '전동기 Key 파손': '🔑',
+                'MTR Key 파손': '🔑',
                 '리미트 정비 [회로] - 정비후 양호': '⚡',
                 '리미트 정비 [회로] - 정비후 교체': '⚡',
                 '리미트 정비': '⚡',
@@ -1677,7 +1683,7 @@
                                 <div class="text-[10px] text-blue-500 font-bold">${deviceNum}</div>
                             </td>
                             <td class="px-4 py-3 text-slate-600 text-xs font-medium break-keep">
-                                ${item.action === '일반점검' ? '일반점검(MTR 건전성)' : item.action}
+                                ${(item.action === '일반점검' || item.action === '일반점검(MTR 건전성)') ? '일반점검(MTR절연,선간저항 측정)' : item.action}
                             </td>
                         </tr>
                     `;
@@ -1916,7 +1922,7 @@
                     }
 
                     let actionDisplay = item.action;
-                    if (actionDisplay === '일반점검') actionDisplay = '일반점검(MTR 건전성)';
+                    if (actionDisplay === '일반점검' || actionDisplay === '일반점검(MTR 건전성)') actionDisplay = '일반점검(MTR절연,선간저항 측정)';
 
                     tbody.innerHTML += `<tr>
                         <td class="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">${dateDisplay}</td>
