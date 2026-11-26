@@ -760,6 +760,19 @@
 
                 const allBlockItems = sheetData.items.filter(i => i.blockId === block.id);
                 const doneBlockCount = allBlockItems.filter(i => ((workingValues[i.key] && workingValues[i.key].value) || '').trim() !== '').length;
+                const savedBlockCount = allBlockItems.filter(i => {
+                    const saved = getSheetSavedEntry(i);
+                    return (saved.value || '').trim() !== '' || (saved.note || '').trim() !== '';
+                }).length;
+
+                const firstDateObj = block.dates && block.dates[0] ? block.dates[0] : null;
+                const rawBlockDate = firstDateObj && firstDateObj.hasRealLabel ? String(firstDateObj.label || '').trim() : '';
+                const hasValidSavedDate = savedBlockCount > 0 && rawBlockDate && rawBlockDate !== '미점검';
+                const blockStatusBadgeHtml = hasValidSavedDate
+                    ? `<span class="text-[10px] md:text-[11px] font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3 h-3"></i>저장: ${escapeHtml(rawBlockDate)}</span>`
+                    : (savedBlockCount > 0
+                        ? `<span class="text-[10px] md:text-[11px] font-bold bg-blue-500/20 text-blue-200 border border-blue-400/30 px-2 py-0.5 rounded-full shrink-0">저장됨</span>`
+                        : `<span class="text-[10px] md:text-[11px] font-bold bg-slate-600/60 text-slate-300 px-2 py-0.5 rounded-full shrink-0">미점검</span>`);
 
                 const metaHeaders = block.metaHeaders || ['사양'];
                 const metaCount = metaHeaders.length;
@@ -904,9 +917,12 @@
                                 <i data-lucide="clipboard-list" class="w-4 h-4 text-blue-300 shrink-0"></i>
                                 <h2 class="text-xs md:text-sm font-black truncate">${escapeHtml(block.title)}</h2>
                             </div>
-                            <span class="text-[11px] font-bold bg-white/15 px-2.5 py-0.5 rounded-full shrink-0">
-                                ${doneBlockCount} / ${allBlockItems.length}
-                            </span>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                ${blockStatusBadgeHtml}
+                                <span class="text-[11px] font-bold bg-white/15 px-2.5 py-0.5 rounded-full shrink-0">
+                                    ${doneBlockCount} / ${allBlockItems.length}
+                                </span>
+                            </div>
                         </div>
 
                         <!-- 시트형 파란색 헤더 (왼쪽: 사양 | 오른쪽: 현재 날짜·시간 -> 점검값 / 점검내용) -->

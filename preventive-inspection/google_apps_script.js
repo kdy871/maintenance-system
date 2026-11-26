@@ -17,7 +17,7 @@ function doGet(e) {
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sheets = ss.getSheets().filter(function (s) {
-      return !s.isSheetHidden();
+      return !s.isSheetHidden() && s.getName() !== '점검이력_DB';
     });
 
     if (sheets.length === 0) {
@@ -150,6 +150,26 @@ function doPost(e) {
         sheet.getRange(rowNum, targetPair.noteCol).setValue(entry.note);
       }
       updatedCount++;
+    }
+
+    SpreadsheetApp.flush();
+
+    // 저장 후 해당 블록의 E:F 데이터가 모두 비워져 있다면 날짜 헤더도 '미점검'으로 정리
+    const touchedBlockIds = Object.keys(targetColByBlockId);
+    for (let b = 0; b < touchedBlockIds.length; b++) {
+      const bId = touchedBlockIds[b];
+      const blk = blockById[bId];
+      const pair = targetColByBlockId[bId];
+      if (!blk || !pair || blk.dataEndRow < blk.dataStartRow) continue;
+
+      const colCount = pair.noteCol ? 2 : 1;
+      const vals = sheet.getRange(blk.dataStartRow, pair.valCol, blk.dataEndRow - blk.dataStartRow + 1, colCount).getDisplayValues();
+      const hasAnyValue = vals.some(function (r) {
+        return r.some(function (cell) { return String(cell || '').trim() !== ''; });
+      });
+      if (!hasAnyValue) {
+        sheet.getRange(blk.dateHeaderRow, pair.valCol).setValue('미점검');
+      }
     }
 
     SpreadsheetApp.flush();
