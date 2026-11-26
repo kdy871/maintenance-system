@@ -133,18 +133,31 @@
 
         <!-- 상단 컨트롤 패널 -->
         <section class="bg-white rounded-2xl border border-slate-200 p-3 md:p-4 shadow-sm space-y-3">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-
-                <!-- 기존 점검 날짜 자리에: 시트 탭 선택 (주간 / 월간 / 분기 등 시트명 그대로 자동 연동) -->
-                <div class="md:col-span-5">
-                    <label class="block text-[10px] font-bold text-slate-400 mb-1.5">점검 시트 선택 (구글 시트 탭 연동)</label>
-                    <div id="sheet-tabs-bar" class="flex flex-wrap gap-1.5">
-                        <!-- Dynamic Sheet Tab Pills -->
-                    </div>
+            <!-- 1단계: 5개 파트 선택 버튼 -->
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-[11px] font-bold text-slate-500">1. 담당 파트 선택</label>
+                    <span class="text-[10px] font-bold text-slate-400" id="active-sheet-label">연동 시트: -</span>
                 </div>
+                <div id="part-buttons-bar" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 md:gap-2">
+                    <!-- Dynamic 5 Part Buttons -->
+                </div>
+            </div>
 
-                <!-- 예방점검 블록 선택 (시트 내 A1:D1, A47:D47 등) -->
-                <div class="md:col-span-4">
+            <!-- 2단계: 선택된 파트의 예방점검 주기 (주간 / 월간 / 분기) -->
+            <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="w-1.5 h-4 rounded-full bg-blue-600"></span>
+                    <span class="text-xs font-extrabold text-slate-700" id="cycle-bar-title">예방점검 주기 선택</span>
+                </div>
+                <div id="cycle-buttons-bar" class="flex flex-wrap items-center gap-1.5">
+                    <!-- Dynamic Weekly / Monthly / Quarterly Buttons -->
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end pt-1">
+                <!-- 예방점검 블록 선택 (시트 내 A1:D1, A46:D46 등) -->
+                <div class="md:col-span-6">
                     <label class="block text-[10px] font-bold text-slate-400 mb-1.5">세부 블록 이동</label>
                     <select id="section-select" onchange="handleSectionChange()"
                         class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs md:text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-500">
@@ -152,7 +165,7 @@
                 </div>
 
                 <!-- 현재 날짜·시간 고정 표시 + 진행률 -->
-                <div class="md:col-span-3 flex flex-col justify-center">
+                <div class="md:col-span-6 flex flex-col justify-center">
                     <div class="flex items-center justify-between text-[11px] font-bold mb-1">
                         <span class="text-slate-500 flex items-center gap-1">
                             <i data-lucide="clock" class="w-3 h-3 text-blue-600"></i>
@@ -243,6 +256,19 @@
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby5JI00cAiE2VLEvwDnlqBzoz6URpDkjvilPLRD7w7dvi2plk82cOav9GSAeGPEIN5taA/exec";
         const SPREADSHEET_ID = "1fmNem3oXLQFqg22ZJ9an55x5gSudjWz5jONRl1f_2b8";
 
+        const PARTS = [
+            { id: 'turbine', label: '터빈전기', keywords: ['터빈전기', '터빈'], icon: 'zap', activeCls: 'bg-blue-600 text-white border-blue-600 shadow-sm', iconCls: 'text-blue-600 bg-blue-50' },
+            { id: 'boiler', label: '보일러전기', keywords: ['보일러전기', '보일러'], icon: 'flame', activeCls: 'bg-orange-500 text-white border-orange-500 shadow-sm', iconCls: 'text-orange-600 bg-orange-50' },
+            { id: 'power', label: '전력기기', keywords: ['전력기기', '전력'], icon: 'power', activeCls: 'bg-indigo-600 text-white border-indigo-600 shadow-sm', iconCls: 'text-indigo-600 bg-indigo-50' },
+            { id: 'electronics', label: '전자회로', keywords: ['전자회로', '전자'], icon: 'cpu', activeCls: 'bg-purple-600 text-white border-purple-600 shadow-sm', iconCls: 'text-purple-600 bg-purple-50' },
+            { id: 'desulfurization', label: '탈황전기', keywords: ['탈황전기', '탈황'], icon: 'droplets', activeCls: 'bg-emerald-600 text-white border-emerald-600 shadow-sm', iconCls: 'text-emerald-600 bg-emerald-50' }
+        ];
+        const CYCLES = [
+            { id: 'weekly', label: '주간', keywords: ['주간'] },
+            { id: 'monthly', label: '월간', keywords: ['월간'] },
+            { id: 'quarterly', label: '분기', keywords: ['분기'] }
+        ];
+
         let sheetData = {
             sheetNames: [],
             activeSheet: '',
@@ -250,6 +276,7 @@
             dates: [],
             items: []
         };
+        let activePartId = 'turbine';
         let activeSectionTitle = 'ALL';
         let statusFilter = 'all';
         let workingValues = {}; // { [itemKey]: { value: string, note: string } }
@@ -300,7 +327,7 @@
                 isDemoMode = true;
                 document.getElementById('demo-badge').classList.remove('hidden');
                 document.getElementById('setup-banner').classList.remove('hidden');
-                loadDemoData(targetSheetName || '주간예방점검');
+                loadDemoData(targetSheetName || '터빈전기(주간)');
                 refreshIcon.classList.remove('animate-spin');
                 return;
             }
@@ -343,51 +370,47 @@
         }
 
         function loadDemoData(requestedSheet) {
-            const sheetNames = ['주간예방점검', '월간점검예방', '분기점검예방'];
+            const sheetNames = [];
+            PARTS.forEach(p => {
+                CYCLES.forEach(c => sheetNames.push(`${p.label}(${c.label})`));
+            });
             const activeSheet = sheetNames.includes(requestedSheet) ? requestedSheet : sheetNames[0];
 
-            const demoBySheet = {
-                '주간예방점검': {
-                    blocks: [
-                        { id: 'block_1', title: '3호기 발전기 주간 점검표', metaHeaders: ['No', '기기명(*)', '점검항목(*)', '기준값'] },
-                        { id: 'block_2', title: '4호기 발전기 주간 점검표', metaHeaders: ['No', '기기명(*)', '점검항목(*)', '기준값'] }
-                    ],
-                    items: [
-                        { row: 3, blockId: 'block_1', blockTitle: '3호기 발전기 주간 점검표', sectionTitle: '3호기 발전기 주간 점검표', key: 'w||1', label: 'Brush', meta: ['1', 'Brush', '오염', '양호(0)'], options: ['양호', '주의', '불량'] },
-                        { row: 10, blockId: 'block_1', blockTitle: '3호기 발전기 주간 점검표', sectionTitle: '3호기 발전기 주간 점검표', key: 'w||2', label: 'Slip Ring', meta: ['8', 'Slip Ring', '과열 및 변색', '양호(0)'], options: ['양호', '주의', '불량'] },
-                        { row: 14, blockId: 'block_1', blockTitle: '3호기 발전기 주간 점검표', sectionTitle: '3호기 발전기 주간 점검표', key: 'w||3', label: 'Collector 열화상 카메라(CE)', meta: ['12', 'Collector 열화상 카메라(CE)', '온도', '30~80℃ (경보:80℃) R/L'], options: [] },
-                        { row: 48, blockId: 'block_2', blockTitle: '4호기 발전기 주간 점검표', sectionTitle: '4호기 발전기 주간 점검표', key: 'w||4', label: 'Brush', meta: ['1', 'Brush', '오염', '양호(0)'], options: ['양호', '주의', '불량'] },
-                        { row: 63, blockId: 'block_2', blockTitle: '4호기 발전기 주간 점검표', sectionTitle: '4호기 발전기 주간 점검표', key: 'w||5', label: '고정자권선 RTD', meta: ['16', '고정자권선 RTD', '온도', '89℃ 이하'], options: [] }
-                    ]
-                },
-                '월간점검예방': {
-                    blocks: [
-                        { id: 'block_1', title: '1. 월간 절연 및 계통 예방점검 (시트2 예시)', metaHeaders: ['구분', '설비명', '점검기준', '점검항목'] }
-                    ],
-                    items: [
-                        { row: 4, blockId: 'block_1', blockTitle: '1. 월간 절연 및 계통 예방점검 (시트2 예시)', sectionTitle: '1. 월간 절연 및 계통 예방점검 (시트2 예시)', key: 'm||1', label: 'Insulation Phase Bus(R)', meta: ['모선', 'Phase Bus', '절연저항', 'Insulation Phase Bus(R)'], options: [] },
-                        { row: 5, blockId: 'block_1', blockTitle: '1. 월간 절연 및 계통 예방점검 (시트2 예시)', sectionTitle: '1. 월간 절연 및 계통 예방점검 (시트2 예시)', key: 'm||2', label: 'Insulation Phase Bus(S)', meta: ['모선', 'Phase Bus', '절연저항', 'Insulation Phase Bus(S)'], options: [] },
-                        { row: 6, blockId: 'block_1', blockTitle: '1. 월간 절연 및 계통 예방점검 (시트2 예시)', sectionTitle: '1. 월간 절연 및 계통 예방점검 (시트2 예시)', key: 'm||3', label: 'Oil Leak Detector(발전기)', meta: ['발전기', '누유감지', '동작확인', 'Oil Leak Detector(발전기)'], options: ['양호', '주의', '불량'] }
-                    ]
-                },
-                '분기점검예방': {
-                    blocks: [
-                        { id: 'block_1', title: '1. 분기 정밀 예방점검 (시트3 예시)', metaHeaders: ['구분', '설비명', '점검기준', '점검항목'] }
-                    ],
-                    items: [
-                        { row: 4, blockId: 'block_1', blockTitle: '1. 분기 정밀 예방점검 (시트3 예시)', sectionTitle: '1. 분기 정밀 예방점검 (시트3 예시)', key: 'q||1', label: 'Generator 본체 정밀점검', meta: ['발전기', '본체', '외관/소음/체결', 'Generator'], options: ['양호', '주의', '불량'] },
-                        { row: 5, blockId: 'block_1', blockTitle: '1. 분기 정밀 예방점검 (시트3 예시)', sectionTitle: '1. 분기 정밀 예방점검 (시트3 예시)', key: 'q||2', label: '고정자권선 TC 정밀측정', meta: ['발전기', '권선온도', 'TC(℃)', '고정자권선 TC'], options: [] }
-                    ]
-                }
-            };
+            const isWeekly = activeSheet.includes('주간');
+            const isMonthly = activeSheet.includes('월간');
+            const partName = (PARTS.find(p => p.keywords.some(k => activeSheet.includes(k))) || PARTS[0]).label;
 
-            const picked = demoBySheet[activeSheet];
+            let blocks = [];
+            let items = [];
+            if (isWeekly) {
+                blocks = [
+                    { id: 'block_1', title: `3호기 ${partName} 주간 점검표`, metaHeaders: ['No', '기기명(*)', '점검항목(*)', '기준값'] },
+                    { id: 'block_2', title: `4호기 ${partName} 주간 점검표`, metaHeaders: ['No', '기기명(*)', '점검항목(*)', '기준값'] }
+                ];
+                items = [
+                    { row: 3, blockId: 'block_1', blockTitle: blocks[0].title, sectionTitle: blocks[0].title, key: `${activeSheet}||1`, label: 'Brush', meta: ['1', 'Brush', '오염', '양호(0)'], options: ['양호', '주의', '불량'] },
+                    { row: 10, blockId: 'block_1', blockTitle: blocks[0].title, sectionTitle: blocks[0].title, key: `${activeSheet}||2`, label: 'Slip Ring', meta: ['8', 'Slip Ring', '과열 및 변색', '양호(0)'], options: ['양호', '주의', '불량'] },
+                    { row: 48, blockId: 'block_2', blockTitle: blocks[1].title, sectionTitle: blocks[1].title, key: `${activeSheet}||3`, label: '고정자권선 RTD', meta: ['16', '고정자권선 RTD', '온도', '89℃ 이하'], options: [] }
+                ];
+            } else if (isMonthly) {
+                blocks = [{ id: 'block_1', title: `${partName} 월간 예방점검표`, metaHeaders: ['No', '기기명(*)', '점검항목(*)', '기준값'] }];
+                items = [
+                    { row: 3, blockId: 'block_1', blockTitle: blocks[0].title, sectionTitle: blocks[0].title, key: `${activeSheet}||1`, label: '절연저항 측정', meta: ['1', 'Main Motor / Panel', '절연저항', '10MΩ 이상'], options: [] },
+                    { row: 4, blockId: 'block_1', blockTitle: blocks[0].title, sectionTitle: blocks[0].title, key: `${activeSheet}||2`, label: '접속부 열화상 점검', meta: ['2', '단자대 / 차단기', '발열상태', '양호(0)'], options: ['양호', '주의', '불량'] }
+                ];
+            } else {
+                blocks = [{ id: 'block_1', title: `${partName} 분기 정밀점검표`, metaHeaders: ['No', '기기명(*)', '점검항목(*)', '기준값'] }];
+                items = [
+                    { row: 3, blockId: 'block_1', blockTitle: blocks[0].title, sectionTitle: blocks[0].title, key: `${activeSheet}||1`, label: '보호계전기 동작시험', meta: ['1', '보호계전기', '동작 및 트립시험', '양호(0)'], options: ['양호', '주의', '불량'] }
+                ];
+            }
+
             applyLoadedSheetData({
                 sheetNames: sheetNames,
                 activeSheet: activeSheet,
-                blocks: picked.blocks,
+                blocks: blocks,
                 dates: [],
-                items: picked.items
+                items: items
             });
         }
 
@@ -400,10 +423,21 @@
                 items: (data.items || []).map((item, idx) => ({ ...item, _idx: idx }))
             };
 
-            // 1. 시트 탭 버튼 렌더링 (시트1, 시트2, 시트3... 추가된 시트명 그대로 표시)
-            renderSheetTabs();
+            // 현재 로드된 시트명에 맞춰 활성 파트 동기화
+            const matchedPart = findPartForSheetName(sheetData.activeSheet);
+            if (matchedPart) {
+                activePartId = matchedPart.id;
+            }
 
-            // 2. 세부 블록 선택기 (시트 내부 A1:D1, A47:D47 등)
+            const activeLabelEl = document.getElementById('active-sheet-label');
+            if (activeLabelEl) {
+                activeLabelEl.textContent = `연동 시트: ${sheetData.activeSheet || '-'}`;
+            }
+
+            // 1. 5개 파트 버튼 & 주간/월간/분기 주기 버튼 렌더링
+            renderPartAndCycleButtons();
+
+            // 2. 세부 블록 선택기 (시트 내부 A1:D1, A46:D46 등)
             const sectionSelect = document.getElementById('section-select');
             const sectionTitles = [];
             sheetData.items.forEach(item => {
@@ -424,30 +458,146 @@
             renderSheetTable();
         }
 
-        function renderSheetTabs() {
-            const bar = document.getElementById('sheet-tabs-bar');
-            if (!sheetData.sheetNames || sheetData.sheetNames.length === 0) {
-                bar.innerHTML = `<span class="text-xs font-bold text-slate-400">시트 없음</span>`;
-                return;
-            }
-
-            bar.innerHTML = sheetData.sheetNames.map((name, idx) => {
-                const isActive = name === sheetData.activeSheet;
-                return `
-                    <button type="button" onclick="switchSheetByIndex(${idx})"
-                        class="px-3.5 py-2 rounded-xl text-xs md:text-sm font-extrabold border transition-all active:scale-95 ${isActive
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'}">
-                        ${escapeHtml(name)}
-                    </button>`;
-            }).join('');
+        function normalizeSheetName(name) {
+            return String(name || '').replace(/\s+/g, '').toLowerCase();
         }
 
-        function switchSheetByIndex(idx) {
-            const target = sheetData.sheetNames[idx];
-            if (!target || target === sheetData.activeSheet) return;
+        function findPartForSheetName(sheetName) {
+            const norm = normalizeSheetName(sheetName);
+            return PARTS.find(p => p.keywords.some(kw => norm.includes(normalizeSheetName(kw)))) || null;
+        }
+
+        function findSheetForPartAndCycle(part, cycle) {
+            return sheetData.sheetNames.find(name => {
+                const norm = normalizeSheetName(name);
+                const matchPart = part.keywords.some(kw => norm.includes(normalizeSheetName(kw)));
+                const matchCycle = cycle.keywords.some(kw => norm.includes(normalizeSheetName(kw)));
+                return matchPart && matchCycle;
+            }) || null;
+        }
+
+        function findAnySheetsForPart(part) {
+            return sheetData.sheetNames.filter(name => {
+                const norm = normalizeSheetName(name);
+                return part.keywords.some(kw => norm.includes(normalizeSheetName(kw)));
+            });
+        }
+
+        function renderPartAndCycleButtons() {
+            const partBar = document.getElementById('part-buttons-bar');
+            const cycleBar = document.getElementById('cycle-buttons-bar');
+            const cycleTitle = document.getElementById('cycle-bar-title');
+
+            partBar.innerHTML = PARTS.map(p => {
+                const isSelected = p.id === activePartId;
+                const partSheets = findAnySheetsForPart(p);
+                const hasSheets = partSheets.length > 0;
+
+                return `
+                    <button type="button" onclick="selectPart('${p.id}')"
+                        class="flex items-center justify-center gap-1.5 px-2.5 py-2.5 rounded-xl border text-xs md:text-sm font-extrabold transition-all active:scale-95 ${isSelected
+                            ? p.activeCls
+                            : (hasSheets
+                                ? 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                                : 'bg-slate-50 text-slate-400 border-slate-200/70')}">
+                        <i data-lucide="${p.icon}" class="w-3.5 h-3.5 shrink-0"></i>
+                        <span class="truncate">${escapeHtml(p.label)}</span>
+                    </button>`;
+            }).join('');
+
+            const activePart = PARTS.find(p => p.id === activePartId) || PARTS[0];
+            cycleTitle.textContent = `${activePart.label} · 예방점검`;
+
+            const matchedTabs = new Set();
+            let cycleHtml = CYCLES.map(c => {
+                const targetSheet = findSheetForPartAndCycle(activePart, c);
+                if (targetSheet) matchedTabs.add(targetSheet);
+                const isCurrent = targetSheet && targetSheet === sheetData.activeSheet;
+
+                if (targetSheet) {
+                    return `
+                        <button type="button" onclick="selectCycleSheet('${escapeAttr(targetSheet)}')"
+                            class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-extrabold border transition-all active:scale-95 ${isCurrent
+                                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                            ${escapeHtml(c.label)}
+                        </button>`;
+                }
+                return `
+                    <button type="button" onclick="showMissingCycleToast('${c.id}')"
+                        class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold border border-dashed border-slate-300 bg-slate-100/70 text-slate-400">
+                        ${escapeHtml(c.label)} (미등록)
+                    </button>`;
+            }).join('');
+
+            // 해당 파트에 속하지만 주간/월간/분기가 아닌 추가 탭이 있는 경우에도 함께 표시
+            const extraPartSheets = findAnySheetsForPart(activePart).filter(name => !matchedTabs.has(name));
+            extraPartSheets.forEach((name, idx) => {
+                const isCurrent = name === sheetData.activeSheet;
+                cycleHtml += `
+                    <button type="button" onclick="selectExtraSheet(${idx})"
+                        class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-extrabold border transition-all active:scale-95 ${isCurrent
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                        ${escapeHtml(name)}
+                    </button>`;
+            });
+
+            cycleBar.innerHTML = cycleHtml;
+            lucide.createIcons();
+        }
+
+        function showMissingCycleToast(cycleId) {
+            const activePart = PARTS.find(p => p.id === activePartId) || PARTS[0];
+            const cycle = CYCLES.find(c => c.id === cycleId);
+            const cycleLabel = cycle ? cycle.label : '';
+            showToast(`시트에 [${activePart.label}(${cycleLabel})] 탭이 아직 없습니다.`);
+        }
+
+        function selectExtraSheet(idx) {
+            const activePart = PARTS.find(p => p.id === activePartId) || PARTS[0];
+            const matchedTabs = new Set();
+            CYCLES.forEach(c => {
+                const t = findSheetForPartAndCycle(activePart, c);
+                if (t) matchedTabs.add(t);
+            });
+            const extraPartSheets = findAnySheetsForPart(activePart).filter(name => !matchedTabs.has(name));
+            if (extraPartSheets[idx]) selectCycleSheet(extraPartSheets[idx]);
+        }
+
+        function selectPart(partId) {
+            const part = PARTS.find(p => p.id === partId);
+            if (!part) return;
+            activePartId = partId;
+
+            // 해당 파트의 주간 -> 월간 -> 분기 -> 기타 순서로 첫 번째 유효 시트 선택
+            let targetSheet = null;
+            for (let i = 0; i < CYCLES.length; i++) {
+                const found = findSheetForPartAndCycle(part, CYCLES[i]);
+                if (found) {
+                    targetSheet = found;
+                    break;
+                }
+            }
+            if (!targetSheet) {
+                const anySheets = findAnySheetsForPart(part);
+                if (anySheets.length > 0) targetSheet = anySheets[0];
+            }
+
+            renderPartAndCycleButtons();
+
+            if (targetSheet && targetSheet !== sheetData.activeSheet) {
+                activeSectionTitle = 'ALL';
+                loadFromSheet(true, targetSheet);
+            } else if (!targetSheet) {
+                showToast(`구글 시트에서 [${part.label}] 관련 탭을 찾지 못했습니다. (예: ${part.label}(주간))`);
+            }
+        }
+
+        function selectCycleSheet(sheetName) {
+            if (!sheetName || sheetName === sheetData.activeSheet) return;
             activeSectionTitle = 'ALL';
-            loadFromSheet(true, target);
+            loadFromSheet(true, sheetName);
         }
 
         function getSheetSavedEntry(item) {
