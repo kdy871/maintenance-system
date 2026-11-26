@@ -133,14 +133,14 @@
 
         <!-- 상단 컨트롤 패널 -->
         <section class="bg-white rounded-2xl border border-slate-200 p-3 md:p-4 shadow-sm space-y-3">
-            <!-- 1단계: 5개 파트 선택 버튼 -->
+            <!-- 1단계: 담당 파트 선택 (5개 파트 + 기타 공용) -->
             <div>
                 <div class="flex items-center justify-between mb-1.5">
                     <label class="text-[11px] font-bold text-slate-500">1. 담당 파트 선택</label>
                     <span class="text-[10px] font-bold text-slate-400" id="active-sheet-label">연동 시트: -</span>
                 </div>
-                <div id="part-buttons-bar" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 md:gap-2">
-                    <!-- Dynamic 5 Part Buttons -->
+                <div id="part-buttons-bar" class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 md:gap-2">
+                    <!-- Dynamic Part Buttons -->
                 </div>
             </div>
 
@@ -261,7 +261,8 @@
             { id: 'boiler', label: '보일러전기', keywords: ['보일러전기', '보일러'], icon: 'flame', activeCls: 'bg-orange-500 text-white border-orange-500 shadow-sm', iconCls: 'text-orange-600 bg-orange-50' },
             { id: 'power', label: '전력기기', keywords: ['전력기기', '전력'], icon: 'power', activeCls: 'bg-indigo-600 text-white border-indigo-600 shadow-sm', iconCls: 'text-indigo-600 bg-indigo-50' },
             { id: 'electronics', label: '전자회로', keywords: ['전자회로', '전자'], icon: 'cpu', activeCls: 'bg-purple-600 text-white border-purple-600 shadow-sm', iconCls: 'text-purple-600 bg-purple-50' },
-            { id: 'desulfurization', label: '탈황전기', keywords: ['탈황전기', '탈황'], icon: 'droplets', activeCls: 'bg-emerald-600 text-white border-emerald-600 shadow-sm', iconCls: 'text-emerald-600 bg-emerald-50' }
+            { id: 'desulfurization', label: '탈황전기', keywords: ['탈황전기', '탈황'], icon: 'droplets', activeCls: 'bg-emerald-600 text-white border-emerald-600 shadow-sm', iconCls: 'text-emerald-600 bg-emerald-50' },
+            { id: 'etc', label: '기타', keywords: ['기타', '공용'], icon: 'layers', activeCls: 'bg-slate-700 text-white border-slate-700 shadow-sm', iconCls: 'text-slate-700 bg-slate-100' }
         ];
         const CYCLES = [
             { id: 'weekly', label: '주간', keywords: ['주간'] },
@@ -530,8 +531,11 @@
                     </button>`;
             }).join('');
 
-            // 해당 파트에 속하지만 주간/월간/분기가 아닌 추가 탭이 있는 경우에도 함께 표시
+            // 해당 파트에 속하지만 주간/월간/분기가 아닌 추가 탭이 있는 경우 (예: '기타' 단일 공용 탭)
             const extraPartSheets = findAnySheetsForPart(activePart).filter(name => !matchedTabs.has(name));
+            if (matchedTabs.size === 0 && extraPartSheets.length > 0) {
+                cycleHtml = '';
+            }
             extraPartSheets.forEach((name, idx) => {
                 const isCurrent = name === sheetData.activeSheet;
                 cycleHtml += `
