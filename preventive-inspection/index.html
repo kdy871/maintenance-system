@@ -894,6 +894,9 @@
                 });
                 const desktopGridTemplate = metaHeaders.map((_, cIdx) => cIdx === desktopNoIdx ? '52px' : 'minmax(0, 1fr)').join(' ');
 
+                const valHeaderText = block.valHeader || (block.dates && block.dates[0] && block.dates[0].valHeader) || '점검값';
+                const noteHeaderText = block.noteHeader || (block.dates && block.dates[0] && block.dates[0].noteHeader) || '점검내용';
+
                 blockHtmls.push(`
                     <div class="bg-white rounded-2xl border border-slate-300 shadow-sm overflow-hidden">
                         <div class="bg-slate-800 text-white px-3.5 py-2.5 flex items-center justify-between gap-2">
@@ -906,7 +909,7 @@
                             </span>
                         </div>
 
-                        <!-- 시트형 파란색 헤더 (왼쪽: 사양 | 오른쪽: 현재 날짜·시간 -> 점검값(+) / 점검내용(*)) -->
+                        <!-- 시트형 파란색 헤더 (왼쪽: 사양 | 오른쪽: 현재 날짜·시간 -> 점검값 / 점검내용) -->
                         <div class="grid grid-cols-12 border-b-2 border-slate-300 bg-[#dbeafe]">
                             <div class="col-span-5 md:col-span-6 border-r-2 border-slate-300 flex items-stretch">
                                 <div class="md:hidden w-full px-2.5 py-2.5 flex items-center text-[11px] font-black text-slate-700">
@@ -923,10 +926,10 @@
                                 </div>
                                 <div class="grid grid-cols-2 flex-1">
                                     <div class="px-2 py-1.5 border-r border-blue-200 text-center text-[11px] md:text-xs font-extrabold text-slate-800">
-                                        점검값(+)
+                                        ${escapeHtml(valHeaderText)}
                                     </div>
                                     <div class="px-2 py-1.5 text-center text-[11px] md:text-xs font-extrabold text-slate-800">
-                                        점검내용(*)
+                                        ${escapeHtml(noteHeaderText)}
                                     </div>
                                 </div>
                             </div>

@@ -336,7 +336,16 @@ function parseInspectionSheet(sheet) {
         }
         const rawDateLabel = getCellText(dateRowIdx, c);
         const dateLabel = rawDateLabel || ('__EMPTY_DATE_' + columnToLetter(c + 1));
-        const dObj = { label: dateLabel, hasRealLabel: rawDateLabel !== '', valCol: c + 1, noteCol: noteCol };
+        const valHeader = String(allDisplay[subRowIdx][c] || '').trim() || '점검값';
+        const noteHeader = noteCol ? (String(allDisplay[subRowIdx][noteCol - 1] || '').trim() || '점검내용') : '점검내용';
+        const dObj = {
+          label: dateLabel,
+          hasRealLabel: rawDateLabel !== '',
+          valCol: c + 1,
+          noteCol: noteCol,
+          valHeader: valHeader,
+          noteHeader: noteHeader
+        };
         blockDates.push(dObj);
 
         if (rawDateLabel && !allDatesMap[dateLabel]) {
@@ -357,6 +366,8 @@ function parseInspectionSheet(sheet) {
       dataEndRow: dataEndRowIdx + 1,
       metaColCount: metaColCount,
       metaHeaders: metaHeaders,
+      valHeader: blockDates.length > 0 ? blockDates[0].valHeader : '점검값',
+      noteHeader: blockDates.length > 0 ? blockDates[0].noteHeader : '점검내용',
       firstValCol: bm.firstValColIdx + 1,
       dates: blockDates
     };
@@ -446,8 +457,8 @@ function createFirstDateColumnPairForBlock(sheet, blockInfo, dateLabel) {
   dateRange.setValue(dateLabel);
   dateRange.setHorizontalAlignment('center');
 
-  sheet.getRange(blockInfo.subHeaderRow, newValCol).setValue('점검값(+)');
-  sheet.getRange(blockInfo.subHeaderRow, newNoteCol).setValue('점검내용(*)');
+  sheet.getRange(blockInfo.subHeaderRow, newValCol).setValue('점검값');
+  sheet.getRange(blockInfo.subHeaderRow, newNoteCol).setValue('점검내용');
 
   return {
     label: dateLabel,
